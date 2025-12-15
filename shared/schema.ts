@@ -5,6 +5,9 @@ export type PaymentStatus = 'Pending' | 'Partially Paid' | 'Paid';
 export type TechnicianStatus = 'Available' | 'Busy' | 'Off';
 export type InventoryCategory = 'PPF' | 'Ceramic' | 'Tools' | 'Parts' | 'Chemicals';
 export type PaymentMode = 'Cash' | 'UPI' | 'Card' | 'Bank Transfer';
+export type CustomerStatus = 'Inquired' | 'Working' | 'Waiting' | 'Completed';
+
+export const CUSTOMER_STATUSES: CustomerStatus[] = ['Inquired', 'Working', 'Waiting', 'Completed'];
 
 export const JOB_STAGES: JobStage[] = [
   'New Lead',
@@ -29,6 +32,7 @@ export const customerSchema = z.object({
   phone: z.string().min(1),
   email: z.string().email().optional(),
   address: z.string().optional(),
+  status: z.enum(['Inquired', 'Working', 'Waiting', 'Completed']).default('Inquired'),
   vehicles: z.array(vehicleSchema).default([])
 });
 

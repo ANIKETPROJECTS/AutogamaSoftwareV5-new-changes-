@@ -7,15 +7,26 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { Plus, Search, User, Phone, Car, ChevronRight, MapPin } from 'lucide-react';
 import { Link } from 'wouter';
+
+const CUSTOMER_STATUSES = ['Inquired', 'Working', 'Waiting', 'Completed'];
+
+const STATUS_COLORS: Record<string, string> = {
+  Inquired: "bg-blue-100 text-blue-700 border-blue-200",
+  Working: "bg-orange-100 text-orange-700 border-orange-200",
+  Waiting: "bg-yellow-100 text-yellow-700 border-yellow-200",
+  Completed: "bg-green-100 text-green-700 border-green-200",
+};
 
 export default function Customers() {
   const [search, setSearch] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [vehicleDialogOpen, setVehicleDialogOpen] = useState(false);
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
+  const [newCustomerStatus, setNewCustomerStatus] = useState('Inquired');
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -33,6 +44,17 @@ export default function Customers() {
     },
     onError: () => {
       toast({ title: 'Failed to create customer', variant: 'destructive' });
+    }
+  });
+
+  const updateCustomerMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: any }) => api.customers.update(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['customers'] });
+      toast({ title: 'Customer updated successfully' });
+    },
+    onError: () => {
+      toast({ title: 'Failed to update customer', variant: 'destructive' });
     }
   });
 
@@ -58,6 +80,7 @@ export default function Customers() {
       phone: formData.get('phone') as string,
       email: formData.get('email') as string || undefined,
       address: formData.get('address') as string || undefined,
+      status: newCustomerStatus,
       vehicles: [{
         make: formData.get('vehicleMake') as string,
         model: formData.get('vehicleModel') as string,
@@ -66,6 +89,7 @@ export default function Customers() {
         color: formData.get('vehicleColor') as string,
       }]
     });
+    setNewCustomerStatus('Inquired');
   };
 
   const handleAddVehicle = (e: React.FormEvent<HTMLFormElement>) => {
@@ -84,6 +108,13 @@ export default function Customers() {
         plateNumber: formData.get('plateNumber') as string,
         color: formData.get('color') as string,
       }
+    });
+  };
+
+  const handleStatusChange = (customerId: string, newStatus: string) => {
+    updateCustomerMutation.mutate({
+      id: customerId,
+      data: { status: newStatus }
     });
   };
 
@@ -123,6 +154,21 @@ export default function Customers() {
                 <div className="col-span-2 space-y-2">
                   <Label>Address</Label>
                   <Input name="address" placeholder="Full address" data-testid="input-customer-address" />
+                </div>
+                <div className="col-span-2 space-y-2">
+                  <Label>Status</Label>
+                  <Select value={newCustomerStatus} onValueChange={setNewCustomerStatus}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {CUSTOMER_STATUSES.map((status) => (
+                        <SelectItem key={status} value={status}>
+                          {status}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 
@@ -207,6 +253,25 @@ export default function Customers() {
                 </div>
               </CardHeader>
               <CardContent className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">Status:</span>
+                  <Select 
+                    value={customer.status || 'Inquired'} 
+                    onValueChange={(value) => handleStatusChange(customer._id, value)}
+                  >
+                    <SelectTrigger className={`w-auto h-7 text-xs ${STATUS_COLORS[customer.status || 'Inquired']}`}>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {CUSTOMER_STATUSES.map((status) => (
+                        <SelectItem key={status} value={status}>
+                          {status}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
                 {customer.address && (
                   <p className="text-sm text-muted-foreground flex items-center gap-1">
                     <MapPin className="w-3 h-3" />

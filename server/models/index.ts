@@ -15,11 +15,14 @@ export interface IVehicle {
   vin?: string;
 }
 
+export type CustomerStatus = 'Inquired' | 'Working' | 'Waiting' | 'Completed';
+
 export interface ICustomer extends Document {
   name: string;
   phone: string;
   email?: string;
   address?: string;
+  status: CustomerStatus;
   vehicles: IVehicle[];
   createdAt: Date;
 }
@@ -111,6 +114,7 @@ const CustomerSchema = new Schema<ICustomer>({
   phone: { type: String, required: true },
   email: { type: String },
   address: { type: String },
+  status: { type: String, enum: ['Inquired', 'Working', 'Waiting', 'Completed'], default: 'Inquired' },
   vehicles: [VehicleSchema],
   createdAt: { type: Date, default: Date.now }
 });

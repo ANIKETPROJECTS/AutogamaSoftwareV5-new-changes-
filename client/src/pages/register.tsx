@@ -25,6 +25,13 @@ const REFERRAL_SOURCES = [
   "Other",
 ];
 
+const CUSTOMER_STATUSES = [
+  { value: "Inquired", label: "Inquired" },
+  { value: "Working", label: "Working" },
+  { value: "Waiting", label: "Waiting" },
+  { value: "Completed", label: "Completed" },
+];
+
 const VEHICLE_TYPES = [
   "Sedan",
   "SUV",
@@ -51,6 +58,7 @@ export default function CustomerRegistration() {
     district: "",
     state: "Maharashtra",
     referralSource: "",
+    status: "Inquired",
   });
 
   // Vehicle info
@@ -66,23 +74,8 @@ export default function CustomerRegistration() {
 
   const createCustomerMutation = useMutation({
     mutationFn: api.customers.create,
-    onSuccess: async (customer: any) => {
+    onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ["customers"] });
-
-      // Auto-create a job with "Enquired" stage for the new customer
-      try {
-        await api.jobs.create({
-          customerId: customer.id,
-          vehicleId: customer.vehicles?.[0]?.id,
-          stage: "Enquired",
-          description: `New customer inquiry - ${vehicleData.make} ${vehicleData.model}`,
-          estimatedCost: 0,
-        });
-        queryClient.invalidateQueries({ queryKey: ["jobs"] });
-      } catch (error) {
-        console.error("Failed to create job:", error);
-      }
-
       toast({ title: "Customer registered successfully!" });
       setLocation("/funnel");
     },
@@ -97,6 +90,7 @@ export default function CustomerRegistration() {
       phone: customerData.phone,
       email: customerData.email || undefined,
       address: `${customerData.address}, ${customerData.city}, ${customerData.district}, ${customerData.state}`,
+      status: customerData.status,
       vehicles: [
         {
           make: vehicleData.make,
@@ -251,7 +245,7 @@ export default function CustomerRegistration() {
                   />
                 </div>
 
-                <div className="md:col-span-2 space-y-2">
+                <div className="space-y-2">
                   <Label>How did you hear about us?</Label>
                   <Select
                     value={customerData.referralSource}
@@ -269,6 +263,30 @@ export default function CustomerRegistration() {
                       {REFERRAL_SOURCES.map((source) => (
                         <SelectItem key={source} value={source}>
                           {source}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Customer Status</Label>
+                  <Select
+                    value={customerData.status}
+                    onValueChange={(value) =>
+                      setCustomerData({
+                        ...customerData,
+                        status: value,
+                      })
+                    }
+                  >
+                    <SelectTrigger data-testid="select-status">
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {CUSTOMER_STATUSES.map((status) => (
+                        <SelectItem key={status.value} value={status.value}>
+                          {status.label}
                         </SelectItem>
                       ))}
                     </SelectContent>
