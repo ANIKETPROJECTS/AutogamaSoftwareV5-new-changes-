@@ -7,9 +7,13 @@ import { Layout } from "@/components/layout";
 import Dashboard from "@/pages/dashboard";
 import Jobs from "@/pages/jobs";
 import Customers from "@/pages/customers";
+import CustomerRegistration from "@/pages/register";
+import CustomerFunnel from "@/pages/funnel";
 import Technicians from "@/pages/technicians";
 import Inventory from "@/pages/inventory";
 import Appointments from "@/pages/appointments";
+import Billing from "@/pages/billing";
+import PaymentTracking from "@/pages/payments";
 import WhatsApp from "@/pages/whatsapp";
 import Settings from "@/pages/settings";
 import NotFound from "@/pages/not-found";
@@ -19,9 +23,13 @@ function Router() {
     <Layout>
       <Switch>
         <Route path="/" component={Dashboard} />
-        <Route path="/jobs" component={Jobs} />
+        <Route path="/register" component={CustomerRegistration} />
+        <Route path="/funnel" component={CustomerFunnel} />
         <Route path="/customers" component={Customers} />
+        <Route path="/jobs" component={Jobs} />
         <Route path="/technicians" component={Technicians} />
+        <Route path="/billing" component={Billing} />
+        <Route path="/payments" component={PaymentTracking} />
         <Route path="/inventory" component={Inventory} />
         <Route path="/appointments" component={Appointments} />
         <Route path="/whatsapp" component={WhatsApp} />
