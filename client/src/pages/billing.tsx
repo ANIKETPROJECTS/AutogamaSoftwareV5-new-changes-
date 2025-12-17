@@ -36,10 +36,13 @@ export default function Billing() {
 
   const markPaidMutation = useMutation({
     mutationFn: (invoiceId: string) => api.invoices.markPaid(invoiceId),
-    onSuccess: () => {
+    onSuccess: (updatedInvoice: any) => {
       queryClient.invalidateQueries({ queryKey: ["invoices"] });
       queryClient.invalidateQueries({ queryKey: ["jobs"] });
-      setViewDialogOpen(false);
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      if (selectedInvoice && updatedInvoice) {
+        setSelectedInvoice(updatedInvoice);
+      }
       toast({ title: "Invoice marked as paid" });
     },
     onError: () => {
@@ -404,7 +407,7 @@ Balance: Rs.${(selectedInvoice.totalAmount - selectedInvoice.paidAmount).toLocal
               <Separator />
 
               <div>
-                <h3 className="font-semibold mb-3">Items</h3>
+                <h3 className="font-semibold mb-3">Items & Services</h3>
                 <div className="border rounded-lg overflow-hidden">
                   <table className="w-full">
                     <thead className="bg-muted">
@@ -420,8 +423,8 @@ Balance: Rs.${(selectedInvoice.totalAmount - selectedInvoice.paidAmount).toLocal
                         <tr key={index} className="border-t">
                           <td className="p-3">
                             {item.description}
-                            <Badge variant="outline" className="ml-2 text-xs">
-                              {item.type}
+                            <Badge variant="outline" className={`ml-2 text-xs ${item.type === 'service' ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-green-50 text-green-700 border-green-200'}`}>
+                              {item.type === 'service' ? 'Service' : 'Material'}
                             </Badge>
                           </td>
                           <td className="text-center p-3">{item.quantity}</td>
@@ -438,6 +441,25 @@ Balance: Rs.${(selectedInvoice.totalAmount - selectedInvoice.paidAmount).toLocal
                     </tbody>
                   </table>
                 </div>
+
+                {selectedInvoice.items?.length > 0 && (
+                  <div className="mt-3 p-3 bg-accent/30 rounded-lg space-y-1">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Service Cost:</span>
+                      <span className="flex items-center">
+                        <IndianRupee className="w-3 h-3" />
+                        {(selectedInvoice.items?.filter((i: any) => i.type === 'service')?.reduce((sum: number, i: any) => sum + i.total, 0) || 0).toLocaleString("en-IN")}
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Items Cost:</span>
+                      <span className="flex items-center">
+                        <IndianRupee className="w-3 h-3" />
+                        {(selectedInvoice.items?.filter((i: any) => i.type === 'material')?.reduce((sum: number, i: any) => sum + i.total, 0) || 0).toLocaleString("en-IN")}
+                      </span>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="flex justify-end">
