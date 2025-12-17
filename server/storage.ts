@@ -441,7 +441,8 @@ export class MongoStorage implements IStorage {
     const allMaterials = [...job.materials, ...newMaterials];
     const materialsTotal = allMaterials.reduce((sum, m) => sum + m.cost, 0);
     const servicesTotal = job.serviceItems.reduce((sum, s) => sum + s.cost, 0);
-    const totalAmount = materialsTotal + servicesTotal;
+    const serviceCost = job.serviceCost || 0;
+    const totalAmount = materialsTotal + servicesTotal + serviceCost;
 
     const updatedJob = await Job.findByIdAndUpdate(jobId, {
       materials: allMaterials,
@@ -470,6 +471,16 @@ export class MongoStorage implements IStorage {
     const customer = await this.getCustomer(job.customerId.toString());
 
     const items: { description: string; quantity: number; unitPrice: number; total: number; type: 'service' | 'material' }[] = [];
+
+    if (job.serviceCost && job.serviceCost > 0) {
+      items.push({
+        description: 'Service/Labor Charge',
+        quantity: 1,
+        unitPrice: job.serviceCost,
+        total: job.serviceCost,
+        type: 'service'
+      });
+    }
 
     for (const service of job.serviceItems) {
       items.push({

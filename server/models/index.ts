@@ -51,6 +51,7 @@ export interface IJob extends Document {
   technicianId?: mongoose.Types.ObjectId;
   technicianName?: string;
   notes: string;
+  serviceCost: number;
   serviceItems: IServiceItem[];
   materials: { inventoryId: mongoose.Types.ObjectId; name: string; quantity: number; cost: number }[];
   totalAmount: number;
@@ -179,6 +180,7 @@ const JobSchema = new Schema<IJob>({
   technicianId: { type: Schema.Types.ObjectId, ref: 'Technician' },
   technicianName: { type: String },
   notes: { type: String, default: '' },
+  serviceCost: { type: Number, default: 0, required: true },
   serviceItems: [ServiceItemSchema],
   materials: [{
     inventoryId: { type: Schema.Types.ObjectId, ref: 'Inventory' },
