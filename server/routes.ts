@@ -2,13 +2,70 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { sendStageUpdateMessage, sendCustomerStatusUpdate } from "./whatsapp";
-import { Customer } from "./models";
+import { Customer, Admin } from "./models";
 import type { JobStage, CustomerStatus } from "./models";
+
+// Seed default admin user
+async function seedAdminUser() {
+  try {
+    const existingAdmin = await Admin.findOne({ email: 'Autogarage@system.com' });
+    if (!existingAdmin) {
+      await Admin.create({
+        email: 'Autogarage@system.com',
+        password: 'Autogarage',
+        name: 'Auto Garage Admin'
+      });
+      console.log('Default admin user created');
+    }
+  } catch (error) {
+    console.error('Error seeding admin user:', error);
+  }
+}
 
 export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
+
+  // Seed admin user on startup
+  await seedAdminUser();
+
+  // Login endpoint
+  app.post("/api/auth/login", async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      
+      if (!email || !password) {
+        return res.status(400).json({ message: "Email and password are required" });
+      }
+
+      const admin = await Admin.findOne({ email: { $regex: new RegExp(`^${email}$`, 'i') } });
+      
+      if (!admin) {
+        return res.status(401).json({ message: "Invalid email or password" });
+      }
+
+      if (admin.password !== password) {
+        return res.status(401).json({ message: "Invalid email or password" });
+      }
+
+      res.json({ 
+        success: true, 
+        user: { 
+          id: admin._id, 
+          email: admin.email, 
+          name: admin.name 
+        } 
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Login failed" });
+    }
+  });
+
+  // Check auth status
+  app.get("/api/auth/me", async (req, res) => {
+    res.json({ authenticated: false });
+  });
 
   app.get("/api/customers", async (req, res) => {
     try {

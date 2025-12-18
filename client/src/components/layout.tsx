@@ -1,7 +1,9 @@
 import { Link, useLocation } from 'wouter';
-import { Menu, X, LayoutDashboard, UserPlus, Filter, Users, Wrench, UserCog, FileText, CreditCard, Package, Calendar, MessageCircle, Settings } from 'lucide-react';
+import { Menu, X, LayoutDashboard, UserPlus, Filter, Users, Wrench, UserCog, FileText, CreditCard, Package, Calendar, MessageCircle, Settings, LogOut } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/contexts/auth-context';
+import { Button } from '@/components/ui/button';
 
 const navItems = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
@@ -19,6 +21,7 @@ const navItems = [
 export function Layout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { user, logout } = useAuth();
 
   return (
     <div className="min-h-screen bg-background">
@@ -71,8 +74,30 @@ export function Layout({ children }: { children: React.ReactNode }) {
             })}
           </nav>
 
-          <div className="p-4 border-t border-sidebar-border">
-            <p className="text-xs text-muted-foreground">AutoGarage CRM v1.0</p>
+          <div className="p-4 border-t border-sidebar-border space-y-3">
+            {user && (
+              <div className="flex items-center gap-2 text-sm">
+                <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
+                  <span className="text-primary font-medium text-xs">
+                    {user.name?.charAt(0) || 'A'}
+                  </span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-foreground truncate text-xs">{user.name}</p>
+                  <p className="text-muted-foreground truncate text-xs">{user.email}</p>
+                </div>
+              </div>
+            )}
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="w-full justify-start gap-2"
+              onClick={logout}
+              data-testid="button-logout"
+            >
+              <LogOut className="w-4 h-4" />
+              Sign Out
+            </Button>
           </div>
         </div>
       </aside>
