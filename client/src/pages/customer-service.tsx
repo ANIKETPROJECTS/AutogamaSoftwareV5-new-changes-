@@ -275,7 +275,11 @@ export default function CustomerService() {
                     <Label>Select Vehicle *</Label>
                     <Select value={selectedVehicleIndex} onValueChange={setSelectedVehicleIndex}>
                       <SelectTrigger data-testid="select-vehicle">
-                        <SelectValue placeholder="Choose a vehicle" />
+                        {selectedVehicleIndex ? (
+                          <SelectValue />
+                        ) : (
+                          <span className="text-muted-foreground">Choose a vehicle</span>
+                        )}
                       </SelectTrigger>
                       <SelectContent>
                         {selectedCustomer.vehicles.map((vehicle: any, index: number) => (
