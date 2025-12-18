@@ -75,19 +75,9 @@ export default function ServiceFunnel() {
     queryFn: () => api.invoices.list(),
   });
 
-  const generateInvoiceMutation = useMutation({
-    mutationFn: (jobId: string) => api.jobs.generateInvoice(jobId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['invoices'] });
-      queryClient.invalidateQueries({ queryKey: ['jobs'] });
-      toast({ title: 'Invoice created successfully' });
-    },
-    onError: () => {
-      toast({ title: 'Failed to create invoice', variant: 'destructive' });
-    }
-  });
-
   const hasInvoice = (jobId: string) => invoices.some((inv: any) => inv.jobId === jobId);
+  
+  const isTerminalStage = (stage: string) => stage === 'Completed' || stage === 'Cancelled';
 
   const updateStageMutation = useMutation({
     mutationFn: ({ id, stage }: { id: string; stage: string }) => api.jobs.updateStage(id, stage),
@@ -215,7 +205,7 @@ export default function ServiceFunnel() {
                   </div>
 
                   <div className="flex items-center gap-3">
-                    {hasInvoice(job._id) ? (
+                    {isTerminalStage(job.stage) ? (
                       <Badge className={cn("w-48 justify-center border py-2", STAGE_COLORS[job.stage])}>
                         {job.stage}
                       </Badge>
@@ -235,7 +225,7 @@ export default function ServiceFunnel() {
                       </Select>
                     )}
                     
-                    <div title="WhatsApp message sent automatically">
+                    <div title="WhatsApp notification sent on status change">
                       <MessageCircle className="w-5 h-5 text-green-500" />
                     </div>
                   </div>
@@ -263,22 +253,11 @@ export default function ServiceFunnel() {
                     </Badge>
                   </div>
                   <div>
-                    {hasInvoice(job._id) ? (
+                    {hasInvoice(job._id) && (
                       <Badge className="bg-green-100 dark:bg-green-950/50 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800">
                         <FileText className="w-3 h-3 mr-1" />
                         Invoice Created
                       </Badge>
-                    ) : (
-                      <Button
-                        size="sm"
-                        className="bg-blue-600 hover:bg-blue-700"
-                        onClick={() => generateInvoiceMutation.mutate(job._id)}
-                        disabled={generateInvoiceMutation.isPending || job.totalAmount <= 0}
-                        data-testid={`button-create-invoice-${job._id}`}
-                      >
-                        <FileText className="w-4 h-4 mr-1" />
-                        Create Invoice
-                      </Button>
                     )}
                   </div>
                 </div>
