@@ -14,8 +14,7 @@ import ServiceFunnel from "@/pages/service-funnel";
 import Technicians from "@/pages/technicians";
 import Inventory from "@/pages/inventory";
 import Appointments from "@/pages/appointments";
-import Billing from "@/pages/billing";
-import PaymentTracking from "@/pages/payments";
+import Invoices from "@/pages/invoices";
 import Settings from "@/pages/settings";
 import NotFound from "@/pages/not-found";
 
@@ -31,8 +30,7 @@ function Router() {
         <Route path="/service-funnel" component={ServiceFunnel} />
         <Route path="/jobs" component={Jobs} />
         <Route path="/technicians" component={Technicians} />
-        <Route path="/billing" component={Billing} />
-        <Route path="/payments" component={PaymentTracking} />
+        <Route path="/invoices" component={Invoices} />
         <Route path="/inventory" component={Inventory} />
         <Route path="/appointments" component={Appointments} />
         <Route path="/settings" component={Settings} />
