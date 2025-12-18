@@ -234,11 +234,11 @@ export default function ServiceFunnel() {
                 <div className="flex items-center justify-between gap-4 mt-4 pt-4 border-t border-border text-sm flex-wrap">
                   <div className="flex items-center gap-4">
                     <div>
-                      <span className="text-muted-foreground">Total: </span>
+                      <span className="text-muted-foreground">Service Cost: </span>
                       <span className="font-semibold flex items-center"><IndianRupee className="w-3 h-3" />{job.totalAmount.toLocaleString('en-IN')}</span>
                     </div>
                     <div>
-                      <span className="text-muted-foreground">Paid: </span>
+                      <span className="text-muted-foreground">Final Amount: </span>
                       <span className="font-semibold text-green-500 flex items-center"><IndianRupee className="w-3 h-3" />{job.paidAmount.toLocaleString('en-IN')}</span>
                     </div>
                     <Badge 
