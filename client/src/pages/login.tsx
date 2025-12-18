@@ -5,11 +5,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/auth-context';
 import { Car, Lock, Mail } from 'lucide-react';
 
 export default function Login() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -37,11 +39,7 @@ export default function Login() {
         throw new Error(data.message || 'Login failed');
       }
 
-      localStorage.setItem('autogarage_auth', JSON.stringify({
-        isAuthenticated: true,
-        user: data.user
-      }));
-
+      login(data.user);
       toast({ title: 'Login successful!' });
       setLocation('/');
     } catch (error: any) {
