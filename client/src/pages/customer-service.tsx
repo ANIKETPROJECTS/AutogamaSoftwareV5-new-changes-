@@ -238,15 +238,30 @@ export default function CustomerService() {
       toast({ title: 'Please fill in make, model, and plate number', variant: 'destructive' });
       return;
     }
+    
+    // Copy preferences from existing vehicle (if available) to new vehicle
+    const newVehicle: any = {
+      make: newVehicleMake,
+      model: newVehicleModel,
+      plateNumber: newVehiclePlate,
+      year: newVehicleYear ? parseInt(newVehicleYear, 10) : undefined,
+      color: newVehicleColor || undefined,
+    };
+    
+    // Inherit PPF and service preferences from customer's existing vehicle
+    if (selectedCustomer?.vehicles?.[0]) {
+      const firstVehicle = selectedCustomer.vehicles[0];
+      if (firstVehicle.ppfCategory) newVehicle.ppfCategory = firstVehicle.ppfCategory;
+      if (firstVehicle.ppfVehicleType) newVehicle.ppfVehicleType = firstVehicle.ppfVehicleType;
+      if (firstVehicle.ppfWarranty) newVehicle.ppfWarranty = firstVehicle.ppfWarranty;
+      if (firstVehicle.ppfPrice) newVehicle.ppfPrice = firstVehicle.ppfPrice;
+      if (firstVehicle.laborCost) newVehicle.laborCost = firstVehicle.laborCost;
+      if (firstVehicle.otherServices?.length > 0) newVehicle.otherServices = firstVehicle.otherServices;
+    }
+    
     addVehicleMutation.mutate({
       customerId: selectedCustomerId,
-      vehicle: {
-        make: newVehicleMake,
-        model: newVehicleModel,
-        plateNumber: newVehiclePlate,
-        year: newVehicleYear ? parseInt(newVehicleYear, 10) : undefined,
-        color: newVehicleColor || undefined,
-      }
+      vehicle: newVehicle
     });
   };
 
