@@ -3,6 +3,32 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@layer components {
+  .card-modern {
+    @apply bg-card border border-border/50 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200;
+  }
+  
+  .stat-card {
+    @apply bg-card border border-border/50 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 p-5;
+  }
+  
+  .stat-card-grid {
+    @apply grid gap-4 grid-cols-2 lg:grid-cols-4;
+  }
+  
+  .stat-icon-container {
+    @apply p-2 bg-primary/10 rounded-lg;
+  }
+  
+  .stat-label {
+    @apply text-xs font-medium text-muted-foreground uppercase tracking-wide;
+  }
+  
+  .stat-value {
+    @apply text-2xl font-bold text-foreground;
+  }
+}
+
 @theme inline {
   --color-background: hsl(var(--background));
   --color-foreground: hsl(var(--foreground));

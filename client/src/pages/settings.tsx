@@ -69,10 +69,10 @@ export default function Settings() {
       </div>
 
       <div className="grid gap-6 max-w-3xl">
-        <Card className="bg-card border-border">
+        <Card className="card-modern">
           <CardHeader>
             <CardTitle className="text-foreground font-medium flex items-center gap-2">
-              <Building2 className="w-5 h-5 text-blue-500" />
+              <Building2 className="w-5 h-5 text-primary" />
               Garage Details
             </CardTitle>
           </CardHeader>
@@ -121,10 +121,10 @@ export default function Settings() {
           </CardContent>
         </Card>
 
-        <Card className="bg-card border-border">
+        <Card className="card-modern">
           <CardHeader>
             <CardTitle className="text-foreground font-medium flex items-center gap-2">
-              <Lock className="w-5 h-5 text-purple-500" />
+              <Lock className="w-5 h-5 text-primary" />
               Admin Credentials
             </CardTitle>
             <CardDescription>
@@ -157,10 +157,10 @@ export default function Settings() {
           </CardContent>
         </Card>
 
-        <Card className="bg-card border-border">
+        <Card className="card-modern">
           <CardHeader>
             <CardTitle className="text-foreground font-medium flex items-center gap-2">
-              <MessageCircle className="w-5 h-5 text-green-500" />
+              <MessageCircle className="w-5 h-5 text-primary" />
               WhatsApp Business API Setup
             </CardTitle>
             <CardDescription>

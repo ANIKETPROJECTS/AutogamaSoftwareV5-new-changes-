@@ -151,58 +151,58 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
-        <Card className="border border-slate-200 dark:border-slate-800 hover:shadow-md transition-shadow duration-200" data-testid="card-todays-sales">
+      <div className="stat-card-grid">
+        <Card className="stat-card" data-testid="card-todays-sales">
           <CardContent className="p-5">
             <div className="flex items-start justify-between">
               <div className="space-y-2">
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Today's Sales</p>
-                <p className="text-2xl font-bold text-foreground">₹{(todaySales/1000).toFixed(1)}K</p>
+                <p className="stat-label">Today's Sales</p>
+                <p className="stat-value">₹{(todaySales/1000).toFixed(1)}K</p>
               </div>
-              <div className="p-2 bg-slate-100 dark:bg-slate-800 rounded-md">
-                <IndianRupee className="w-5 h-5 text-slate-600 dark:text-slate-300" />
+              <div className="stat-icon-container">
+                <IndianRupee className="w-5 h-5 text-primary" />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border border-slate-200 dark:border-slate-800 hover:shadow-md transition-shadow duration-200" data-testid="card-active-jobs-count">
+        <Card className="stat-card" data-testid="card-active-jobs-count">
           <CardContent className="p-5">
             <div className="flex items-start justify-between">
               <div className="space-y-2">
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Active Jobs</p>
-                <p className="text-2xl font-bold text-foreground">{jobs.filter((j: any) => j.stage !== "Completed" && j.stage !== "Cancelled").length}</p>
+                <p className="stat-label">Active Jobs</p>
+                <p className="stat-value">{jobs.filter((j: any) => j.stage !== "Completed" && j.stage !== "Cancelled").length}</p>
               </div>
-              <div className="p-2 bg-slate-100 dark:bg-slate-800 rounded-md">
-                <Package className="w-5 h-5 text-slate-600 dark:text-slate-300" />
+              <div className="stat-icon-container">
+                <Package className="w-5 h-5 text-primary" />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border border-slate-200 dark:border-slate-800 hover:shadow-md transition-shadow duration-200" data-testid="card-low-stock-count">
+        <Card className="stat-card" data-testid="card-low-stock-count">
           <CardContent className="p-5">
             <div className="flex items-start justify-between">
               <div className="space-y-2">
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Low Stock</p>
-                <p className="text-2xl font-bold text-foreground">{lowStock.length}</p>
+                <p className="stat-label">Low Stock</p>
+                <p className="stat-value">{lowStock.length}</p>
               </div>
-              <div className="p-2 bg-slate-100 dark:bg-slate-800 rounded-md">
-                <AlertTriangle className="w-5 h-5 text-slate-600 dark:text-slate-300" />
+              <div className="stat-icon-container">
+                <AlertTriangle className="w-5 h-5 text-primary" />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border border-slate-200 dark:border-slate-800 hover:shadow-md transition-shadow duration-200" data-testid="card-total-customers">
+        <Card className="stat-card" data-testid="card-total-customers">
           <CardContent className="p-5">
             <div className="flex items-start justify-between">
               <div className="space-y-2">
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Customers</p>
-                <p className="text-2xl font-bold text-foreground">{customers.length}</p>
+                <p className="stat-label">Customers</p>
+                <p className="stat-value">{customers.length}</p>
               </div>
-              <div className="p-2 bg-slate-100 dark:bg-slate-800 rounded-md">
-                <Users className="w-5 h-5 text-slate-600 dark:text-slate-300" />
+              <div className="stat-icon-container">
+                <Users className="w-5 h-5 text-primary" />
               </div>
             </div>
           </CardContent>
@@ -211,39 +211,39 @@ export default function Dashboard() {
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Card
-          className="border border-slate-200 dark:border-slate-800 hover:shadow-md transition-shadow duration-200"
+          className="card-modern"
           data-testid="card-sales-trends"
         >
-          <CardHeader className="pb-4 border-b border-slate-100 dark:border-slate-800">
+          <CardHeader className="pb-4 border-b border-border/50">
             <CardTitle className="flex items-center gap-3 text-base text-foreground">
-              <TrendingUp className="w-4 h-4 text-slate-600 dark:text-slate-300" />
+              <TrendingUp className="w-4 h-4 text-primary" />
               Sales Trends (Last 7 Days)
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-6">
             <ResponsiveContainer width="100%" height={200}>
               <BarChart data={last7Days}>
                 <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                 <XAxis dataKey="day" className="text-muted-foreground" />
                 <YAxis className="text-muted-foreground" />
                 <Tooltip />
-                <Bar dataKey="sales" fill="#3B82F6" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="sales" fill="#dc2626" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
 
         <Card
-          className="border border-slate-200 dark:border-slate-800 hover:shadow-md transition-shadow duration-200"
+          className="card-modern"
           data-testid="card-service-status"
         >
-          <CardHeader className="pb-4 border-b border-slate-100 dark:border-slate-800">
+          <CardHeader className="pb-4 border-b border-border/50">
             <CardTitle className="flex items-center gap-3 text-base text-foreground">
-              <Clock className="w-4 h-4 text-slate-600 dark:text-slate-300" />
+              <Clock className="w-4 h-4 text-primary" />
               Customer Status Distribution
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-6">
             <ResponsiveContainer width="100%" height={200}>
               <PieChart margin={{ left: 80, right: 20 }}>
                 <Pie
@@ -274,16 +274,16 @@ export default function Dashboard() {
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Card
-          className="border-border"
+          className="card-modern"
           data-testid="card-customer-growth"
         >
-          <CardHeader className="pb-2">
+          <CardHeader className="pb-4 border-b border-border/50">
             <CardTitle className="flex items-center gap-2 text-foreground">
-              <TrendingUp className="w-5 h-5 text-green-500" />
+              <TrendingUp className="w-5 h-5 text-primary" />
               Customer Growth (6 Months)
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-6">
             <ResponsiveContainer width="100%" height={200}>
               <LineChart data={customerGrowth}>
                 <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
@@ -294,9 +294,9 @@ export default function Dashboard() {
                 <Line
                   type="monotone"
                   dataKey="customers"
-                  stroke="#22C55E"
+                  stroke="#dc2626"
                   strokeWidth={2}
-                  dot={{ fill: "#22C55E", strokeWidth: 2 }}
+                  dot={{ fill: "#dc2626", strokeWidth: 2 }}
                   name="Total Customers"
                 />
               </LineChart>
@@ -305,16 +305,16 @@ export default function Dashboard() {
         </Card>
 
         <Card
-          className="border-border"
+          className="card-modern"
           data-testid="card-product-categories"
         >
-          <CardHeader className="pb-2">
+          <CardHeader className="pb-4 border-b border-border/50">
             <CardTitle className="flex items-center gap-2 text-foreground">
-              <Package className="w-5 h-5 text-orange-500" />
+              <Package className="w-5 h-5 text-primary" />
               Product Categories
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-6">
             <ResponsiveContainer width="100%" height={200}>
               <BarChart data={categoryData} layout="vertical">
                 <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />

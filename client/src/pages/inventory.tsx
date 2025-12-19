@@ -150,8 +150,8 @@ export default function Inventory() {
               <Card 
                 key={displayItem.category} 
                 className={cn(
-                  "bg-card border-border",
-                  item && isLowStock(item) && "border-red-500/30"
+                  "card-modern",
+                  item && isLowStock(item) && "border-red-500/30 shadow-md"
                 )}
                 data-testid={`inventory-card-${displayItem.category}`}
               >

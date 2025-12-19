@@ -129,7 +129,7 @@ export default function Technicians() {
             return (
               <Card 
                 key={tech._id} 
-                className="bg-card border-border"
+                className="card-modern"
                 data-testid={`technician-card-${tech._id}`}
               >
                 <CardHeader className="pb-3">
