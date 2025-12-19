@@ -71,7 +71,7 @@ export default function Invoices() {
       case "Partially Paid":
         return "bg-yellow-100 dark:bg-yellow-950/50 text-yellow-700 dark:text-yellow-400";
       default:
-        return "bg-red-100 dark:bg-red-950/50 text-red-700 dark:text-red-400";
+        return "bg-gray-100 text-gray-700 border-gray-200";
     }
   };
 
@@ -190,17 +190,17 @@ Balance: Rs.${(selectedInvoice.totalAmount - selectedInvoice.paidAmount).toLocal
           </CardContent>
         </Card>
 
-        <Card className="bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800" data-testid="card-unpaid-invoices">
+        <Card className="bg-gray-50 border-gray-200" data-testid="card-unpaid-invoices">
           <CardContent className="p-5">
             <div className="flex items-center justify-between gap-4">
               <div>
-                <p className="text-sm text-red-600 dark:text-red-400 font-medium">Unpaid Invoices</p>
-                <p className="text-3xl font-bold mt-1 text-red-900 dark:text-red-100">
+                <p className="text-sm text-gray-600 font-medium">Unpaid Invoices</p>
+                <p className="text-3xl font-bold mt-1 text-gray-900">
                   {unpaidInvoices}
                 </p>
               </div>
-              <div className="p-3 bg-red-100 dark:bg-red-900/50 rounded-lg">
-                <FileText className="w-6 h-6 text-red-600 dark:text-red-400" />
+              <div className="p-3 bg-gray-200 rounded-lg">
+                <FileText className="w-6 h-6 text-gray-600" />
               </div>
             </div>
           </CardContent>

@@ -127,10 +127,10 @@ export default function Inventory() {
       </div>
 
       {lowStockItems.length > 0 && (
-        <Card className="bg-red-500/5 border-red-500/20">
+        <Card className="bg-gray-50 border-gray-200">
           <CardContent className="p-4 flex items-center gap-3">
-            <AlertTriangle className="w-5 h-5 text-red-400" />
-            <span className="text-red-400 font-medium">{lowStockItems.length} product{lowStockItems.length !== 1 ? 's' : ''} below minimum stock level of {MIN_STOCK}!</span>
+            <AlertTriangle className="w-5 h-5 text-gray-600" />
+            <span className="text-gray-700 font-medium">{lowStockItems.length} product{lowStockItems.length !== 1 ? 's' : ''} below minimum stock level of {MIN_STOCK}!</span>
           </CardContent>
         </Card>
       )}
@@ -151,7 +151,7 @@ export default function Inventory() {
                 key={displayItem.category} 
                 className={cn(
                   "card-modern",
-                  item && isLowStock(item) && "border-red-500/30 shadow-md"
+                  item && isLowStock(item) && "border-gray-400 shadow-md"
                 )}
                 data-testid={`inventory-card-${displayItem.category}`}
               >
@@ -172,7 +172,7 @@ export default function Inventory() {
                   <div className="flex items-baseline justify-between">
                     <span className={cn(
                       "text-3xl font-display font-bold",
-                      item && isLowStock(item) && "text-red-400"
+                      item && isLowStock(item) && "text-gray-700"
                     )}>
                       {displayItem.quantity}
                     </span>
@@ -180,7 +180,7 @@ export default function Inventory() {
                   </div>
                   
                   {item && isLowStock(item) && (
-                    <p className="text-xs text-red-400 flex items-center gap-1">
+                    <p className="text-xs text-gray-600 flex items-center gap-1">
                       <AlertTriangle className="w-3 h-3" />
                       Below minimum ({MIN_STOCK} {displayItem.unit})
                     </p>
@@ -223,7 +223,7 @@ export default function Inventory() {
                       data-testid={`button-stock-out-${displayItem.category}`}
                       disabled={displayItem.quantity === 0}
                     >
-                      <ArrowDown className="w-3 h-3 mr-1 text-red-500" />
+                      <ArrowDown className="w-3 h-3 mr-1 text-gray-600" />
                       Stock Out
                     </Button>
                   </div>

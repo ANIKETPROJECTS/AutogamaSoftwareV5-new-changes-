@@ -901,8 +901,8 @@ export default function CustomerService() {
                   </div>
                 )}
 
-                <div className="border rounded-lg p-4 bg-accent/30 space-y-2">
-                  <h4 className="font-semibold text-sm text-muted-foreground">Cost Summary</h4>
+                <div className="border border-gray-200 rounded-lg p-4 bg-gray-50 space-y-2">
+                  <h4 className="font-semibold text-sm text-gray-700">Cost Summary</h4>
                   
                   {ppfPrice > 0 && (
                     <div className="flex justify-between text-sm">
