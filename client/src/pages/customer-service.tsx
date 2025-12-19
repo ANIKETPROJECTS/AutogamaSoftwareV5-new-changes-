@@ -53,13 +53,8 @@ export default function CustomerService() {
   const [otherServiceName, setOtherServiceName] = useState('');
   const [otherServiceVehicleType, setOtherServiceVehicleType] = useState('');
 
-  const [ppfMaterialCategory, setPpfMaterialCategory] = useState('');
-  const [ppfMaterialQuantity, setPpfMaterialQuantity] = useState<string>('1');
-  const [ppfMaterialUnit, setPpfMaterialUnit] = useState<string>('sheets');
-
   const [showPpfSection, setShowPpfSection] = useState(true);
   const [showOtherServicesSection, setShowOtherServicesSection] = useState(true);
-  const [showPpfMaterialsSection, setShowPpfMaterialsSection] = useState(true);
   const [isLoadingLastService, setIsLoadingLastService] = useState(false);
 
   useEffect(() => {
@@ -154,9 +149,6 @@ export default function CustomerService() {
     setSelectedOtherServices([]);
     setOtherServiceName('');
     setOtherServiceVehicleType('');
-    setPpfMaterialCategory('');
-    setPpfMaterialQuantity('1');
-    setPpfMaterialUnit('sheets');
   };
 
   const selectedCustomer = customers.find((c: any) => c._id === selectedCustomerId);
@@ -301,53 +293,6 @@ export default function CustomerService() {
 
   const handleRemoveOtherService = (index: number) => {
     setSelectedOtherServices(selectedOtherServices.filter((_, i) => i !== index));
-  };
-
-  const handleAddPpfMaterial = () => {
-    if (!ppfMaterialCategory) {
-      toast({ title: 'Please select a PPF product', variant: 'destructive' });
-      return;
-    }
-    
-    const qty = parseInt(ppfMaterialQuantity, 10);
-    if (isNaN(qty) || qty <= 0) {
-      toast({ title: 'Please enter valid quantity (greater than 0)', variant: 'destructive' });
-      return;
-    }
-
-    const ppfItem = inventory.find((inv: any) => inv.category === ppfMaterialCategory);
-    if (!ppfItem) {
-      toast({ title: 'PPF product not found in inventory', variant: 'destructive' });
-      return;
-    }
-
-    if (qty > ppfItem.quantity) {
-      toast({ title: `Only ${ppfItem.quantity} ${ppfItem.unit} available in stock`, variant: 'destructive' });
-      return;
-    }
-
-    const existingIndex = selectedItems.findIndex(i => i.inventoryId === ppfItem._id);
-    if (existingIndex >= 0) {
-      const newItems = [...selectedItems];
-      const newQty = newItems[existingIndex].quantity + qty;
-      if (newQty > ppfItem.quantity) {
-        toast({ title: `Total would exceed available stock (${ppfItem.quantity} ${ppfItem.unit})`, variant: 'destructive' });
-        return;
-      }
-      newItems[existingIndex].quantity = newQty;
-      setSelectedItems(newItems);
-    } else {
-      setSelectedItems([...selectedItems, {
-        inventoryId: ppfItem._id,
-        quantity: qty,
-        name: ppfItem.name,
-        unit: ppfMaterialUnit
-      }]);
-    }
-
-    toast({ title: `Added ${qty} ${ppfMaterialUnit} of ${ppfItem.name}` });
-    setPpfMaterialCategory('');
-    setPpfMaterialQuantity('1');
   };
 
   const handleAddItem = () => {
@@ -875,61 +820,6 @@ export default function CustomerService() {
                     rows={3}
                     data-testid="input-service-notes"
                   />
-                </div>
-
-                <div className="space-y-3">
-                  <Label className="flex items-center gap-2">
-                    <Package className="w-4 h-4" />
-                    PPF Materials (with stock reduction)
-                  </Label>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="space-y-1">
-                      <Label className="text-xs">Product</Label>
-                      <Select value={ppfMaterialCategory} onValueChange={setPpfMaterialCategory}>
-                        <SelectTrigger data-testid="select-ppf-material">
-                          <SelectValue placeholder="Select PPF" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {inventory.filter((item: any) => item.category && ['Elite', 'Garware Plus', 'Garware Premium', 'Garware Matt'].includes(item.category)).map((item: any) => (
-                            <SelectItem key={item._id} value={item.category}>
-                              {item.name} ({item.quantity} {item.unit})
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-1">
-                      <Label className="text-xs">Unit</Label>
-                      <Select value={ppfMaterialUnit} onValueChange={setPpfMaterialUnit}>
-                        <SelectTrigger data-testid="select-ppf-unit">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="sheet">sheet</SelectItem>
-                          <SelectItem value="sheets">sheets</SelectItem>
-                          <SelectItem value="roll">roll</SelectItem>
-                          <SelectItem value="rolls">rolls</SelectItem>
-                          <SelectItem value="meter">meter</SelectItem>
-                          <SelectItem value="meters">meters</SelectItem>
-                          <SelectItem value="piece">piece</SelectItem>
-                          <SelectItem value="pieces">pieces</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <Input
-                      type="number"
-                      min="1"
-                      value={ppfMaterialQuantity}
-                      onChange={(e) => setPpfMaterialQuantity(e.target.value)}
-                      placeholder="Quantity"
-                      data-testid="input-ppf-quantity"
-                    />
-                    <Button type="button" onClick={handleAddPpfMaterial} variant="outline" data-testid="button-add-ppf-material">
-                      <Plus className="w-4 h-4" />
-                    </Button>
-                  </div>
                 </div>
 
                 <div className="space-y-2">
