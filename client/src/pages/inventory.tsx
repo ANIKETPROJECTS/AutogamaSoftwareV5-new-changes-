@@ -19,9 +19,9 @@ const PPF_ITEMS = [
   { name: 'Garware Matt', category: 'Garware Matt' }
 ];
 
-const UNITS = ['sheet', 'sheets', 'roll', 'rolls', 'meter', 'meters', 'piece', 'pieces', 'kg', 'liter'];
+const UNITS = ['sheets', 'meter'];
 const MIN_STOCK = 5;
-const DEFAULT_UNIT = 'sheets';
+const DEFAULT_UNIT = 'meter';
 
 const CATEGORY_COLORS: Record<string, string> = {
   'Elite': 'bg-blue-500/20 text-blue-400',
