@@ -53,62 +53,77 @@ export default function Login() {
 
   return (
     <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-white dark:bg-slate-950">
-      {/* Left Hero Section */}
-      <div className="hidden lg:flex flex-col justify-between p-12 bg-gradient-to-br from-red-600 via-red-500 to-red-700 dark:from-red-900 dark:via-red-800 dark:to-red-950 text-white">
-        <div>
+      {/* Left Hero Section with Garage Image */}
+      <div 
+        className="hidden lg:flex flex-col justify-between p-12 text-white relative overflow-hidden"
+        style={{
+          backgroundImage: `url(/attached_assets/garage-hero.png)`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }}
+      >
+        {/* Dark Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-br from-red-600/85 via-red-600/80 to-red-900/85 z-0" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent z-0" />
+        
+        {/* Content */}
+        <div className="relative z-10">
           <div className="flex items-center gap-3 mb-16">
-            <div className="p-2 bg-white/20 backdrop-blur-sm rounded-lg">
+            <div className="p-2 bg-white/30 backdrop-blur-md rounded-lg border border-white/30">
               <Car className="w-8 h-8" />
             </div>
             <div>
               <h1 className="text-3xl font-bold font-display">AutoGarage</h1>
-              <p className="text-red-100 text-sm">CRM System</p>
+              <p className="text-white/80 text-sm">CRM System</p>
             </div>
           </div>
           
           <div className="space-y-8">
-            <h2 className="text-5xl font-bold font-display leading-tight">
-              Manage Your Garage With Ease
-            </h2>
-            <p className="text-red-100 text-lg">
+            <div>
+              <h2 className="text-5xl font-bold font-display leading-tight mb-4">
+                Manage Your Garage With Ease
+              </h2>
+              <div className="h-1 w-20 bg-white/40 rounded-full" />
+            </div>
+            <p className="text-white/90 text-lg max-w-md">
               Streamline your automotive service operations with our comprehensive CRM solution designed for modern garages.
             </p>
             
-            <div className="space-y-4">
+            <div className="space-y-4 pt-4">
               <div className="flex items-start gap-4">
-                <div className="p-3 bg-white/20 backdrop-blur-sm rounded-lg flex-shrink-0">
+                <div className="p-3 bg-white/20 backdrop-blur-md rounded-lg flex-shrink-0 border border-white/20">
                   <Zap className="w-5 h-5" />
                 </div>
                 <div>
                   <h3 className="font-semibold text-lg">Fast Operations</h3>
-                  <p className="text-red-100">Quick service booking and tracking</p>
+                  <p className="text-white/80">Quick service booking and tracking</p>
                 </div>
               </div>
               
               <div className="flex items-start gap-4">
-                <div className="p-3 bg-white/20 backdrop-blur-sm rounded-lg flex-shrink-0">
+                <div className="p-3 bg-white/20 backdrop-blur-md rounded-lg flex-shrink-0 border border-white/20">
                   <Users className="w-5 h-5" />
                 </div>
                 <div>
                   <h3 className="font-semibold text-lg">Customer Management</h3>
-                  <p className="text-red-100">Track customer history and preferences</p>
+                  <p className="text-white/80">Track customer history and preferences</p>
                 </div>
               </div>
               
               <div className="flex items-start gap-4">
-                <div className="p-3 bg-white/20 backdrop-blur-sm rounded-lg flex-shrink-0">
+                <div className="p-3 bg-white/20 backdrop-blur-md rounded-lg flex-shrink-0 border border-white/20">
                   <TrendingUp className="w-5 h-5" />
                 </div>
                 <div>
                   <h3 className="font-semibold text-lg">Real-time Analytics</h3>
-                  <p className="text-red-100">Monitor sales and performance metrics</p>
+                  <p className="text-white/80">Monitor sales and performance metrics</p>
                 </div>
               </div>
             </div>
           </div>
         </div>
         
-        <div className="text-red-100 text-sm">
+        <div className="relative z-10 text-white/80 text-sm">
           <p>© 2025 AutoGarage CRM. All rights reserved.</p>
         </div>
       </div>
