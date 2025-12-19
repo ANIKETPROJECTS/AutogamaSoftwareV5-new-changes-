@@ -172,7 +172,10 @@ export default function CustomerService() {
           if (prefs.ppfCategory) setPpfCategory(prefs.ppfCategory);
           if (prefs.ppfVehicleType) setPpfVehicleType(prefs.ppfVehicleType);
           if (prefs.ppfWarranty) setPpfWarranty(prefs.ppfWarranty);
-          if (typeof prefs.ppfPrice === 'number') setPpfPrice(prefs.ppfPrice);
+          // Always set the price from preferences if available
+          if (typeof prefs.ppfPrice === 'number') {
+            setPpfPrice(prefs.ppfPrice);
+          }
           if (typeof prefs.laborCost === 'number' && prefs.laborCost > 0) setLaborCost(prefs.laborCost.toString());
           if (Array.isArray(prefs.otherServices) && prefs.otherServices.length > 0) {
             setSelectedOtherServices(prefs.otherServices);
@@ -193,21 +196,19 @@ export default function CustomerService() {
   }, [selectedCustomerId, selectedVehicleIndex]);
 
   useEffect(() => {
-    // Only recalculate price if warranty was manually changed (not from preferences loading)
-    if (ppfCategory && ppfVehicleType && ppfWarranty) {
+    // Only recalculate price if warranty was manually changed and price is still 0
+    // This ensures we don't override prices loaded from preferences
+    if (ppfCategory && ppfVehicleType && ppfWarranty && ppfPrice === 0) {
       const categoryData = PPF_CATEGORIES[ppfCategory];
       if (categoryData && categoryData[ppfVehicleType] && categoryData[ppfVehicleType][ppfWarranty]) {
         const calculatedPrice = categoryData[ppfVehicleType][ppfWarranty];
-        // Update price if it differs from calculated value or if price is 0
-        if (ppfPrice === 0 || ppfPrice === calculatedPrice) {
-          setPpfPrice(calculatedPrice);
-        }
+        setPpfPrice(calculatedPrice);
       }
     } else if (!ppfWarranty) {
       // Only reset to 0 if warranty is explicitly cleared
       setPpfPrice(0);
     }
-  }, [ppfCategory, ppfVehicleType, ppfWarranty]);
+  }, [ppfCategory, ppfVehicleType, ppfWarranty, ppfPrice]);
 
   const handleAddVehicle = () => {
     if (!selectedCustomerId) {

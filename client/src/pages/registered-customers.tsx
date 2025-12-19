@@ -2,12 +2,14 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Phone, Search } from "lucide-react";
 import { Link } from "wouter";
 import { useState } from "react";
 
 export default function RegisteredCustomers() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [filterVehicles, setFilterVehicles] = useState("all");
 
   const { data: customers = [], isLoading } = useQuery({
     queryKey: ["customers"],
@@ -15,6 +17,15 @@ export default function RegisteredCustomers() {
   });
 
   const filteredCustomers = customers.filter((customer: any) => {
+    // Apply vehicle filter
+    if (filterVehicles === "with-vehicles" && (!customer.vehicles || customer.vehicles.length === 0)) {
+      return false;
+    }
+    if (filterVehicles === "without-vehicles" && customer.vehicles && customer.vehicles.length > 0) {
+      return false;
+    }
+
+    // Apply search filter
     if (!searchQuery.trim()) return true;
     const query = searchQuery.toLowerCase();
     const nameMatch = customer.name?.toLowerCase().includes(query);
@@ -34,15 +45,27 @@ export default function RegisteredCustomers() {
         <p className="text-muted-foreground mt-1 text-sm">View and manage all registered customers</p>
       </div>
 
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground z-10" />
-        <Input
-          placeholder="Search by name, phone, or car..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-10 h-9"
-          data-testid="input-search-customer"
-        />
+      <div className="flex gap-3">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground z-10" />
+          <Input
+            placeholder="Search by name, phone, or car..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10 h-9"
+            data-testid="input-search-customer"
+          />
+        </div>
+        <Select value={filterVehicles} onValueChange={setFilterVehicles}>
+          <SelectTrigger className="w-40" data-testid="select-filter-vehicles">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Customers</SelectItem>
+            <SelectItem value="with-vehicles">With Vehicles</SelectItem>
+            <SelectItem value="without-vehicles">Without Vehicles</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {isLoading ? (
