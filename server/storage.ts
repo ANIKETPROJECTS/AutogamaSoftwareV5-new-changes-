@@ -16,6 +16,7 @@ export interface IStorage {
   getJobsByStage(stage: JobStage): Promise<IJob[]>;
   getLastJobForVehicle(customerId: string, vehicleIndex: number): Promise<IJob | null>;
   getVehicleServicePreferences(customerId: string, vehicleIndex: number): Promise<any | null>;
+  updateVehiclePreferences(customerId: string, vehicleIndex: number, preferences: any): Promise<ICustomer | null>;
   createJob(data: Partial<IJob>): Promise<IJob>;
   updateJob(id: string, data: Partial<IJob>): Promise<IJob | null>;
   updateJobStage(id: string, stage: JobStage): Promise<IJob | null>;
@@ -134,8 +135,26 @@ export class MongoStorage implements IStorage {
       ppfVehicleType: vehicle.ppfVehicleType,
       ppfWarranty: vehicle.ppfWarranty,
       ppfPrice: vehicle.ppfPrice,
-      laborCost: vehicle.laborCost
+      laborCost: vehicle.laborCost,
+      otherServices: vehicle.otherServices
     };
+  }
+
+  async updateVehiclePreferences(customerId: string, vehicleIndex: number, preferences: any): Promise<ICustomer | null> {
+    if (!mongoose.Types.ObjectId.isValid(customerId)) return null;
+    const customer = await Customer.findById(customerId);
+    if (!customer || !customer.vehicles[vehicleIndex]) return null;
+    
+    const vehicle = customer.vehicles[vehicleIndex];
+    if (preferences.ppfCategory) vehicle.ppfCategory = preferences.ppfCategory;
+    if (preferences.ppfVehicleType) vehicle.ppfVehicleType = preferences.ppfVehicleType;
+    if (preferences.ppfWarranty) vehicle.ppfWarranty = preferences.ppfWarranty;
+    if (typeof preferences.ppfPrice === 'number') vehicle.ppfPrice = preferences.ppfPrice;
+    if (typeof preferences.laborCost === 'number') vehicle.laborCost = preferences.laborCost;
+    if (Array.isArray(preferences.otherServices)) vehicle.otherServices = preferences.otherServices;
+    
+    await customer.save();
+    return customer;
   }
 
   async createJob(data: Partial<IJob>): Promise<IJob> {

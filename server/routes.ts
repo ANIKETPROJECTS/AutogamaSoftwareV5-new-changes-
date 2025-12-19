@@ -183,6 +183,33 @@ export async function registerRoutes(
       const customer = await Customer.findById(job.customerId);
       if (customer) {
         await sendStageUpdateMessage(customer.phone, job.stage, job.vehicleName, job.plateNumber);
+        
+        // Save vehicle service preferences for auto-fill on next service
+        const jobData = req.body as any;
+        const ppfService = jobData.serviceItems?.find((item: any) => item.name?.startsWith('PPF'));
+        const otherServices = jobData.serviceItems?.filter((item: any) => !item.name?.startsWith('PPF')).map((item: any) => ({
+          name: item.name,
+          vehicleType: item.vehicleType || '',
+          price: item.price || 0
+        })) || [];
+        
+        const preferences: any = {};
+        if (ppfService) {
+          preferences.ppfCategory = ppfService.category;
+          preferences.ppfVehicleType = ppfService.vehicleType;
+          preferences.ppfWarranty = ppfService.warranty;
+          preferences.ppfPrice = ppfService.price;
+        }
+        if (req.body.laborCost) {
+          preferences.laborCost = req.body.laborCost;
+        }
+        if (otherServices.length > 0) {
+          preferences.otherServices = otherServices;
+        }
+        
+        if (Object.keys(preferences).length > 0) {
+          await storage.updateVehiclePreferences(job.customerId.toString(), job.vehicleIndex, preferences);
+        }
       }
       res.status(201).json(job);
     } catch (error) {
