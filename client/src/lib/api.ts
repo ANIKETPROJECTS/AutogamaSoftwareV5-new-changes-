@@ -27,6 +27,7 @@ export const api = {
     update: (id: string, data: any) => request<any>(`/customers/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
     addVehicle: (id: string, vehicle: any) => request<any>(`/customers/${id}/vehicles`, { method: 'POST', body: JSON.stringify(vehicle) }),
     getJobs: (id: string) => request<any[]>(`/customers/${id}/jobs`),
+    getLastService: (customerId: string, vehicleIndex: number) => request<any>(`/customers/${customerId}/vehicles/${vehicleIndex}/last-service`),
   },
   
   jobs: {

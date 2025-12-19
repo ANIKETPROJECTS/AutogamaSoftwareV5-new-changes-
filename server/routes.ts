@@ -135,6 +135,16 @@ export async function registerRoutes(
     }
   });
 
+  app.get("/api/customers/:customerId/vehicles/:vehicleIndex/last-service", async (req, res) => {
+    try {
+      const job = await storage.getLastJobForVehicle(req.params.customerId, parseInt(req.params.vehicleIndex, 10));
+      if (!job) return res.status(404).json({ message: "No previous service found" });
+      res.json(job);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch last service" });
+    }
+  });
+
   app.get("/api/jobs", async (req, res) => {
     try {
       const { stage } = req.query;

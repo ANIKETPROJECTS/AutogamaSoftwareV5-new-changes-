@@ -55,6 +55,7 @@ export default function CustomerService() {
 
   const [showPpfSection, setShowPpfSection] = useState(true);
   const [showOtherServicesSection, setShowOtherServicesSection] = useState(true);
+  const [isLoadingLastService, setIsLoadingLastService] = useState(false);
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -159,6 +160,46 @@ export default function CustomerService() {
       }
     }
   }, [selectedCustomerId, selectedCustomer]);
+
+  useEffect(() => {
+    const loadLastService = async () => {
+      if (!selectedCustomerId || selectedVehicleIndex === '') return;
+      
+      setIsLoadingLastService(true);
+      try {
+        const lastJob = await api.customers.getLastService(selectedCustomerId, parseInt(selectedVehicleIndex, 10));
+        if (lastJob && lastJob.serviceItems && lastJob.serviceItems.length > 0) {
+          const ppfService = lastJob.serviceItems.find((item: any) => item.name.startsWith('PPF'));
+          if (ppfService) {
+            setPpfCategory(ppfService.category || '');
+            setPpfVehicleType(ppfService.vehicleType || '');
+            setPpfWarranty(ppfService.warranty || '');
+          }
+          
+          const otherServices = lastJob.serviceItems.filter((item: any) => !item.name.startsWith('PPF'));
+          if (otherServices.length > 0) {
+            setSelectedOtherServices(otherServices.map((item: any) => ({
+              name: item.name,
+              vehicleType: item.vehicleType || '',
+              price: item.price || 0,
+              category: item.category,
+              warranty: item.warranty
+            })));
+          }
+          
+          if (lastJob.laborCost) {
+            setLaborCost(lastJob.laborCost.toString());
+          }
+        }
+      } catch (error) {
+        // No previous service found, keep fields empty
+      } finally {
+        setIsLoadingLastService(false);
+      }
+    };
+    
+    loadLastService();
+  }, [selectedCustomerId, selectedVehicleIndex]);
 
   useEffect(() => {
     if (ppfCategory && ppfVehicleType && ppfWarranty) {
@@ -552,12 +593,17 @@ export default function CustomerService() {
                   </CardHeader>
                   {showPpfSection && (
                     <CardContent className="space-y-3">
+                      {selectedVehicleIndex !== '' && ppfCategory && (
+                        <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded p-2 text-sm text-blue-700 dark:text-blue-300">
+                          Auto-filled from previous service - feel free to edit
+                        </div>
+                      )}
                       <div className="space-y-2">
                         <Label className="text-sm">PPF Category</Label>
                         <Select value={ppfCategory} onValueChange={(val) => {
                           setPpfCategory(val);
                           setPpfWarranty('');
-                        }}>
+                        }} disabled={isLoadingLastService}>
                           <SelectTrigger data-testid="select-ppf-category">
                             <SelectValue placeholder="Select PPF category" />
                           </SelectTrigger>
@@ -574,7 +620,7 @@ export default function CustomerService() {
                         <Select value={ppfVehicleType} onValueChange={(val) => {
                           setPpfVehicleType(val);
                           setPpfWarranty('');
-                        }}>
+                        }} disabled={isLoadingLastService}>
                           <SelectTrigger data-testid="select-ppf-vehicle-type">
                             <SelectValue placeholder="Select vehicle type" />
                           </SelectTrigger>
@@ -588,7 +634,7 @@ export default function CustomerService() {
 
                       <div className="space-y-2">
                         <Label className="text-sm">Warranty / Variant</Label>
-                        <Select value={ppfWarranty} onValueChange={setPpfWarranty} disabled={!ppfCategory || !ppfVehicleType}>
+                        <Select value={ppfWarranty} onValueChange={setPpfWarranty} disabled={!ppfCategory || !ppfVehicleType || isLoadingLastService}>
                           <SelectTrigger data-testid="select-ppf-warranty">
                             <SelectValue placeholder="Select warranty" />
                           </SelectTrigger>
@@ -621,9 +667,14 @@ export default function CustomerService() {
                   </CardHeader>
                   {showOtherServicesSection && (
                     <CardContent className="space-y-3">
+                      {selectedVehicleIndex !== '' && selectedOtherServices.length > 0 && (
+                        <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded p-2 text-sm text-blue-700 dark:text-blue-300">
+                          Auto-filled from previous service - feel free to edit
+                        </div>
+                      )}
                       <div className="space-y-2">
                         <Label className="text-sm">Select Service</Label>
-                        <Select value={otherServiceName} onValueChange={setOtherServiceName}>
+                        <Select value={otherServiceName} onValueChange={setOtherServiceName} disabled={isLoadingLastService}>
                           <SelectTrigger data-testid="select-other-service">
                             <SelectValue placeholder="Choose a service" />
                           </SelectTrigger>
@@ -637,7 +688,7 @@ export default function CustomerService() {
 
                       <div className="space-y-2">
                         <Label className="text-sm">Vehicle Type</Label>
-                        <Select value={otherServiceVehicleType} onValueChange={setOtherServiceVehicleType}>
+                        <Select value={otherServiceVehicleType} onValueChange={setOtherServiceVehicleType} disabled={isLoadingLastService}>
                           <SelectTrigger data-testid="select-other-service-vehicle-type">
                             <SelectValue placeholder="Select vehicle type" />
                           </SelectTrigger>
@@ -710,6 +761,11 @@ export default function CustomerService() {
 
                 <div className="space-y-2">
                   <Label>Labor Cost</Label>
+                  {selectedVehicleIndex !== '' && laborCost && (
+                    <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded p-2 text-xs text-blue-700 dark:text-blue-300">
+                      Auto-filled from previous service - feel free to edit
+                    </div>
+                  )}
                   <div className="relative">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">₹</span>
                     <Input
@@ -721,6 +777,7 @@ export default function CustomerService() {
                       placeholder="Enter labor charge"
                       className="pl-7"
                       data-testid="input-labor-cost"
+                      disabled={isLoadingLastService}
                     />
                   </div>
                 </div>
