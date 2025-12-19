@@ -58,6 +58,20 @@ export default function Inventory() {
     }
   });
 
+  const createMutation = useMutation({
+    mutationFn: (data: any) => api.inventory.create(data),
+    onSuccess: (newItem: any) => {
+      // After creating, adjust the stock
+      adjustMutation.mutate({
+        id: newItem._id,
+        quantity: adjustType === 'in' ? parseInt(adjustAmount, 10) : -parseInt(adjustAmount, 10)
+      });
+    },
+    onError: () => {
+      toast({ title: 'Failed to create inventory item', variant: 'destructive' });
+    }
+  });
+
   const handleAdjust = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!selectedItem) return;
@@ -68,8 +82,20 @@ export default function Inventory() {
       return;
     }
     
+    // If item doesn't have an ID yet, create it first
+    if (!selectedItem._id) {
+      createMutation.mutate({
+        name: selectedItem.name,
+        category: selectedItem.category,
+        quantity: 0,
+        unit: adjustUnit,
+        minStock: MIN_STOCK
+      });
+      return;
+    }
+    
     // Update the item with the new unit before adjusting
-    if (selectedItem._id && selectedItem.unit !== adjustUnit) {
+    if (selectedItem.unit !== adjustUnit) {
       // Update unit on the server
       api.inventory.update(selectedItem._id, { unit: adjustUnit }).then(() => {
         adjustMutation.mutate({
