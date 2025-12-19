@@ -53,8 +53,12 @@ export default function CustomerService() {
   const [otherServiceName, setOtherServiceName] = useState('');
   const [otherServiceVehicleType, setOtherServiceVehicleType] = useState('');
 
+  const [ppfMaterialCategory, setPpfMaterialCategory] = useState('');
+  const [ppfMaterialMeters, setPpfMaterialMeters] = useState<string>('1');
+
   const [showPpfSection, setShowPpfSection] = useState(true);
   const [showOtherServicesSection, setShowOtherServicesSection] = useState(true);
+  const [showPpfMaterialsSection, setShowPpfMaterialsSection] = useState(true);
   const [isLoadingLastService, setIsLoadingLastService] = useState(false);
 
   useEffect(() => {
@@ -149,6 +153,8 @@ export default function CustomerService() {
     setSelectedOtherServices([]);
     setOtherServiceName('');
     setOtherServiceVehicleType('');
+    setPpfMaterialCategory('');
+    setPpfMaterialMeters('1');
   };
 
   const selectedCustomer = customers.find((c: any) => c._id === selectedCustomerId);
@@ -293,6 +299,53 @@ export default function CustomerService() {
 
   const handleRemoveOtherService = (index: number) => {
     setSelectedOtherServices(selectedOtherServices.filter((_, i) => i !== index));
+  };
+
+  const handleAddPpfMaterial = () => {
+    if (!ppfMaterialCategory) {
+      toast({ title: 'Please select a PPF product', variant: 'destructive' });
+      return;
+    }
+    
+    const meters = parseInt(ppfMaterialMeters, 10);
+    if (isNaN(meters) || meters <= 0) {
+      toast({ title: 'Please enter valid meters (greater than 0)', variant: 'destructive' });
+      return;
+    }
+
+    const ppfItem = inventory.find((inv: any) => inv.category === ppfMaterialCategory);
+    if (!ppfItem) {
+      toast({ title: 'PPF product not found in inventory', variant: 'destructive' });
+      return;
+    }
+
+    if (meters > ppfItem.quantity) {
+      toast({ title: `Only ${ppfItem.quantity} ${ppfItem.unit} available in stock`, variant: 'destructive' });
+      return;
+    }
+
+    const existingIndex = selectedItems.findIndex(i => i.inventoryId === ppfItem._id);
+    if (existingIndex >= 0) {
+      const newItems = [...selectedItems];
+      const newQty = newItems[existingIndex].quantity + meters;
+      if (newQty > ppfItem.quantity) {
+        toast({ title: `Total would exceed available stock (${ppfItem.quantity} ${ppfItem.unit})`, variant: 'destructive' });
+        return;
+      }
+      newItems[existingIndex].quantity = newQty;
+      setSelectedItems(newItems);
+    } else {
+      setSelectedItems([...selectedItems, {
+        inventoryId: ppfItem._id,
+        quantity: meters,
+        name: ppfItem.name,
+        unit: ppfItem.unit
+      }]);
+    }
+
+    toast({ title: `Added ${meters}m of ${ppfItem.name}` });
+    setPpfMaterialCategory('');
+    setPpfMaterialMeters('1');
   };
 
   const handleAddItem = () => {
@@ -820,6 +873,39 @@ export default function CustomerService() {
                     rows={3}
                     data-testid="input-service-notes"
                   />
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-2">
+                    <Package className="w-4 h-4" />
+                    PPF Materials (with stock reduction)
+                  </Label>
+                  <div className="flex gap-2">
+                    <Select value={ppfMaterialCategory} onValueChange={setPpfMaterialCategory}>
+                      <SelectTrigger className="flex-1" data-testid="select-ppf-material">
+                        <SelectValue placeholder="Select PPF product" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {inventory.filter((item: any) => item.category && ['Elite', 'Garware Plus', 'Garware Premium', 'Garware Matt'].includes(item.category)).map((item: any) => (
+                          <SelectItem key={item._id} value={item.category}>
+                            {item.name} ({item.quantity} {item.unit} available)
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Input
+                      type="number"
+                      min="1"
+                      value={ppfMaterialMeters}
+                      onChange={(e) => setPpfMaterialMeters(e.target.value)}
+                      className="w-20"
+                      placeholder="Meters"
+                      data-testid="input-ppf-meters"
+                    />
+                    <Button type="button" onClick={handleAddPpfMaterial} variant="outline" data-testid="button-add-ppf-material">
+                      <Plus className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </div>
 
                 <div className="space-y-2">
