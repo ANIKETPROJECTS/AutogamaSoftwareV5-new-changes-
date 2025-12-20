@@ -52,103 +52,42 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-white dark:bg-slate-950">
-      {/* Left Hero Section with Garage Image */}
-      <div 
-        className="hidden lg:flex flex-col justify-between p-12 text-white relative overflow-hidden"
-        style={{
-          backgroundImage: `url(/attached_assets/garage-hero.png)`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-        }}
-      >
-        {/* Dark Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-800/95 via-slate-900/95 to-slate-950/95 z-0" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent z-0" />
-        
-        {/* Content */}
-        <div className="relative z-10">
-          <div className="flex items-center gap-3 mb-16">
-            <div className="p-2 bg-white/30 backdrop-blur-md rounded-lg border border-white/30">
-              <Car className="w-8 h-8" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold font-display">AutoGarage</h1>
-              <p className="text-white/80 text-sm">CRM System</p>
-            </div>
-          </div>
-          
-          <div className="space-y-8">
-            <div>
-              <h2 className="text-5xl font-bold font-display leading-tight mb-4">
-                Manage Your Garage With Ease
-              </h2>
-              <div className="h-1 w-20 bg-white/40 rounded-full" />
-            </div>
-            <p className="text-white/90 text-lg max-w-md">
-              Streamline your automotive service operations with our comprehensive CRM solution designed for modern garages.
-            </p>
-            
-            <div className="space-y-4 pt-4">
-              <div className="flex items-start gap-4">
-                <div className="p-3 bg-white/20 backdrop-blur-md rounded-lg flex-shrink-0 border border-white/20">
-                  <Zap className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-lg">Fast Operations</h3>
-                  <p className="text-white/80">Quick service booking and tracking</p>
-                </div>
-              </div>
-              
-              <div className="flex items-start gap-4">
-                <div className="p-3 bg-white/20 backdrop-blur-md rounded-lg flex-shrink-0 border border-white/20">
-                  <Users className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-lg">Customer Management</h3>
-                  <p className="text-white/80">Track customer history and preferences</p>
-                </div>
-              </div>
-              
-              <div className="flex items-start gap-4">
-                <div className="p-3 bg-white/20 backdrop-blur-md rounded-lg flex-shrink-0 border border-white/20">
-                  <TrendingUp className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-lg">Real-time Analytics</h3>
-                  <p className="text-white/80">Monitor sales and performance metrics</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div className="relative z-10 text-white/80 text-sm">
-          <p>© 2025 AutoGarage CRM. All rights reserved.</p>
-        </div>
-      </div>
+    <div 
+      className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden"
+      style={{
+        backgroundImage: 'url(/garage-bg.png)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed',
+      }}
+    >
+      {/* Dark Overlay */}
+      <div className="absolute inset-0 bg-gradient-to-br from-black/60 via-black/50 to-black/60 backdrop-blur-sm z-0" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent z-0" />
 
-      {/* Right Login Section */}
-      <div className="flex items-center justify-center p-6 lg:p-12">
-        <div className="w-full max-w-sm">
-          <div className="lg:hidden text-center mb-8">
-            <div className="flex justify-center mb-4">
-              <div className="p-3 rounded-xl bg-red-100 dark:bg-red-900/30">
-                <Car className="w-8 h-8 text-red-600 dark:text-red-400" />
+      {/* Login Dialog */}
+      <div className="relative z-10 w-full max-w-md">
+        <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 dark:border-slate-700/20 overflow-hidden">
+          {/* Header */}
+          <div className="bg-gradient-to-r from-red-600 to-red-700 px-6 py-8 text-white">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 bg-white/20 backdrop-blur-md rounded-lg border border-white/30">
+                <Car className="w-6 h-6" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold font-display">AutoGarage</h1>
+                <p className="text-white/80 text-xs">CRM System</p>
               </div>
             </div>
-            <h1 className="text-3xl font-bold font-display text-foreground">AutoGarage CRM</h1>
+            <h2 className="text-3xl font-bold font-display">Welcome Back</h2>
+            <p className="text-white/90 text-sm mt-2">Sign in to your garage management account</p>
           </div>
 
-          <div className="space-y-8">
-            <div className="hidden lg:block">
-              <h2 className="text-3xl font-bold font-display text-foreground mb-2">Welcome Back</h2>
-              <p className="text-muted-foreground">Sign in to your garage management account</p>
-            </div>
-
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-3">
-                <Label htmlFor="email" className="text-base font-medium">Email Address</Label>
+          {/* Form Content */}
+          <div className="p-8 space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-sm font-semibold text-foreground">Email Address</Label>
                 <div className="relative group">
                   <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-red-600 transition-colors" />
                   <Input
@@ -157,14 +96,15 @@ export default function Login() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="admin@autogarage.com"
-                    className="pl-12 h-11 text-base border-2 border-slate-200 dark:border-slate-700 focus:border-red-600 focus:ring-0 transition-colors"
+                    className="pl-12 h-11 text-base border border-slate-300 dark:border-slate-600 rounded-lg focus:border-red-600 focus:ring-2 focus:ring-red-600/20 focus:ring-offset-0 transition-all bg-white dark:bg-slate-800"
                     data-testid="input-email"
+                    autoComplete="email"
                   />
                 </div>
               </div>
 
-              <div className="space-y-3">
-                <Label htmlFor="password" className="text-base font-medium">Password</Label>
+              <div className="space-y-2">
+                <Label htmlFor="password" className="text-sm font-semibold text-foreground">Password</Label>
                 <div className="relative group">
                   <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-red-600 transition-colors" />
                   <Input
@@ -173,20 +113,21 @@ export default function Login() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="pl-12 h-11 text-base border-2 border-slate-200 dark:border-slate-700 focus:border-red-600 focus:ring-0 transition-colors"
+                    className="pl-12 h-11 text-base border border-slate-300 dark:border-slate-600 rounded-lg focus:border-red-600 focus:ring-2 focus:ring-red-600/20 focus:ring-offset-0 transition-all bg-white dark:bg-slate-800"
                     data-testid="input-password"
+                    autoComplete="current-password"
                   />
                 </div>
               </div>
 
               <Button 
                 type="submit" 
-                className="w-full h-11 text-base font-semibold bg-red-600 hover:bg-red-700 text-white rounded-lg transition-all hover:shadow-lg hover:shadow-red-600/30"
+                className="w-full h-11 text-base font-semibold bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white rounded-lg transition-all hover:shadow-lg hover:shadow-red-600/40"
                 disabled={isLoading}
                 data-testid="button-login"
               >
                 {isLoading ? (
-                  <span className="flex items-center gap-2">
+                  <span className="flex items-center justify-center gap-2">
                     <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                     Signing in...
                   </span>
@@ -196,9 +137,18 @@ export default function Login() {
               </Button>
             </form>
 
-            <p className="text-center text-sm text-muted-foreground">
-              Demo: Use <span className="font-semibold text-foreground">Autogarage@system.com</span> / <span className="font-semibold text-foreground">Autogarage</span>
-            </p>
+            <div className="pt-4 border-t border-slate-200 dark:border-slate-700">
+              <p className="text-center text-xs text-muted-foreground">
+                Demo Credentials:<br />
+                <span className="font-semibold text-foreground">Autogarage@system.com</span><br />
+                <span className="font-semibold text-foreground">Autogarage</span>
+              </p>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="px-8 py-4 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-200 dark:border-slate-700 text-center text-xs text-muted-foreground">
+            <p>© 2025 AutoGarage CRM. All rights reserved.</p>
           </div>
         </div>
       </div>
