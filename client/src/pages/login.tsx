@@ -63,8 +63,8 @@ export default function Login() {
         }}
       >
         {/* Dark Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-600/85 via-blue-600/80 to-blue-900/85 z-0" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent z-0" />
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-800/95 via-slate-900/95 to-slate-950/95 z-0" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent z-0" />
         
         {/* Content */}
         <div className="relative z-10">
@@ -133,8 +133,8 @@ export default function Login() {
         <div className="w-full max-w-sm">
           <div className="lg:hidden text-center mb-8">
             <div className="flex justify-center mb-4">
-              <div className="p-3 rounded-xl bg-blue-100 dark:bg-blue-900/30">
-                <Car className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+              <div className="p-3 rounded-xl bg-red-100 dark:bg-red-900/30">
+                <Car className="w-8 h-8 text-red-600 dark:text-red-400" />
               </div>
             </div>
             <h1 className="text-3xl font-bold font-display text-foreground">AutoGarage CRM</h1>
@@ -150,14 +150,14 @@ export default function Login() {
               <div className="space-y-3">
                 <Label htmlFor="email" className="text-base font-medium">Email Address</Label>
                 <div className="relative group">
-                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-blue-600 transition-colors" />
+                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-red-600 transition-colors" />
                   <Input
                     id="email"
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="admin@autogarage.com"
-                    className="pl-12 h-11 text-base border-2 border-slate-200 dark:border-slate-700 focus:border-blue-600 focus:ring-0 transition-colors"
+                    className="pl-12 h-11 text-base border-2 border-slate-200 dark:border-slate-700 focus:border-red-600 focus:ring-0 transition-colors"
                     data-testid="input-email"
                   />
                 </div>
@@ -166,14 +166,14 @@ export default function Login() {
               <div className="space-y-3">
                 <Label htmlFor="password" className="text-base font-medium">Password</Label>
                 <div className="relative group">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-blue-600 transition-colors" />
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-red-600 transition-colors" />
                   <Input
                     id="password"
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="pl-12 h-11 text-base border-2 border-slate-200 dark:border-slate-700 focus:border-blue-600 focus:ring-0 transition-colors"
+                    className="pl-12 h-11 text-base border-2 border-slate-200 dark:border-slate-700 focus:border-red-600 focus:ring-0 transition-colors"
                     data-testid="input-password"
                   />
                 </div>
@@ -181,7 +181,7 @@ export default function Login() {
 
               <Button 
                 type="submit" 
-                className="w-full h-11 text-base font-semibold bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all hover:shadow-lg hover:shadow-blue-600/30"
+                className="w-full h-11 text-base font-semibold bg-red-600 hover:bg-red-700 text-white rounded-lg transition-all hover:shadow-lg hover:shadow-red-600/30"
                 disabled={isLoading}
                 data-testid="button-login"
               >
