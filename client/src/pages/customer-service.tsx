@@ -441,8 +441,8 @@ export default function CustomerService() {
         <div className="inline-block px-4 py-2 bg-gradient-to-r from-green-100 to-green-50 border border-green-200 rounded-lg mb-4">
           <span className="text-xs font-bold text-green-700 uppercase tracking-wider">Service Management</span>
         </div>
-        <h1 className="font-display text-5xl font-bold tracking-tight text-slate-900 mb-2">Customer Service</h1>
-        <p className="text-slate-600 text-lg font-medium">Create and manage professional services for your customers with detailed tracking</p>
+        <h1 className="text-2xl font-semibold text-slate-900 mb-2">Customer Service</h1>
+        <p className="text-sm text-slate-600 mt-2">Create and manage professional services for your customers with detailed tracking</p>
       </div>
 
       <Card className="bg-gradient-to-br from-white via-slate-50 to-slate-50 border border-slate-200 shadow-lg overflow-hidden">

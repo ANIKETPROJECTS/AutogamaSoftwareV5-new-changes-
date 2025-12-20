@@ -44,8 +44,8 @@ export default function RegisteredCustomers() {
       <div className="pb-6 border-b border-slate-200">
         <div className="flex items-center justify-between gap-4">
           <div>
-            <h1 className="font-display text-5xl font-bold tracking-tight text-slate-900">Registered Customers</h1>
-            <p className="text-slate-600 mt-3 font-medium">Manage and view all your garage customers</p>
+            <h1 className="text-2xl font-semibold text-slate-900">Registered Customers</h1>
+            <p className="text-sm text-slate-600 mt-2">Manage and view all your garage customers</p>
           </div>
           <div className="hidden md:flex items-center justify-center w-16 h-16 bg-gradient-to-br from-primary/10 to-primary/5 rounded-xl">
             <Users className="w-8 h-8 text-primary" />
