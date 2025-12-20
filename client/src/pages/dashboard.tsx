@@ -29,7 +29,7 @@ import {
   Legend,
 } from "recharts";
 
-const COLORS = ["#dc2626", "#3B82F6", "#22C55E", "#F97316"];
+const COLORS = ["#3B82F6", "#22C55E", "#F97316", "#dc2626"];
 
 const STATUS_COLORS: Record<string, string> = {
   Inquired: "#3B82F6",
