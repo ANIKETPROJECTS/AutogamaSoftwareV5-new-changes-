@@ -116,9 +116,6 @@ export default function ServiceFunnel() {
   return (
     <div className="space-y-8">
       <div className="pb-6 border-b border-slate-200">
-        <div className="inline-block px-4 py-2 bg-gradient-to-r from-blue-100 to-blue-50 border border-blue-200 rounded-lg mb-4">
-          <span className="text-xs font-bold text-blue-700 uppercase tracking-wider">Real-Time Pipeline</span>
-        </div>
         <p className="text-sm font-medium text-slate-600">
           Track service status in real-time, send WhatsApp updates automatically, and manage invoices
         </p>

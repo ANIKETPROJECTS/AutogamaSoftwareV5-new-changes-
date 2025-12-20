@@ -438,17 +438,14 @@ export default function CustomerService() {
   return (
     <div className="space-y-8">
       <div className="pb-8 border-b border-slate-200">
-        <div className="inline-block px-4 py-2 bg-gradient-to-r from-green-100 to-green-50 border border-green-200 rounded-lg mb-4">
-          <span className="text-xs font-bold text-green-700 uppercase tracking-wider">Service Management</span>
-        </div>
         <p className="text-sm font-medium text-slate-600">Create and manage professional services for your customers with detailed tracking</p>
       </div>
 
       <Card className="bg-gradient-to-br from-white via-slate-50 to-slate-50 border border-slate-200 shadow-lg overflow-hidden">
-        <CardHeader className="pb-4 border-b border-slate-200 bg-gradient-to-r from-green-500/10 via-green-500/5 to-transparent">
+        <CardHeader className="pb-4 border-b border-slate-200">
           <CardTitle className="flex items-center gap-3 text-xl text-slate-900 font-bold">
-            <div className="p-2.5 bg-gradient-to-br from-green-500 to-green-600 rounded-lg shadow-lg">
-              <Plus className="w-5 h-5 text-white" />
+            <div className="p-2.5 bg-slate-200 rounded-lg">
+              <Plus className="w-5 h-5 text-slate-700" />
             </div>
             Create New Service
           </CardTitle>
