@@ -153,7 +153,7 @@ export default function Dashboard() {
       {/* Header */}
       <div className="flex items-center justify-between gap-4 flex-wrap pb-4 border-b border-slate-200">
         <div>
-          <p className="text-sm text-slate-600">Welcome back! Here's your garage performance</p>
+          <p className="text-sm font-medium text-slate-600">Welcome back! Here's your garage performance</p>
         </div>
         {user && (
           <div className="flex items-center gap-3 bg-gradient-to-br from-slate-100 to-slate-50 rounded-lg p-3 border border-slate-200">
