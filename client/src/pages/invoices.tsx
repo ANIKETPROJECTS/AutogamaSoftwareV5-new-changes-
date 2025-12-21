@@ -103,9 +103,9 @@ export default function Invoices() {
   const getPaymentStatusColor = (status: string) => {
     switch (status) {
       case "Paid":
-        return "bg-gray-100 dark:bg-green-950/50 text-slate-600 dark:text-green-400";
+        return "bg-green-100 text-green-700 border-green-200";
       case "Partially Paid":
-        return "bg-yellow-100 dark:bg-yellow-950/50 text-yellow-700 dark:text-yellow-400";
+        return "bg-yellow-100 text-yellow-700 border-yellow-200";
       default:
         return "bg-gray-100 text-gray-700 border-gray-200";
     }
