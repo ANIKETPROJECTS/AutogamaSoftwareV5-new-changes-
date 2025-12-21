@@ -25,7 +25,7 @@ export function MetricCard({
 }: MetricCardProps) {
   return (
     <div 
-      className="bg-gradient-to-br from-white to-slate-50 border-2 border-red-600 rounded-lg p-3 shadow-sm hover:shadow-md hover:border-red-700 transition-all duration-300 group overflow-hidden relative"
+      className="bg-gradient-to-br from-white to-slate-50 border border-red-300 rounded-lg p-3 shadow-sm hover:shadow-md hover:border-red-400 transition-all duration-300 group overflow-hidden relative"
       data-testid={testId}
     >
       {/* Accent gradient background */}
