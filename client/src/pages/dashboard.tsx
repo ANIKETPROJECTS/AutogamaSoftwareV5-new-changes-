@@ -151,24 +151,9 @@ export default function Dashboard() {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="flex items-center justify-between gap-4 flex-wrap pb-4 border-b border-slate-200">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-900 mb-1">Dashboard</h1>
-          <p className="text-sm font-medium text-slate-600">Welcome back, {user?.name || 'Admin'}!</p>
-        </div>
-        {user && (
-          <div className="flex items-center gap-3 bg-gradient-to-br from-slate-100 to-slate-50 rounded-lg p-3 border border-slate-200">
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center flex-shrink-0">
-              <span className="text-primary font-bold text-sm">
-                {user.name?.charAt(0) || 'A'}
-              </span>
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="font-semibold text-slate-900 text-sm truncate">{user.name}</p>
-              <p className="text-slate-600 text-xs truncate">{user.email}</p>
-            </div>
-          </div>
-        )}
+      <div className="pb-4 border-b border-slate-200">
+        <h1 className="text-3xl font-bold text-slate-900 mb-1">Dashboard</h1>
+        <p className="text-sm font-medium text-slate-600">Welcome back, {user?.name || 'Admin'}!</p>
       </div>
 
       {/* Metric Cards Grid */}
