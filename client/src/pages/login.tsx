@@ -7,6 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/auth-context';
 import { Lock, Mail } from 'lucide-react';
 import garageBg from '@assets/garage-professional.png';
+import logoImage from '@assets/image_1766306108094.png';
 
 export default function Login() {
   const [, setLocation] = useLocation();
@@ -69,6 +70,11 @@ export default function Login() {
       {/* Login Dialog */}
       <div className="relative z-10 w-full max-w-md">
         <div className="bg-white/98 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/30 overflow-hidden">
+          {/* Logo */}
+          <div className="bg-gradient-to-r from-red-600 to-red-700 px-8 pt-8 pb-4 flex justify-center">
+            <img src={logoImage} alt="Auto Gamma Logo" className="h-16 object-contain" />
+          </div>
+          
           {/* Form Content */}
           <div className="p-8 space-y-6">
             <form onSubmit={handleSubmit} className="space-y-5">
