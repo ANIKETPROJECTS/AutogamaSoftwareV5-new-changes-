@@ -35,37 +35,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const { user, logout } = useAuth();
-  const [isDark, setIsDark] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
-
-  useEffect(() => {
-    // Initialize theme from localStorage
-    const savedTheme = localStorage.getItem('theme');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const shouldBeDark = savedTheme ? savedTheme === 'dark' : prefersDark;
-    
-    const html = document.documentElement;
-    if (shouldBeDark) {
-      html.classList.add('dark');
-      setIsDark(true);
-    } else {
-      html.classList.remove('dark');
-      setIsDark(false);
-    }
-  }, []);
-
-  const toggleTheme = () => {
-    const html = document.documentElement;
-    if (html.classList.contains('dark')) {
-      html.classList.remove('dark');
-      setIsDark(false);
-      localStorage.setItem('theme', 'light');
-    } else {
-      html.classList.add('dark');
-      setIsDark(true);
-      localStorage.setItem('theme', 'dark');
-    }
-  };
 
   const handleClearNotifications = () => {
     setNotifications([]);
