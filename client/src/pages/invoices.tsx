@@ -320,7 +320,7 @@ Balance: Rs.${(selectedInvoice.totalAmount - selectedInvoice.paidAmount).toLocal
                         <IndianRupee className="w-4 h-4" />
                         {(invoice.totalAmount || 0).toLocaleString("en-IN")}
                       </p>
-                      <p className="text-sm text-slate-600">
+                      <p className="text-sm text-slate-500">
                         Paid: <IndianRupee className="w-3 h-3 inline" />
                         {(invoice.paidAmount || 0).toLocaleString("en-IN")}
                       </p>
