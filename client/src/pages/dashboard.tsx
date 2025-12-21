@@ -324,23 +324,64 @@ export default function Dashboard() {
         </CardHeader>
         <CardContent className="pt-6">
           {activeJobs.length > 0 ? (
-            <div className="space-y-3">
+            <div className="space-y-4">
               {activeJobs.map((job: any) => (
                 <div
                   key={job.id}
-                  className="flex items-center justify-between p-4 rounded-lg bg-gradient-to-r from-slate-50 to-white hover:from-slate-100 hover:to-slate-50 transition-all border border-slate-200 hover:border-slate-300"
+                  className="p-4 rounded-lg bg-gradient-to-r from-slate-50 to-white hover:from-slate-100 hover:to-slate-50 transition-all border border-slate-200 hover:border-slate-300"
                   data-testid={`job-row-${job.id}`}
                 >
-                  <div className="flex-1">
-                    <p className="font-semibold text-slate-900 text-sm">{job.serviceType}</p>
-                    <p className="text-xs text-slate-600 mt-1">{job.customerName}</p>
+                  {/* Header with customer and stage */}
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex-1">
+                      <p className="font-semibold text-slate-900 text-sm">{job.customerName}</p>
+                      <p className="text-xs text-slate-600 mt-0.5">{job.vehicleName} • {job.plateNumber}</p>
+                    </div>
+                    <Badge
+                      variant="outline"
+                      className="bg-white text-primary border-primary/50 text-xs font-semibold ml-2 flex-shrink-0"
+                    >
+                      {job.stage}
+                    </Badge>
                   </div>
-                  <Badge
-                    variant="outline"
-                    className="bg-white text-primary border-primary/50 text-xs font-semibold"
-                  >
-                    {job.stage}
-                  </Badge>
+
+                  {/* Job details grid */}
+                  <div className="grid grid-cols-2 gap-3 text-xs">
+                    {job.technicianName && (
+                      <div>
+                        <p className="text-slate-600">Technician</p>
+                        <p className="font-medium text-slate-900">{job.technicianName}</p>
+                      </div>
+                    )}
+                    <div>
+                      <p className="text-slate-600">Payment Status</p>
+                      <p className="font-medium text-slate-900">{job.paymentStatus}</p>
+                    </div>
+                    <div>
+                      <p className="text-slate-600">Total Amount</p>
+                      <p className="font-medium text-slate-900">₹{job.totalAmount}</p>
+                    </div>
+                    <div>
+                      <p className="text-slate-600">Paid</p>
+                      <p className="font-medium text-slate-900">₹{job.paidAmount}</p>
+                    </div>
+                  </div>
+
+                  {/* Progress bar if partially paid */}
+                  {job.totalAmount > 0 && job.paidAmount > 0 && job.paidAmount < job.totalAmount && (
+                    <div className="mt-3 pt-3 border-t border-slate-200">
+                      <div className="flex items-center justify-between mb-1">
+                        <p className="text-xs text-slate-600">Payment Progress</p>
+                        <p className="text-xs font-semibold text-slate-900">{Math.round((job.paidAmount / job.totalAmount) * 100)}%</p>
+                      </div>
+                      <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-green-500 rounded-full transition-all"
+                          style={{ width: `${(job.paidAmount / job.totalAmount) * 100}%` }}
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
