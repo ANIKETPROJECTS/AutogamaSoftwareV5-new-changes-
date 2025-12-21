@@ -148,7 +148,7 @@ Balance: Rs.${(selectedInvoice.totalAmount - selectedInvoice.paidAmount).toLocal
   return (
     <div className="space-y-8">
       <div className="grid gap-6 grid-cols-1 md:grid-cols-3">
-        <Card className="bg-gradient-to-br from-green-50 to-white border-gray-200 shadow-sm" data-testid="card-total-revenue">
+        <Card className="bg-gradient-to-br from-green-50 to-white border-red-300 shadow-sm" data-testid="card-total-revenue">
           <CardContent className="p-6">
             <div className="flex items-center justify-between gap-4">
               <div>
@@ -165,7 +165,7 @@ Balance: Rs.${(selectedInvoice.totalAmount - selectedInvoice.paidAmount).toLocal
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-emerald-50 to-white border-emerald-200 shadow-sm" data-testid="card-paid-invoices">
+        <Card className="bg-gradient-to-br from-emerald-50 to-white border-red-300 shadow-sm" data-testid="card-paid-invoices">
           <CardContent className="p-6">
             <div className="flex items-center justify-between gap-4">
               <div>
@@ -181,7 +181,7 @@ Balance: Rs.${(selectedInvoice.totalAmount - selectedInvoice.paidAmount).toLocal
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-slate-100 to-white border-slate-200 shadow-sm" data-testid="card-unpaid-invoices">
+        <Card className="bg-gradient-to-br from-slate-100 to-white border-red-300 shadow-sm" data-testid="card-unpaid-invoices">
           <CardContent className="p-6">
             <div className="flex items-center justify-between gap-4">
               <div>
