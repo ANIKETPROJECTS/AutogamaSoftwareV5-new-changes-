@@ -638,6 +638,7 @@ export default function CustomerRegistration() {
                     }
                     placeholder="Street address"
                     data-testid="input-address"
+                    className="border border-input"
                   />
                 </div>
 
@@ -650,6 +651,7 @@ export default function CustomerRegistration() {
                     }
                     placeholder="City"
                     data-testid="input-city"
+                    className="border border-input"
                   />
                 </div>
 
@@ -665,6 +667,7 @@ export default function CustomerRegistration() {
                     }
                     placeholder="District"
                     data-testid="input-district"
+                    className="border border-input"
                   />
                 </div>
 
@@ -680,6 +683,7 @@ export default function CustomerRegistration() {
                     }
                     placeholder="State"
                     data-testid="input-state"
+                    className="border border-input"
                   />
                 </div>
               </div>
