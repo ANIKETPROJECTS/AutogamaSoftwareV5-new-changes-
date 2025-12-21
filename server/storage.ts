@@ -81,7 +81,9 @@ export class MongoStorage implements IStorage {
   }
 
   async createCustomer(data: Partial<ICustomer>): Promise<ICustomer> {
-    const customer = new Customer(data);
+    const count = await Customer.countDocuments();
+    const customerId = `cus${String(count + 1).padStart(3, '0')}`;
+    const customer = new Customer({ ...data, customerId });
     return customer.save();
   }
 

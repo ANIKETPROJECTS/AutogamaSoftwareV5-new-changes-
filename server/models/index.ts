@@ -19,6 +19,7 @@ export interface IVehicle {
   plateNumber: string;
   color: string;
   vin?: string;
+  image?: string;
   ppfCategory?: string;
   ppfVehicleType?: string;
   ppfWarranty?: string;
@@ -34,6 +35,7 @@ export interface ICustomer extends Document {
   phone: string;
   email?: string;
   address?: string;
+  customerId: string;
   status: CustomerStatus;
   service?: string;
   serviceCost?: number;
@@ -161,6 +163,7 @@ const VehicleSchema = new Schema<IVehicle>({
   plateNumber: { type: String, default: '' },
   color: { type: String, default: '' },
   vin: { type: String },
+  image: { type: String },
   ppfCategory: { type: String },
   ppfVehicleType: { type: String },
   ppfWarranty: { type: String },
@@ -174,6 +177,7 @@ const CustomerSchema = new Schema<ICustomer>({
   phone: { type: String, required: true },
   email: { type: String },
   address: { type: String },
+  customerId: { type: String, unique: true, required: true },
   status: { type: String, enum: ['Inquired', 'Working', 'Waiting', 'Completed'], default: 'Inquired' },
   service: { type: String },
   serviceCost: { type: Number, default: 0 },

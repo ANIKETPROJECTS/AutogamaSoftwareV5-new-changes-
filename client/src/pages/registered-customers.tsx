@@ -101,7 +101,7 @@ export default function RegisteredCustomers() {
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <h3 className="font-semibold text-lg text-slate-900 group-hover:text-primary transition-colors">{customer.name}</h3>
-                      <p className="text-xs text-slate-500 mt-0.5 font-mono">ID: {customer._id}</p>
+                      <p className="text-xs text-slate-500 mt-0.5 font-mono">ID: {customer.customerId}</p>
                       <p className="text-sm text-slate-600 mt-1">{customer.phone}</p>
                     </div>
                     {customer.vehicles && customer.vehicles.length > 0 && (
