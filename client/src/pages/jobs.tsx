@@ -204,94 +204,86 @@ export default function ServiceFunnel() {
                   No services in this phase
                 </div>
               ) : (
-                <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-2">
+                <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                   {phaseJobs.map((job: any) => (
             <Card 
               key={job._id} 
-              className="card-modern border-slate-200 shadow-md hover:shadow-xl transition-all duration-300 hover:border-slate-300 bg-white"
+              className="card-modern border-slate-200 shadow-md hover:shadow-xl transition-all duration-300 hover:border-slate-300 bg-white flex flex-col"
               data-testid={`service-item-${job._id}`}
             >
-              <CardContent className="p-6">
-                <div className="flex flex-col gap-4">
-                  <div className="flex items-start gap-4 flex-1">
-                    <div className="p-3.5 bg-gradient-to-br from-blue-100 to-blue-50 rounded-xl border border-blue-200 shadow-sm flex-shrink-0">
-                      <Car className="w-6 h-6 text-blue-600" />
+              <CardContent className="p-4 flex flex-col gap-3 flex-1">
+                <div className="flex items-start gap-3">
+                  <div className="p-2.5 bg-gradient-to-br from-blue-100 to-blue-50 rounded-lg border border-blue-200 shadow-sm flex-shrink-0">
+                    <Car className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <h3 className="font-bold text-sm text-slate-900 truncate">{job.vehicleName}</h3>
+                      <Badge variant="outline" className="text-xs font-semibold bg-slate-100 border-slate-300 truncate">{job.plateNumber}</Badge>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <h3 className="font-bold text-lg text-slate-900">{job.vehicleName}</h3>
-                        <Badge variant="outline" className="text-xs font-semibold bg-slate-100 border-slate-300">{job.plateNumber}</Badge>
-                      </div>
-                      <div className="flex flex-col gap-1.5 mt-2 text-sm text-slate-600">
-                        <span className="flex items-center gap-1.5 font-medium">
-                          <User className="w-4 h-4 text-slate-400" />
-                          {job.customerName}
+                    <div className="flex flex-col gap-1 mt-1.5 text-xs text-slate-600">
+                      <span className="flex items-center gap-1 font-medium">
+                        <User className="w-3 h-3 text-slate-400 flex-shrink-0" />
+                        <span className="truncate">{job.customerName}</span>
+                      </span>
+                      {job.technicianName && (
+                        <span className="flex items-center gap-1 font-medium">
+                          <span className="inline-block w-1 h-1 bg-gray-500 rounded-full flex-shrink-0"></span>
+                          <span className="truncate">Assigned: {job.technicianName}</span>
                         </span>
-                        {job.technicianName && (
-                          <span className="flex items-center gap-1.5 font-medium">
-                            <span className="inline-block w-1.5 h-1.5 bg-gray-500 rounded-full"></span>
-                            Assigned: {job.technicianName}
-                          </span>
-                        )}
-                      </div>
-                      {job.notes && (
-                        <p className="text-sm text-slate-600 mt-2 italic bg-slate-100 px-3 py-1.5 rounded-lg">{job.notes}</p>
                       )}
                     </div>
                   </div>
-
-                  <div className="w-full">
-                    {isTerminalStage(job.stage) ? (
-                      <Badge className={cn("w-full justify-center border py-2", STAGE_COLORS[job.stage])}>
-                        {job.stage}
-                      </Badge>
-                    ) : (
-                      <Select
-                        value={job.stage}
-                        onValueChange={(stage) => updateStageMutation.mutate({ id: job._id, stage })}
-                      >
-                        <SelectTrigger className={cn("w-full border", STAGE_COLORS[job.stage])} data-testid={`stage-select-${job._id}`}>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {JOB_STAGES.map(stage => (
-                            <SelectItem key={stage} value={stage}>{stage}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    )}
-                  </div>
                 </div>
 
-                    <div className="flex items-center justify-between gap-4 mt-4 pt-4 border-t border-slate-200 text-sm flex-wrap">
-                      <div className="flex items-center gap-4 text-sm">
-                        <div>
-                          <span className="text-slate-500 font-medium">Service Cost: </span>
-                          <span className="font-bold">₹{job.totalAmount.toLocaleString('en-IN')}</span>
-                        </div>
-                        <div>
-                          <span className="text-slate-500 font-medium">Final Amount: </span>
-                          <span className="font-bold">₹{job.paidAmount.toLocaleString('en-IN')}</span>
-                        </div>
-                        <Badge 
-                          variant="outline" 
-                          className={cn(
-                            job.paymentStatus === 'Paid' && 'border-green-500/30 text-slate-600',
-                            job.paymentStatus === 'Partially Paid' && 'border-yellow-500/30 text-yellow-500',
-                            job.paymentStatus === 'Pending' && 'border-red-500/30 text-red-500'
-                          )}
-                        >
-                          {job.paymentStatus}
-                        </Badge>
-                      </div>
-                      <div>
-                        {hasInvoice(job._id) && (
-                          <Badge className="bg-gray-100 dark:bg-green-950/50 text-slate-600 dark:text-green-400 border-gray-200 dark:border-green-800">
-                            Invoice Created
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
+                {job.notes && (
+                  <p className="text-xs text-slate-600 italic bg-slate-100 px-2 py-1.5 rounded line-clamp-2">{job.notes}</p>
+                )}
+
+                <div className="w-full">
+                  {isTerminalStage(job.stage) ? (
+                    <Badge className={cn("w-full justify-center border py-1.5 text-xs", STAGE_COLORS[job.stage])}>
+                      {job.stage}
+                    </Badge>
+                  ) : (
+                    <Select
+                      value={job.stage}
+                      onValueChange={(stage) => updateStageMutation.mutate({ id: job._id, stage })}
+                    >
+                      <SelectTrigger className={cn("w-full border text-xs h-8", STAGE_COLORS[job.stage])} data-testid={`stage-select-${job._id}`}>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {JOB_STAGES.map(stage => (
+                          <SelectItem key={stage} value={stage}>{stage}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                </div>
+
+                <div className="flex flex-col gap-2 pt-2 border-t border-slate-200">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-slate-500 font-medium">Cost:</span>
+                    <span className="font-bold text-slate-900">₹{(job.totalAmount || 0).toLocaleString('en-IN')}</span>
+                  </div>
+                  <Badge 
+                    variant="outline" 
+                    className={cn(
+                      "w-full justify-center text-xs",
+                      job.paymentStatus === 'Paid' && 'border-green-500/30 text-slate-600',
+                      job.paymentStatus === 'Partially Paid' && 'border-yellow-500/30 text-yellow-500',
+                      job.paymentStatus === 'Pending' && 'border-red-500/30 text-red-500'
+                    )}
+                  >
+                    {job.paymentStatus}
+                  </Badge>
+                  {hasInvoice(job._id) && (
+                    <Badge className="w-full justify-center bg-gray-100 text-slate-600 border-gray-200 text-xs">
+                      Invoice Created
+                    </Badge>
+                  )}
+                </div>
                   </CardContent>
                 </Card>
                   ))}
