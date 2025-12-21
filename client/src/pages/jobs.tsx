@@ -115,15 +115,15 @@ export default function ServiceFunnel() {
 
   const PHASE_STAGE_MAPPING: Record<string, string[]> = {
     'PHASE 1': ['New Lead'],
-    'PHASE 2': ['Inspection Done', 'Work In Progress'],
-    'PHASE 3': ['Ready for Delivery'],
-    'PHASE 4': ['Completed', 'Cancelled']
+    'PHASE 2': ['Inspection Done'],
+    'PHASE 3': ['Work In Progress'],
+    'PHASE 4': ['Ready for Delivery', 'Completed', 'Cancelled']
   };
 
   const PHASE_BORDERS: Record<string, string> = {
     'PHASE 1': 'border-blue-500',
     'PHASE 2': 'border-yellow-500',
-    'PHASE 3': 'border-green-500',
+    'PHASE 3': 'border-orange-500',
     'PHASE 4': 'border-red-500'
   };
 
@@ -135,17 +135,21 @@ export default function ServiceFunnel() {
   return (
     <div className="space-y-8">
       {/* Phase Summary Header */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        {JOB_STAGES.map(stage => (
-          <Card key={stage} className={cn("card-modern border-2 shadow-md hover:shadow-lg transition-all duration-300", STAGE_BG_COLORS[stage])}>
-            <CardContent className="p-4">
-              <div className="flex flex-col items-center gap-3 text-center">
-                <Badge className={cn(STAGE_BADGE_COLORS[stage], "text-xs font-bold")}>{stage}</Badge>
-                <span className="text-4xl font-bold text-slate-900">{groupedJobs[stage]?.length || 0}</span>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {Object.entries(PHASE_STAGE_MAPPING).map(([phase, stages]) => {
+          const phaseJobCount = stages.reduce((sum, stage) => sum + (groupedJobs[stage]?.length || 0), 0);
+          const primaryStage = stages[0];
+          return (
+            <Card key={phase} className={cn("card-modern border-2 shadow-md hover:shadow-lg transition-all duration-300", STAGE_BG_COLORS[primaryStage])}>
+              <CardContent className="p-4">
+                <div className="flex flex-col items-center gap-3 text-center">
+                  <Badge className={cn(STAGE_BADGE_COLORS[primaryStage], "text-xs font-bold")}>{primaryStage}</Badge>
+                  <span className="text-4xl font-bold text-slate-900">{phaseJobCount}</span>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
 
       {/* Search and Filter */}
