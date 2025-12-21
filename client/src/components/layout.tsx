@@ -10,6 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Card } from '@/components/ui/card';
 
 const menuItems = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
@@ -24,15 +25,33 @@ const menuItems = [
   { href: '/settings', label: 'Settings', icon: Settings },
 ];
 
+interface Notification {
+  id: string;
+  message: string;
+  timestamp: Date;
+}
+
 export function Layout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { user, logout } = useAuth();
   const [isDark, setIsDark] = useState(false);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
 
   useEffect(() => {
-    const isDarkMode = document.documentElement.classList.contains('dark');
-    setIsDark(isDarkMode);
+    // Initialize theme from localStorage
+    const savedTheme = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const shouldBeDark = savedTheme ? savedTheme === 'dark' : prefersDark;
+    
+    const html = document.documentElement;
+    if (shouldBeDark) {
+      html.classList.add('dark');
+      setIsDark(true);
+    } else {
+      html.classList.remove('dark');
+      setIsDark(false);
+    }
   }, []);
 
   const toggleTheme = () => {
@@ -48,6 +67,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const handleClearNotifications = () => {
+    setNotifications([]);
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <button
@@ -60,21 +83,21 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
       <aside
         className={cn(
-          "fixed left-0 top-0 z-40 h-screen w-64 bg-white border-r border-gray-200 transition-transform duration-300 flex flex-col",
+          "fixed left-0 top-0 z-40 h-screen w-64 bg-card border-r border-border transition-transform duration-300 flex flex-col",
           sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         )}
       >
           {/* Logo Section */}
-          <div className="p-6 border-b border-gray-200">
+          <div className="p-6 border-b border-border">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold text-sm">
                 AG
               </div>
               <div>
-                <h1 className="font-bold text-base text-gray-900">
+                <h1 className="font-bold text-base text-foreground">
                   AutoGarage
                 </h1>
-                <p className="text-xs text-gray-500 font-medium">CRM System</p>
+                <p className="text-xs text-muted-foreground font-medium">CRM System</p>
               </div>
             </div>
           </div>
@@ -94,10 +117,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   >
                     <div
                       className={cn(
-                        "flex items-center gap-3 px-3 py-2.5 cursor-pointer text-sm font-medium rounded-md",
+                        "flex items-center gap-3 px-3 py-2.5 cursor-pointer text-sm font-medium rounded-md transition-colors",
                         isActive
-                          ? "bg-blue-100 text-blue-700"
-                          : "text-gray-700 hover:bg-gray-100"
+                          ? "bg-sidebar-accent text-sidebar-primary"
+                          : "text-sidebar-foreground hover:bg-sidebar-accent"
                       )}
                     >
                       <Icon className="w-5 h-5 flex-shrink-0" />
@@ -118,18 +141,55 @@ export function Layout({ children }: { children: React.ReactNode }) {
       )}
 
       {/* Header */}
-      <header className="md:ml-64 bg-white border-b border-gray-200 sticky top-0 z-30">
+      <header className="md:ml-64 bg-card border-b border-border sticky top-0 z-30">
         <div className="px-4 md:px-8 py-4 flex items-center justify-end gap-4">
           {/* Notification Button */}
-          <Button
-            variant="ghost"
-            size="icon"
-            data-testid="button-notifications"
-            className="relative"
-          >
-            <Bell className="w-5 h-5" />
-            <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                data-testid="button-notifications"
+                className="relative"
+              >
+                <Bell className="w-5 h-5" />
+                {notifications.length > 0 && (
+                  <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
+                )}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-80">
+              <div className="p-2">
+                <h3 className="font-semibold text-sm mb-2">Notifications</h3>
+                {notifications.length === 0 ? (
+                  <div className="text-center py-6">
+                    <Bell className="w-8 h-8 mx-auto mb-2 text-muted-foreground opacity-50" />
+                    <p className="text-sm text-muted-foreground" data-testid="text-no-notifications">No notifications</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {notifications.map((notif) => (
+                      <div key={notif.id} className="text-sm p-2 bg-secondary rounded">
+                        <p>{notif.message}</p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {notif.timestamp.toLocaleTimeString()}
+                        </p>
+                      </div>
+                    ))}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleClearNotifications}
+                      className="w-full"
+                      data-testid="button-clear-notifications"
+                    >
+                      Clear All
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </DropdownMenuContent>
+          </DropdownMenu>
 
           {/* Profile Button */}
           <DropdownMenu>
@@ -166,7 +226,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </header>
 
       {/* Main Content */}
-      <main className="md:ml-64 min-h-screen bg-gray-50">
+      <main className="md:ml-64 min-h-screen bg-background">
         <div className="p-4 md:p-8 max-w-7xl mx-auto">
           {children}
         </div>

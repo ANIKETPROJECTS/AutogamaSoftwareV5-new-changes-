@@ -143,6 +143,52 @@
   --sidebar-ring: 0 84% 60%;
 }
 
+/* Dark Theme */
+.dark {
+  --background: 0 0% 10%; /* Very dark background */
+  --foreground: 0 0% 98%; /* Light text */
+
+  --card: 0 0% 15%; /* Dark card background */
+  --card-foreground: 0 0% 98%; /* Light text on cards */
+
+  --popover: 0 0% 15%; /* Dark popovers */
+  --popover-foreground: 0 0% 98%;
+
+  --primary: 0 84% 60%; /* Keep red accent */
+  --primary-foreground: 0 0% 100%;
+
+  --secondary: 0 0% 25%; /* Darker grey */
+  --secondary-foreground: 0 0% 98%;
+
+  --muted: 0 0% 30%;
+  --muted-foreground: 0 0% 70%;
+
+  --accent: 0 84% 60%; /* Keep red accent */
+  --accent-foreground: 0 0% 100%;
+
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+
+  --border: 0 0% 25%; /* Subtle dark borders */
+  --input: 0 0% 20%; /* Dark input backgrounds */
+  --ring: 0 84% 60%;
+
+  --chart-1: 217 91% 60%; /* Blue */
+  --chart-2: 142 76% 36%; /* Green */
+  --chart-3: 38 92% 50%; /* Orange */
+  --chart-4: 262 83% 58%; /* Purple */
+  --chart-5: 0 84% 60%; /* Red */
+
+  --sidebar: 0 0% 15%; /* Dark sidebar */
+  --sidebar-foreground: 0 0% 90%;
+  --sidebar-primary: 0 84% 60%; /* Red for active items */
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 0 0% 25%; /* Darker hover state */
+  --sidebar-accent-foreground: 0 0% 95%;
+  --sidebar-border: 0 0% 25%;
+  --sidebar-ring: 0 84% 60%;
+}
+
 @layer base {
   * {
     @apply border-border;
