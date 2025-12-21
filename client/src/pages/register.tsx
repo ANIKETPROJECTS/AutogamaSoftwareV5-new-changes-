@@ -358,17 +358,6 @@ export default function CustomerRegistration() {
   return (
     <div className="p-4">
       <div className="max-w-4xl mx-auto space-y-8">
-        {/* Header */}
-        <div className="pb-6 border-b border-slate-200">
-          <p className="text-sm font-medium text-slate-600">Step {step} of 2 - Fill in customer details and select services</p>
-          
-          {/* Progress Bar */}
-          <div className="mt-6 flex gap-2">
-            <div className={`h-1 flex-1 rounded-full transition-colors ${step >= 1 ? 'bg-primary' : 'bg-slate-200'}`} />
-            <div className={`h-1 flex-1 rounded-full transition-colors ${step >= 2 ? 'bg-primary' : 'bg-slate-200'}`} />
-          </div>
-        </div>
-
         {/* Step 1: Customer Information */}
         {step === 1 && (
           <Card
