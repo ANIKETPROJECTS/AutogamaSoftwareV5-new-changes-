@@ -437,19 +437,15 @@ export default function CustomerService() {
 
   return (
     <div className="space-y-8">
-      <div className="pb-8 border-b border-slate-200">
-        <p className="text-sm font-medium text-slate-600">Create and manage professional services for your customers with detailed tracking</p>
-      </div>
-
-      <Card className="bg-gradient-to-br from-white via-slate-50 to-slate-50 border border-slate-200 shadow-lg overflow-hidden">
-        <CardHeader className="pb-4 border-b border-slate-200">
-          <CardTitle className="flex items-center gap-3 text-xl text-slate-900 font-bold">
-            <div className="p-2.5 bg-slate-200 rounded-lg">
-              
+      <Card className="bg-white border-2 border-red-200 shadow-sm overflow-hidden">
+        <CardHeader className="pb-6 border-b border-red-200 bg-gradient-to-r from-red-50/50 to-transparent">
+          <CardTitle className="flex items-center gap-3 text-lg text-slate-900 font-semibold">
+            <div className="p-2 bg-red-100 rounded-lg">
+              <Package className="w-5 h-5 text-red-600" />
             </div>
             Create New Service
           </CardTitle>
-          <p className="text-sm text-slate-600 mt-3">Select a customer, vehicle, and services to create a new job</p>
+          <p className="text-sm text-slate-600 mt-2">Select a customer, vehicle, and services to create a new job</p>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
