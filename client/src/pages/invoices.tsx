@@ -18,12 +18,23 @@ import {
   Mail,
   MapPin,
   CheckCircle,
+  Filter,
+  ArrowUpDown,
 } from "lucide-react";
 import { useState, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function Invoices() {
   const [search, setSearch] = useState("");
+  const [sortBy, setSortBy] = useState<"date-desc" | "date-asc" | "amount-desc" | "amount-asc">("date-desc");
+  const [filterStatus, setFilterStatus] = useState<"all" | "paid" | "unpaid">("all");
   const [selectedInvoice, setSelectedInvoice] = useState<any>(null);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const printRef = useRef<HTMLDivElement>(null);
@@ -50,12 +61,37 @@ export default function Invoices() {
     },
   });
 
-  const filteredInvoices = invoices.filter(
-    (invoice: any) =>
+  let filteredInvoices = invoices.filter((invoice: any) => {
+    // Search filter
+    const matchesSearch =
       invoice.customerName?.toLowerCase().includes(search.toLowerCase()) ||
       invoice.plateNumber?.toLowerCase().includes(search.toLowerCase()) ||
-      invoice.invoiceNumber?.toLowerCase().includes(search.toLowerCase())
-  );
+      invoice.invoiceNumber?.toLowerCase().includes(search.toLowerCase());
+    
+    // Status filter
+    const matchesStatus = 
+      filterStatus === "all" ||
+      (filterStatus === "paid" && invoice.paymentStatus === "Paid") ||
+      (filterStatus === "unpaid" && invoice.paymentStatus !== "Paid");
+    
+    return matchesSearch && matchesStatus;
+  });
+
+  // Sort
+  filteredInvoices = [...filteredInvoices].sort((a: any, b: any) => {
+    switch (sortBy) {
+      case "date-desc":
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      case "date-asc":
+        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      case "amount-desc":
+        return (b.totalAmount || 0) - (a.totalAmount || 0);
+      case "amount-asc":
+        return (a.totalAmount || 0) - (b.totalAmount || 0);
+      default:
+        return 0;
+    }
+  });
 
   const totalRevenue = invoices
     .filter((inv: any) => inv.paymentStatus === "Paid")
@@ -198,8 +234,7 @@ Balance: Rs.${(selectedInvoice.totalAmount - selectedInvoice.paidAmount).toLocal
         </Card>
       </div>
 
-      <div className="relative">
-        
+      <div className="flex flex-col gap-4">
         <Input
           placeholder="Search by customer name, vehicle number, or invoice number..."
           value={search}
@@ -207,6 +242,37 @@ Balance: Rs.${(selectedInvoice.totalAmount - selectedInvoice.paidAmount).toLocal
           className="pl-10 h-9 border-slate-300 bg-white text-slate-900 placeholder:text-slate-400"
           data-testid="input-search-billing"
         />
+        
+        <div className="flex gap-3 flex-wrap">
+          <div className="flex items-center gap-2">
+            <Filter className="w-4 h-4 text-slate-600" />
+            <Select value={filterStatus} onValueChange={(value: any) => setFilterStatus(value)}>
+              <SelectTrigger className="w-40 h-9" data-testid="select-filter-status">
+                <SelectValue placeholder="Filter by status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Invoices</SelectItem>
+                <SelectItem value="paid">Paid Only</SelectItem>
+                <SelectItem value="unpaid">Unpaid Only</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <ArrowUpDown className="w-4 h-4 text-slate-600" />
+            <Select value={sortBy} onValueChange={(value: any) => setSortBy(value)}>
+              <SelectTrigger className="w-40 h-9" data-testid="select-sort-by">
+                <SelectValue placeholder="Sort by" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="date-desc">Newest First</SelectItem>
+                <SelectItem value="date-asc">Oldest First</SelectItem>
+                <SelectItem value="amount-desc">Highest Amount</SelectItem>
+                <SelectItem value="amount-asc">Lowest Amount</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
       </div>
 
       <Card className="bg-gradient-to-br from-white to-slate-50 border-slate-200 shadow-sm">
