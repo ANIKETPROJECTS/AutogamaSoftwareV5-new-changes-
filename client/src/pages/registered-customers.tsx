@@ -30,8 +30,35 @@ export default function RegisteredCustomers() {
     const districts = new Set<string>();
     const states = new Set<string>();
 
+    console.log("[Filters] Processing customers for filter extraction:", customers.length);
+
     customers.forEach((customer: any) => {
-      // Add city/district/state if they exist
+      console.log("[Filters] Customer data:", {
+        name: customer.name,
+        address: customer.address,
+        city: customer.city,
+        district: customer.district,
+        state: customer.state
+      });
+
+      // Parse address field if it exists (format: "street, city, district, state")
+      if (customer.address?.trim()) {
+        const addressParts = customer.address.split(',').map((part: string) => part.trim());
+        console.log("[Filters] Address parts:", addressParts);
+        
+        // Assuming format: [0]=street, [1]=city, [2]=district, [3]=state
+        if (addressParts.length >= 2) {
+          const city = addressParts[1]?.trim();
+          const district = addressParts[2]?.trim();
+          const state = addressParts[3]?.trim();
+          
+          if (city) cities.add(city);
+          if (district) districts.add(district);
+          if (state) states.add(state);
+        }
+      }
+
+      // Also check if they exist as separate fields (backwards compatibility)
       if (customer.city?.trim()) cities.add(customer.city.trim());
       if (customer.district?.trim()) districts.add(customer.district.trim());
       if (customer.state?.trim()) states.add(customer.state.trim());
@@ -42,14 +69,31 @@ export default function RegisteredCustomers() {
     districts.delete("");
     states.delete("");
 
-    return {
+    const result = {
       cities: Array.from(cities).filter(Boolean).sort(),
       districts: Array.from(districts).filter(Boolean).sort(),
       states: Array.from(states).filter(Boolean).sort(),
     };
+
+    console.log("[Filters] Extracted filter options:", result);
+    return result;
   }, [customers]);
 
   const filteredCustomers = customers.filter((customer: any) => {
+    // Parse address to extract city, district, state
+    let customerCity = customer.city || "";
+    let customerDistrict = customer.district || "";
+    let customerState = customer.state || "";
+
+    if (customer.address?.trim()) {
+      const addressParts = customer.address.split(',').map((part: string) => part.trim());
+      if (addressParts.length >= 2) {
+        customerCity = addressParts[1]?.trim() || customerCity;
+        customerDistrict = addressParts[2]?.trim() || customerDistrict;
+        customerState = addressParts[3]?.trim() || customerState;
+      }
+    }
+
     // Apply search filter
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
@@ -70,19 +114,19 @@ export default function RegisteredCustomers() {
       }
     }
 
-    // Apply location filters (only if customer has these fields)
-    if (selectedCity !== "all" && customer.city?.trim()) {
-      if (customer.city.trim() !== selectedCity.trim()) {
+    // Apply location filters (parse from address field)
+    if (selectedCity !== "all" && customerCity) {
+      if (customerCity !== selectedCity) {
         return false;
       }
     }
-    if (selectedDistrict !== "all" && customer.district?.trim()) {
-      if (customer.district.trim() !== selectedDistrict.trim()) {
+    if (selectedDistrict !== "all" && customerDistrict) {
+      if (customerDistrict !== selectedDistrict) {
         return false;
       }
     }
-    if (selectedState !== "all" && customer.state?.trim()) {
-      if (customer.state.trim() !== selectedState.trim()) {
+    if (selectedState !== "all" && customerState) {
+      if (customerState !== selectedState) {
         return false;
       }
     }
