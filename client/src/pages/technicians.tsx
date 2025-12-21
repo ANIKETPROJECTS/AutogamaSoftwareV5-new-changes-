@@ -124,7 +124,7 @@ export default function Technicians() {
             return (
               <Card 
                 key={tech._id} 
-                className="bg-gradient-to-br from-white to-slate-50 border-slate-200 shadow-sm hover:shadow-md transition-all hover-elevate"
+                className="bg-gradient-to-br from-white to-slate-50 border border-red-300 shadow-sm hover:shadow-md transition-all hover-elevate"
                 data-testid={`technician-card-${tech._id}`}
               >
                 <CardHeader className="pb-4 border-b border-slate-200 bg-gradient-to-r from-primary/5 to-transparent">
