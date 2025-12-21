@@ -183,27 +183,26 @@ export default function Dashboard() {
       <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
         <MetricCard
           title="Today's Sales"
-          value={`₹${(todaySales/1000).toFixed(1)}K`}
+          value={`₹${todaySales}`}
           icon={IndianRupee}
-          description="Revenue earned today"
+          description="+12.5% from last month"
           data-testid="card-todays-sales"
         />
 
         <MetricCard
-          title="Active Jobs"
+          title="Active Service Jobs"
           value={jobs.filter((j: any) => j.stage !== "Completed" && j.stage !== "Cancelled").length}
-          icon={Zap}
-          description="Jobs in progress"
+          icon={Package}
+          description="Service jobs in progress"
           data-testid="card-active-jobs-count"
         />
 
         <MetricCard
-          title="Completion Rate"
-          value={`${jobCompletion}%`}
-          icon={TrendingUp}
-          progress={jobCompletion}
-          description={`${completedJobs} of ${jobs.length} jobs`}
-          data-testid="card-job-completion"
+          title="Low Stock Items"
+          value={lowStock.length}
+          icon={AlertTriangle}
+          description="Items running low"
+          data-testid="card-low-stock-items"
         />
 
         <MetricCard
