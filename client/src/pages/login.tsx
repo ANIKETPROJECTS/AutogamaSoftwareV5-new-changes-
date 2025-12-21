@@ -62,13 +62,13 @@ export default function Login() {
         backgroundAttachment: 'fixed',
       }}
     >
-      {/* Dark Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-black/40 via-black/30 to-black/40 z-0" />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent z-0" />
+      {/* Light Overlay */}
+      <div className="absolute inset-0 bg-gradient-to-br from-white/60 via-white/50 to-white/60 z-0" />
+      <div className="absolute inset-0 bg-gradient-to-t from-white/40 to-transparent z-0" />
 
       {/* Login Dialog */}
       <div className="relative z-10 w-full max-w-md">
-        <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 dark:border-slate-700/20 overflow-hidden">
+        <div className="bg-white/98 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/30 overflow-hidden">
           {/* Form Content */}
           <div className="p-8 space-y-6">
             <form onSubmit={handleSubmit} className="space-y-5">
@@ -82,7 +82,7 @@ export default function Login() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="admin@autogarage.com"
-                    className="pl-12 h-11 text-base border border-slate-300 dark:border-slate-600 rounded-lg focus:border-red-600 focus:ring-2 focus:ring-red-600/20 focus:ring-offset-0 transition-all bg-white dark:bg-slate-800"
+                    className="pl-12 h-11 text-base border border-slate-300 rounded-lg focus:border-red-600 focus:ring-2 focus:ring-red-600/20 focus:ring-offset-0 transition-all bg-white"
                     data-testid="input-email"
                     autoComplete="email"
                   />
@@ -99,7 +99,7 @@ export default function Login() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="pl-12 h-11 text-base border border-slate-300 dark:border-slate-600 rounded-lg focus:border-red-600 focus:ring-2 focus:ring-red-600/20 focus:ring-offset-0 transition-all bg-white dark:bg-slate-800"
+                    className="pl-12 h-11 text-base border border-slate-300 rounded-lg focus:border-red-600 focus:ring-2 focus:ring-red-600/20 focus:ring-offset-0 transition-all bg-white"
                     data-testid="input-password"
                     autoComplete="current-password"
                   />
@@ -123,7 +123,7 @@ export default function Login() {
               </Button>
             </form>
 
-            <div className="pt-4 border-t border-slate-200 dark:border-slate-700">
+            <div className="pt-4 border-t border-slate-200">
               <p className="text-center text-xs text-muted-foreground">
                 Demo Credentials:<br />
                 <span className="font-semibold text-foreground">Autogarage@system.com</span><br />
