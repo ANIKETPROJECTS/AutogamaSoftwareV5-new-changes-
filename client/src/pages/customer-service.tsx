@@ -784,23 +784,6 @@ export default function CustomerService() {
                                   <div className="flex-1">
                                     <Label className="text-xs">Price: ₹{service.price.toLocaleString('en-IN')}</Label>
                                   </div>
-                                  <div className="w-32">
-                                    <Label className="text-xs">Discount</Label>
-                                    <Input
-                                      type="number"
-                                      min="0"
-                                      step="1"
-                                      value={service.discount || 0}
-                                      onChange={(e) => {
-                                        const newServices = [...selectedOtherServices];
-                                        newServices[index].discount = parseFloat(e.target.value) || 0;
-                                        setSelectedOtherServices(newServices);
-                                      }}
-                                      placeholder="0"
-                                      data-testid={`input-service-discount-${index}`}
-                                      className="mt-1"
-                                    />
-                                  </div>
                                 </div>
                               </div>
                             ))}
@@ -966,17 +949,9 @@ export default function CustomerService() {
                   )}
                   
                   {otherServicesAfterDiscount.map((service, index) => (
-                    <div key={index} className="space-y-1">
-                      <div className="flex justify-between text-sm">
-                        <span>{service.name}:</span>
-                        <span>₹{service.price.toLocaleString('en-IN')}</span>
-                      </div>
-                      {service.discount > 0 && (
-                        <div className="flex justify-between text-xs text-slate-600">
-                          <span>Discount:</span>
-                          <span>-₹{service.discount.toLocaleString('en-IN')}</span>
-                        </div>
-                      )}
+                    <div key={index} className="flex justify-between text-sm">
+                      <span>{service.name}:</span>
+                      <span>₹{service.price.toLocaleString('en-IN')}</span>
                     </div>
                   ))}
                   
