@@ -711,7 +711,7 @@ export default function CustomerService() {
                               onChange={(e) => setPpfDiscount(e.target.value)}
                               placeholder=""
                               data-testid="input-ppf-discount-card"
-                              className="mt-1"
+                              className="mt-1 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&]:appearance-none"
                             />
                           </div>
                         </div>
@@ -813,7 +813,7 @@ export default function CustomerService() {
                                       }}
                                       placeholder=""
                                       data-testid={`input-service-discount-${index}`}
-                                      className="mt-1"
+                                      className="mt-1 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&]:appearance-none"
                                     />
                                   </div>
                                 </div>
