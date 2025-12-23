@@ -464,17 +464,19 @@ Balance: Rs.${(selectedInvoice.totalAmount - selectedInvoice.paidAmount).toLocal
               <div>
                 <h3 className="font-semibold mb-3">Items & Services</h3>
                 <div className="border rounded-lg overflow-hidden">
-                  <table className="w-full">
+                  <table className="w-full text-sm">
                     <thead className="bg-muted">
                       <tr>
                         <th className="text-left p-3">Description</th>
                         <th className="text-right p-3">Unit Price</th>
-                        <th className="text-right p-3">Total</th>
+                        <th className="text-right p-3">Discount</th>
+                        <th className="text-right p-3">Discounted Price</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {selectedInvoice.items?.filter((i: any) => i.type === 'service' && i.description !== 'Labor Charge').flatMap((item: any, index: number) => {
-                        const rows: any = [
+                      {selectedInvoice.items?.filter((i: any) => i.type === 'service' && i.description !== 'Labor Charge').map((item: any, index: number) => {
+                        const discountedPrice = (item.total - (item.discount || 0));
+                        return (
                           <tr key={`service-${index}`} className="border-t">
                             <td className="p-3">
                               {item.description}
@@ -487,26 +489,21 @@ Balance: Rs.${(selectedInvoice.totalAmount - selectedInvoice.paidAmount).toLocal
                               {item.unitPrice.toLocaleString("en-IN")}
                             </td>
                             <td className="text-right p-3">
+                              {item.discount && item.discount > 0 ? (
+                                <>
+                                  -<IndianRupee className="w-3 h-3 inline" />
+                                  {item.discount.toLocaleString("en-IN")}
+                                </>
+                              ) : (
+                                <span className="text-gray-400">—</span>
+                              )}
+                            </td>
+                            <td className="text-right p-3 font-semibold">
                               <IndianRupee className="w-3 h-3 inline" />
-                              {item.total.toLocaleString("en-IN")}
+                              {discountedPrice.toLocaleString("en-IN")}
                             </td>
                           </tr>
-                        ];
-                        if (item.discount && item.discount > 0) {
-                          rows.push(
-                            <tr key={`discount-${index}`} className="bg-gray-50">
-                              <td className="p-3 text-slate-600 text-sm">
-                                <span className="pl-8">Discount:</span>
-                              </td>
-                              <td></td>
-                              <td className="text-right p-3 text-slate-600 text-sm">
-                                -<IndianRupee className="w-3 h-3 inline" />
-                                {item.discount.toLocaleString("en-IN")}
-                              </td>
-                            </tr>
-                          );
-                        }
-                        return rows;
+                        );
                       })}
                     </tbody>
                   </table>
