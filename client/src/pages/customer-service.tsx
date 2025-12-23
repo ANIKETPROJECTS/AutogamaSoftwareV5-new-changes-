@@ -151,7 +151,7 @@ export default function CustomerService() {
     setIncludeGst(true);
     setSelectedItems([]);
     setSelectedItemId('');
-    setItemQuantity('1');
+    setMetersUsed('1');
     setPpfCategory('');
     setPpfVehicleType('');
     setPpfWarranty('');
