@@ -336,16 +336,19 @@ export default function Inventory() {
           </DialogHeader>
           <form onSubmit={(e) => {
             e.preventDefault();
-            if (!rollName || !rollMeters || !rollSqft) {
+            const quantity = rollUnit === 'Meters' ? rollMeters : rollSqft;
+            if (!rollName || !quantity) {
               toast({ title: 'Fill all fields', variant: 'destructive' });
               return;
             }
+            const meters = rollUnit === 'Meters' ? parseFloat(rollMeters) : 0;
+            const sqft = rollUnit === 'Square KM' ? parseFloat(rollSqft) : 0;
             addRollMutation.mutate({
               id: selectedItem._id,
               roll: {
                 name: rollName,
-                meters: parseFloat(rollMeters),
-                squareFeet: parseFloat(rollSqft),
+                meters: meters,
+                squareFeet: sqft,
                 unit: rollUnit
               }
             });
