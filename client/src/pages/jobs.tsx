@@ -193,14 +193,9 @@ export default function ServiceFunnel() {
 
           return (
             <div key={phase} className={cn("border-l-4 rounded-lg p-6 space-y-4 bg-white", PHASE_BORDERS[phase])}>
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <span className="text-sm font-bold text-slate-500 uppercase tracking-wider">{phase}</span>
-                  <h3 className="text-xl font-bold text-slate-900">{getPhaseTitle(phase)}</h3>
-                </div>
-                <span className="inline-flex items-center justify-center w-8 h-8 text-sm font-bold text-slate-600 bg-slate-100 rounded-full">
-                  {phaseJobs.length}
-                </span>
+              <div className="flex items-center gap-3 mb-4">
+                <span className="text-sm font-bold text-slate-500 uppercase tracking-wider">{phase}</span>
+                <h3 className="text-xl font-bold text-slate-900">{getPhaseTitle(phase)}</h3>
               </div>
 
               {phaseJobs.length === 0 ? (
