@@ -170,17 +170,26 @@ export default function CustomerService() {
         const prefs = await api.customers.getVehiclePreferences(selectedCustomerId, parseInt(selectedVehicleIndex, 10));
         if (prefs) {
           // Set PPF details
-          const category = prefs.ppfCategory || '';
-          const vehicleType = prefs.ppfVehicleType || '';
-          const warranty = prefs.ppfWarranty || '';
+          let category = prefs.ppfCategory || '';
+          let vehicleType = prefs.ppfVehicleType || '';
+          let warranty = prefs.ppfWarranty || '';
           let price = prefs.ppfPrice || 0;
           
-          // If price is 0 but we have category/vehicleType/warranty, calculate it
-          if (price === 0 && category && vehicleType && warranty) {
+          // Validate warranty exists for the category/vehicleType combination
+          if (category && vehicleType && warranty) {
             const categoryData = PPF_CATEGORIES[category];
-            if (categoryData && categoryData[vehicleType] && categoryData[vehicleType][warranty]) {
+            if (!categoryData || !categoryData[vehicleType] || !categoryData[vehicleType][warranty]) {
+              // Warranty doesn't exist for this category/vehicle type, clear it
+              warranty = '';
+              price = 0;
+            } else if (price === 0) {
+              // If warranty is valid but price is 0, calculate it
               price = categoryData[vehicleType][warranty];
             }
+          } else {
+            // Missing category or vehicleType, clear warranty and price
+            warranty = '';
+            price = 0;
           }
           
           setPpfCategory(category);
@@ -209,8 +218,7 @@ export default function CustomerService() {
   }, [selectedCustomerId, selectedVehicleIndex]);
 
   useEffect(() => {
-    // Only auto-calculate price when user manually changes warranty (not from preferences loading)
-    // Skip if all required fields are empty (form was reset) or if price is already set from preferences
+    // Auto-calculate and update price whenever warranty, category, or vehicle type changes
     if (!ppfCategory || !ppfVehicleType || !ppfWarranty) {
       if (!ppfWarranty) {
         setPpfPrice(0);
@@ -218,13 +226,14 @@ export default function CustomerService() {
       return;
     }
     
-    // Only calculate if price is 0 (hasn't been set yet from preferences)
-    if (ppfPrice === 0) {
-      const categoryData = PPF_CATEGORIES[ppfCategory];
-      if (categoryData && categoryData[ppfVehicleType] && categoryData[ppfVehicleType][ppfWarranty]) {
-        const calculatedPrice = categoryData[ppfVehicleType][ppfWarranty];
-        setPpfPrice(calculatedPrice);
-      }
+    // Always recalculate price when warranty changes
+    const categoryData = PPF_CATEGORIES[ppfCategory];
+    if (categoryData && categoryData[ppfVehicleType] && categoryData[ppfVehicleType][ppfWarranty]) {
+      const calculatedPrice = categoryData[ppfVehicleType][ppfWarranty];
+      setPpfPrice(calculatedPrice);
+    } else {
+      // If the warranty doesn't exist for this category/vehicle combo, reset price
+      setPpfPrice(0);
     }
   }, [ppfCategory, ppfVehicleType, ppfWarranty]);
 
