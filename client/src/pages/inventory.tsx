@@ -241,7 +241,7 @@ export default function Inventory() {
         <Card className="bg-gray-50 border-gray-200">
           <CardContent className="p-4 flex items-center gap-3">
             <AlertTriangle className="w-5 h-5 text-gray-600" />
-            <span className="text-gray-700 font-medium">{lowStockItems.length} product{lowStockItems.length !== 1 ? 's' : ''} below minimum stock level of {MIN_STOCK}!</span>
+            <span className="text-gray-700 font-medium">{lowStockItems.length} product{lowStockItems.length !== 1 ? 's' : ''} with low stock (1 or fewer rolls)!</span>
           </CardContent>
         </Card>
       )}
@@ -276,10 +276,7 @@ export default function Inventory() {
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <div className="flex items-baseline justify-between">
-                    <span className={cn(
-                      "text-3xl font-display font-bold",
-                      isLowStock(displayItem) && "text-orange-600"
-                    )}>
+                    <span className="text-3xl font-display font-bold">
                       {displayItem.rolls?.length || 0}
                     </span>
                     <span className="text-sm text-muted-foreground">rolls</span>
