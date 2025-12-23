@@ -432,125 +432,114 @@ export default function RegisteredCustomers() {
             return (
               <Card
                 key={customer._id}
-                className="border border-orange-200 rounded-lg overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer group"
+                className="border border-orange-200 rounded-lg hover:shadow-lg transition-all duration-300 cursor-pointer group relative"
                 data-testid={`customer-card-${customer._id}`}
               >
-                {/* Card Image Section */}
-                <div className="relative w-full h-48 bg-slate-200 overflow-hidden">
-                  {primaryVehicle?.image ? (
-                    <img
-                      src={primaryVehicle.image}
-                      alt={customer.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200">
-                      <Car className="w-12 h-12 text-slate-400" />
+                <CardContent className="p-4">
+                  <div className="flex gap-4 items-start">
+                    {/* Left Side - Customer Info */}
+                    <div className="flex-1 space-y-3 flex flex-col justify-between">
+                      {/* Header with name */}
+                      <div>
+                        <h3 className="font-semibold text-base text-slate-900 group-hover:text-primary transition-colors truncate">
+                          {customer.name}
+                        </h3>
+                        <p className="text-xs text-slate-500 font-mono mt-0.5">CUST-{customer.customerId}</p>
+                        {customer.phone && (
+                          <p className="text-sm text-slate-700 font-medium mt-1">{customer.phone}</p>
+                        )}
+                      </div>
+
+                      {/* Contact Info */}
+                      <div className="space-y-1.5">
+                        {customer.email && (
+                          <div className="flex items-center gap-2 text-xs text-slate-600">
+                            <Mail className="w-3 h-3 text-slate-500 flex-shrink-0" />
+                            <span className="truncate">{customer.email}</span>
+                          </div>
+                        )}
+                        {customer.address && (
+                          <div className="flex items-start gap-2 text-xs text-slate-600">
+                            <MapPin className="w-3 h-3 text-slate-500 flex-shrink-0 mt-0.5" />
+                            <span className="line-clamp-1">{customer.address}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Badges and Actions */}
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <div className="flex items-center gap-1 px-2 py-0.5 bg-green-50 rounded-full">
+                            <Check className="w-2.5 h-2.5 text-green-600" />
+                            <span className="text-xs font-semibold text-green-600">Verified</span>
+                          </div>
+                          {customer.vehicles && customer.vehicles.length > 0 && (
+                            <div className="flex items-center gap-1 px-2 py-0.5 bg-red-50 rounded-lg">
+                              <Car className="w-2.5 h-2.5 text-red-500" />
+                              <span className="text-xs font-semibold text-red-600">{customer.vehicles.length}</span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex gap-2 pt-1">
+                          <Link href={`/customer-details/${customer._id}`} className="flex-1">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="w-full text-xs text-slate-700"
+                              data-testid={`button-view-details-${customer._id}`}
+                            >
+                              <ExternalLink className="w-3 h-3" />
+                              Details
+                            </Button>
+                          </Link>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="text-xs"
+                            onClick={() => {
+                              setSelectedCustomerForImages(customer);
+                              setUploadedImages([]);
+                              setImageDialogOpen(true);
+                            }}
+                            data-testid={`button-add-images-${customer._id}`}
+                          >
+                            <ImagePlus className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      </div>
                     </div>
-                  )}
-                </div>
 
-                <CardContent className="p-5 space-y-4">
-                  {/* Header with name and vehicles count */}
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-lg text-slate-900 group-hover:text-primary transition-colors truncate">
-                        {customer.name}
-                      </h3>
-                      <p className="text-xs text-slate-500 font-mono mt-1">CUST-{customer.customerId}</p>
+                    {/* Right Side - Vehicle Image */}
+                    <div className="relative w-28 h-28 bg-slate-200 rounded-lg overflow-hidden flex-shrink-0">
+                      {primaryVehicle?.image ? (
+                        <img
+                          src={primaryVehicle.image}
+                          alt={customer.name}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200">
+                          <Car className="w-6 h-6 text-slate-400" />
+                        </div>
+                      )}
                     </div>
-                    {customer.vehicles && customer.vehicles.length > 0 && (
-                      <div className="flex items-center gap-1 px-2 py-1 bg-red-50 rounded-lg flex-shrink-0">
-                        <Car className="w-3 h-3 text-red-500" />
-                        <span className="text-xs font-semibold text-red-600">{customer.vehicles.length}</span>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Verified Badge */}
-                  <div className="flex items-center gap-2">
-                    <div className="flex items-center gap-1 px-2.5 py-1 bg-green-50 rounded-full">
-                      <Check className="w-3 h-3 text-green-600" />
-                      <span className="text-xs font-semibold text-green-600">Verified</span>
-                    </div>
-                  </div>
-
-                  {/* Contact Info */}
-                  <div className="space-y-2">
-                    {customer.email && (
-                      <div className="flex items-center gap-2 text-sm text-slate-700">
-                        <Mail className="w-4 h-4 text-slate-500 flex-shrink-0" />
-                        <span className="truncate">{customer.email}</span>
-                      </div>
-                    )}
-                    {customer.phone && (
-                      <div className="flex items-center gap-2 text-sm text-slate-700">
-                        <Car className="w-4 h-4 text-slate-500 flex-shrink-0" />
-                        <span>{customer.phone}</span>
-                      </div>
-                    )}
-                    {customer.address && (
-                      <div className="flex items-start gap-2 text-sm text-slate-700">
-                        <MapPin className="w-4 h-4 text-slate-500 flex-shrink-0 mt-0.5" />
-                        <span className="line-clamp-1">{customer.address}</span>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Registered By Info */}
-                  <div className="pt-3 border-t border-slate-200">
-                    <p className="text-xs text-slate-600">
-                      <span className="font-semibold">Registered by:</span> {customer.registeredBy || "Admin"}
-                    </p>
-                    {customer.createdAt && (
-                      <p className="text-xs text-slate-500 mt-1">
-                        {new Date(customer.createdAt).toLocaleDateString()}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Action Buttons */}
-                  <div className="flex gap-2 pt-2">
-                    <Link href={`/customer-details/${customer._id}`} className="flex-1">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="w-full flex items-center justify-center gap-2 text-slate-700"
-                        data-testid={`button-view-details-${customer._id}`}
-                      >
-                        <ExternalLink className="w-4 h-4" />
-                        View Details
-                      </Button>
-                    </Link>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="flex items-center gap-2"
-                      onClick={() => {
-                        setSelectedCustomerForImages(customer);
-                        setUploadedImages([]);
-                        setImageDialogOpen(true);
-                      }}
-                      data-testid={`button-add-images-${customer._id}`}
-                    >
-                      <ImagePlus className="w-4 h-4" />
-                      Images
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        setCustomerToDelete(customer);
-                        setDeleteDialogOpen(true);
-                      }}
-                      data-testid={`button-delete-${customer._id}`}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
                   </div>
                 </CardContent>
+
+                {/* Delete Button */}
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="absolute top-2 right-2 text-red-600 hover:text-red-700 hover:bg-red-50 h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setCustomerToDelete(customer);
+                    setDeleteDialogOpen(true);
+                  }}
+                  data-testid={`button-delete-${customer._id}`}
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
               </Card>
             );
           })}
