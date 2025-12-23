@@ -924,81 +924,77 @@ export default function CustomerService() {
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <Label className="flex items-center gap-2">
+                <div className="space-y-3 border border-red-200 p-4 rounded-lg">
+                  <h3 className="font-semibold text-sm flex items-center gap-2">
                     <Package className="w-4 h-4" />
                     Add Items from Inventory
-                  </Label>
-                  <div className="flex gap-2">
-                    <Select value={selectedItemId} onValueChange={setSelectedItemId}>
-                      <SelectTrigger className="flex-1" data-testid="select-inventory-item">
-                        <SelectValue placeholder="Select item" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {inventory.filter((item: any) => item.quantity > 0).reduce((acc: any[], item: any) => {
-                          // For PPF products, deduplicate by category (keep the one with most stock)
-                          if (item.category && ['Elite', 'Garware Plus', 'Garware Premium', 'Garware Matt'].includes(item.category)) {
-                            const existingIndex = acc.findIndex((i: any) => i.category === item.category);
-                            if (existingIndex === -1) {
-                              acc.push(item);
-                            } else if (item.quantity > acc[existingIndex].quantity) {
-                              acc[existingIndex] = item;
-                            }
-                          } else {
-                            acc.push(item);
-                          }
-                          return acc;
-                        }, []).map((item: any) => {
-                          // For PPF products, use category name; otherwise use item name
-                          const displayName = item.category && ['Elite', 'Garware Plus', 'Garware Premium', 'Garware Matt'].includes(item.category) 
-                            ? item.category 
-                            : item.name;
-                          return (
+                  </h3>
+                  <div className="space-y-3">
+                    <div>
+                      <Label className="text-xs">Select Product</Label>
+                      <Select value={selectedItemId} onValueChange={(val) => {
+                        setSelectedItemId(val);
+                        setSelectedRollId('');
+                        setMetersUsed('1');
+                      }}>
+                        <SelectTrigger className="mt-1" data-testid="select-inventory-product">
+                          <SelectValue placeholder="Choose product" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {inventory.filter((item: any) => item.rolls?.length > 0).map((item: any) => (
                             <SelectItem key={item._id} value={item._id}>
-                              {displayName} ({item.quantity} {item.unit} available)
+                              {item.name || item.category} ({item.rolls?.length || 0} rolls)
                             </SelectItem>
-                          );
-                        })}
-                      </SelectContent>
-                    </Select>
-                    {selectedItemId && inventory.find((i: any) => i._id === selectedItemId)?.rolls?.length > 0 ? (
-                      <>
-                        <Select value={selectedRollId} onValueChange={setSelectedRollId}>
-                          <SelectTrigger className="w-32" data-testid="select-roll">
-                            <SelectValue placeholder="Select roll" />
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {selectedItemId && getAvailableRolls().length > 0 && (
+                      <div>
+                        <Label className="text-xs">Select Roll</Label>
+                        <Select value={selectedRollId} onValueChange={(val) => {
+                          setSelectedRollId(val);
+                          setMetersUsed('1');
+                        }}>
+                          <SelectTrigger className="mt-1" data-testid="select-roll">
+                            <SelectValue placeholder="Choose roll" />
                           </SelectTrigger>
                           <SelectContent>
-                            {inventory.find((i: any) => i._id === selectedItemId)?.rolls?.map((roll: any) => (
+                            {getAvailableRolls().map((roll: any) => (
                               <SelectItem key={roll._id} value={roll._id}>
-                                {roll.name} ({roll.remaining_meters}m)
+                                {roll.name} ({roll.remaining_meters}m remaining)
                               </SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
-                        <Input
+                      </div>
+                    )}
+
+                    {selectedRollId && (
+                      <div>
+                        <Label className="text-xs">Quantity to Use (Meters)</Label>
+                        <Input 
                           type="number"
                           min="0.1"
                           step="0.1"
+                          placeholder="1"
                           value={metersUsed}
                           onChange={(e) => setMetersUsed(e.target.value)}
-                          className="w-20"
-                          placeholder="Meters"
+                          className="mt-1"
                           data-testid="input-meters-used"
                         />
-                      </>
-                    ) : (
-                      <Input
-                        type="number"
-                        min="1"
-                        value={metersUsed}
-                        onChange={(e) => setMetersUsed(e.target.value)}
-                        className="w-20"
-                        placeholder="Qty"
-                        data-testid="input-item-quantity"
-                      />
+                      </div>
                     )}
-                    <Button type="button" onClick={handleAddItem} variant="outline" size="icon" data-testid="button-add-item">
-                      <Plus className="w-4 h-4" />
+
+                    <Button
+                      onClick={handleAddItem}
+                      className="w-full bg-primary"
+                      disabled={!selectedItemId || !selectedRollId || !metersUsed}
+                      data-testid="button-add-item"
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add Item
                     </Button>
                   </div>
                 </div>
