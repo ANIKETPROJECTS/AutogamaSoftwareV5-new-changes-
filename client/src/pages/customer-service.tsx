@@ -18,6 +18,7 @@ type SelectedService = {
   name: string;
   vehicleType: string;
   price: number;
+  discount: number;
   category?: string;
   warranty?: string;
 };
@@ -31,8 +32,9 @@ export default function CustomerService() {
   const [selectedVehicleIndex, setSelectedVehicleIndex] = useState<string>('');
   const [selectedTechnicianId, setSelectedTechnicianId] = useState<string>('');
   const [serviceNotes, setServiceNotes] = useState('');
-  const [discountPercentage, setDiscountPercentage] = useState<string>('0');
+  const [ppfDiscount, setPpfDiscount] = useState<string>('0');
   const [laborCost, setLaborCost] = useState<string>('');
+  const [includeGst, setIncludeGst] = useState(true);
   const [selectedItems, setSelectedItems] = useState<{ inventoryId: string; quantity: number; name: string; unit: string }[]>([]);
   const [selectedItemId, setSelectedItemId] = useState<string>('');
   const [itemQuantity, setItemQuantity] = useState<string>('1');
@@ -137,8 +139,9 @@ export default function CustomerService() {
     setSelectedVehicleIndex('');
     setSelectedTechnicianId('');
     setServiceNotes('');
-    setDiscountPercentage('0');
+    setPpfDiscount('0');
     setLaborCost('');
+    setIncludeGst(true);
     setSelectedItems([]);
     setSelectedItemId('');
     setItemQuantity('1');
@@ -294,7 +297,8 @@ export default function CustomerService() {
     setSelectedOtherServices([...selectedOtherServices, {
       name: otherServiceName,
       vehicleType: otherServiceVehicleType,
-      price
+      price,
+      discount: 0
     }]);
     setOtherServiceName('');
     setOtherServiceVehicleType('');
@@ -360,12 +364,13 @@ export default function CustomerService() {
       return;
     }
 
-    const totalServiceCost = ppfPrice + selectedOtherServices.reduce((sum, s) => sum + s.price, 0);
-    const discountPct = parseFloat(discountPercentage) || 0;
-    const discountedServiceCost = totalServiceCost * (1 - discountPct / 100);
+    const ppfDiscountAmount = parseFloat(ppfDiscount) || 0;
+    const ppfAfterDiscount = Math.max(0, ppfPrice - ppfDiscountAmount);
+    const otherServicesTotal = selectedOtherServices.reduce((sum, s) => sum + Math.max(0, s.price - (s.discount || 0)), 0);
+    const totalServiceCost = ppfAfterDiscount + otherServicesTotal;
     const parsedLaborCost = parseFloat(laborCost) || 0;
     
-    if (discountedServiceCost <= 0 && parsedLaborCost <= 0) {
+    if (totalServiceCost <= 0 && parsedLaborCost <= 0) {
       toast({ title: 'Please select at least one service or enter labor cost', variant: 'destructive' });
       return;
     }
@@ -377,8 +382,8 @@ export default function CustomerService() {
     const vehicle = customer.vehicles[vehicleIdx];
     if (!vehicle) return;
 
-    const subtotal = discountedServiceCost + parsedLaborCost;
-    const gstAmount = subtotal * 0.18;
+    const subtotal = totalServiceCost + parsedLaborCost;
+    const gstAmount = includeGst ? subtotal * 0.18 : 0;
     const totalAmount = subtotal + gstAmount;
 
     const selectedTechnician = technicians.find((t: any) => t._id === selectedTechnicianId);
@@ -387,16 +392,17 @@ export default function CustomerService() {
     if (ppfPrice > 0) {
       serviceItemsList.push({
         name: `PPF ${ppfCategory} - ${ppfWarranty}`,
-        price: ppfPrice,
+        price: ppfAfterDiscount,
         category: ppfCategory,
         vehicleType: ppfVehicleType,
         warranty: ppfWarranty
       });
     }
     selectedOtherServices.forEach(s => {
+      const finalPrice = Math.max(0, s.price - (s.discount || 0));
       serviceItemsList.push({
         name: s.name,
-        price: s.price,
+        price: finalPrice,
         vehicleType: s.vehicleType
       });
     });
@@ -418,7 +424,7 @@ export default function CustomerService() {
       technicianName: selectedTechnician?.name,
       notes: serviceNotes,
       stage: 'New Lead',
-      serviceCost: discountedServiceCost,
+      serviceCost: totalServiceCost,
       laborCost: parsedLaborCost,
       serviceItems: serviceItemsList,
       materials: materialsList,
@@ -428,13 +434,16 @@ export default function CustomerService() {
     });
   };
 
-  const totalServiceCost = ppfPrice + selectedOtherServices.reduce((sum, s) => sum + s.price, 0);
-  const discountPct = parseFloat(discountPercentage) || 0;
-  const discountAmount = totalServiceCost * discountPct / 100;
-  const discountedServiceCost = totalServiceCost - discountAmount;
+  const ppfDiscountAmount = parseFloat(ppfDiscount) || 0;
+  const ppfAfterDiscount = Math.max(0, ppfPrice - ppfDiscountAmount);
+  const otherServicesAfterDiscount = selectedOtherServices.map(s => ({
+    ...s,
+    finalPrice: Math.max(0, s.price - (s.discount || 0))
+  }));
+  const totalServiceCost = ppfAfterDiscount + otherServicesAfterDiscount.reduce((sum, s) => sum + s.finalPrice, 0);
   const parsedLaborCost = parseFloat(laborCost) || 0;
-  const subtotal = discountedServiceCost + parsedLaborCost;
-  const gst = subtotal * 0.18;
+  const subtotal = totalServiceCost + parsedLaborCost;
+  const gst = includeGst ? subtotal * 0.18 : 0;
   const totalCost = subtotal + gst;
 
   const getAvailableWarranties = () => {
@@ -755,13 +764,12 @@ export default function CustomerService() {
                           <Label className="text-sm">Selected Services</Label>
                           <div className="border rounded-lg divide-y">
                             {selectedOtherServices.map((service, index) => (
-                              <div key={index} className="flex items-center justify-between p-3">
-                                <div>
-                                  <p className="font-medium text-sm">{service.name}</p>
-                                  <p className="text-xs text-muted-foreground">{service.vehicleType}</p>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <span className="font-semibold">₹{service.price.toLocaleString('en-IN')}</span>
+                              <div key={index} className="space-y-2 p-3">
+                                <div className="flex items-center justify-between">
+                                  <div>
+                                    <p className="font-medium text-sm">{service.name}</p>
+                                    <p className="text-xs text-muted-foreground">{service.vehicleType}</p>
+                                  </div>
                                   <Button
                                     type="button"
                                     variant="ghost"
@@ -771,6 +779,28 @@ export default function CustomerService() {
                                   >
                                     <Trash2 className="w-4 h-4 text-red-500" />
                                   </Button>
+                                </div>
+                                <div className="flex gap-3 items-end">
+                                  <div className="flex-1">
+                                    <Label className="text-xs">Price: ₹{service.price.toLocaleString('en-IN')}</Label>
+                                  </div>
+                                  <div className="w-32">
+                                    <Label className="text-xs">Discount</Label>
+                                    <Input
+                                      type="number"
+                                      min="0"
+                                      step="1"
+                                      value={service.discount || 0}
+                                      onChange={(e) => {
+                                        const newServices = [...selectedOtherServices];
+                                        newServices[index].discount = parseFloat(e.target.value) || 0;
+                                        setSelectedOtherServices(newServices);
+                                      }}
+                                      placeholder="0"
+                                      data-testid={`input-service-discount-${index}`}
+                                      className="mt-1"
+                                    />
+                                  </div>
                                 </div>
                               </div>
                             ))}
@@ -783,18 +813,33 @@ export default function CustomerService() {
               </div>
 
               <div className="space-y-6">
-                <div className="space-y-2">
-                  <Label>Discount %</Label>
-                  <Input
-                    type="number"
-                    min="0"
-                    max="100"
-                    step="0.01"
-                    value={discountPercentage}
-                    onChange={(e) => setDiscountPercentage(e.target.value)}
-                    placeholder="Enter discount percentage"
-                    data-testid="input-discount-percentage"
+                {ppfPrice > 0 && (
+                  <div className="space-y-2">
+                    <Label>PPF Service Discount</Label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">₹</span>
+                      <Input
+                        type="number"
+                        min="0"
+                        step="1"
+                        value={ppfDiscount}
+                        onChange={(e) => setPpfDiscount(e.target.value)}
+                        placeholder="Enter discount amount"
+                        data-testid="input-ppf-discount"
+                        className="pl-7"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex items-center gap-2 p-3 border rounded-lg bg-blue-50 dark:bg-blue-950">
+                  <Checkbox 
+                    id="include-gst" 
+                    checked={includeGst}
+                    onCheckedChange={(checked) => setIncludeGst(checked as boolean)}
+                    data-testid="checkbox-include-gst"
                   />
+                  <Label htmlFor="include-gst" className="text-sm cursor-pointer">Include GST (18%) in total</Label>
                 </div>
 
                 <div className="space-y-2">
@@ -920,24 +965,25 @@ export default function CustomerService() {
                     </div>
                   )}
                   
-                  {selectedOtherServices.map((service, index) => (
-                    <div key={index} className="flex justify-between text-sm">
-                      <span>{service.name}:</span>
-                      <span>₹{service.price.toLocaleString('en-IN')}</span>
+                  {otherServicesAfterDiscount.map((service, index) => (
+                    <div key={index} className="space-y-1">
+                      <div className="flex justify-between text-sm">
+                        <span>{service.name}:</span>
+                        <span>₹{service.price.toLocaleString('en-IN')}</span>
+                      </div>
+                      {service.discount > 0 && (
+                        <div className="flex justify-between text-xs text-slate-600">
+                          <span>Discount:</span>
+                          <span>-₹{service.discount.toLocaleString('en-IN')}</span>
+                        </div>
+                      )}
                     </div>
                   ))}
                   
                   {(ppfPrice > 0 || selectedOtherServices.length > 0) && (
                     <div className="flex justify-between text-sm font-medium border-t pt-2">
-                      <span>Total Service Cost:</span>
+                      <span>Total Service Cost (after discount):</span>
                       <span>₹{totalServiceCost.toLocaleString('en-IN')}</span>
-                    </div>
-                  )}
-                  
-                  {discountPct > 0 && (
-                    <div className="flex justify-between text-sm">
-                      <span>Discount ({discountPct}%):</span>
-                      <span className="text-slate-600">-₹{discountAmount.toLocaleString('en-IN')}</span>
                     </div>
                   )}
                   
@@ -951,10 +997,12 @@ export default function CustomerService() {
                     <span>₹{subtotal.toLocaleString('en-IN')}</span>
                   </div>
                   
-                  <div className="flex justify-between text-sm">
-                    <span>GST (18%):</span>
-                    <span>₹{gst.toLocaleString('en-IN')}</span>
-                  </div>
+                  {includeGst && (
+                    <div className="flex justify-between text-sm">
+                      <span>GST (18%):</span>
+                      <span>₹{gst.toLocaleString('en-IN')}</span>
+                    </div>
+                  )}
                   
                   <div className="border-t pt-2 mt-2">
                     <div className="flex justify-between font-bold text-lg">
