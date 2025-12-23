@@ -517,20 +517,25 @@ export class MongoStorage implements IStorage {
 
     const items: any[] = [];
 
-    // Add service cost to invoice with discount details
-    if (job.serviceCost && job.serviceCost > 0) {
-      items.push({
-        description: 'Service Charge',
-        quantity: 1,
-        unitPrice: job.serviceCost,
-        total: job.serviceCost,
-        type: 'service',
-        discount: 0,
-        discountPercentage: 0
-      });
+    // Add service items (PPF service + labor cost) to invoice
+    let serviceTotal = 0;
+    if (job.serviceItems && job.serviceItems.length > 0) {
+      for (const service of job.serviceItems) {
+        const servicePrice = (service as any).price || 0;
+        items.push({
+          description: (service as any).description || 'Service',
+          quantity: 1,
+          unitPrice: servicePrice,
+          total: servicePrice,
+          type: 'service',
+          discount: 0,
+          discountPercentage: 0
+        });
+        serviceTotal += servicePrice;
+      }
     }
 
-    // Add labor cost to invoice with discount details
+    // Add labor cost if present
     if (job.laborCost && job.laborCost > 0) {
       items.push({
         description: 'Labor Charge',
@@ -541,10 +546,17 @@ export class MongoStorage implements IStorage {
         discount: 0,
         discountPercentage: 0
       });
+      serviceTotal += job.laborCost;
+    }
+
+    // If no items found, return null
+    if (items.length === 0) {
+      console.warn(`No service items found for job ${jobId}`);
+      return null;
     }
 
     // Materials are tracked for inventory purposes only, not included in invoice pricing
-    // Invoice uses only: Service Cost + Labor Cost + GST
+    // Invoice uses only: Service Items + Labor Cost + GST
 
     const subtotal = items.reduce((sum, item) => sum + item.total, 0);
     const discountAmount = Math.min(discount, subtotal);
