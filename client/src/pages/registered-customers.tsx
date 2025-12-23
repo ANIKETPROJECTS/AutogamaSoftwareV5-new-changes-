@@ -1,12 +1,14 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Search, Mail, MapPin, Car, Users, Filter, Grid3X3, List, Trash2, ExternalLink, Check } from "lucide-react";
+import { Search, Mail, MapPin, Car, Users, Filter, Grid3X3, List, Trash2, ExternalLink, Check, ImagePlus } from "lucide-react";
 import { Link } from "wouter";
 import { useState, useMemo } from "react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useToast } from "@/hooks/use-toast";
 
 export default function RegisteredCustomers() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -18,11 +20,47 @@ export default function RegisteredCustomers() {
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
   const [viewMode, setViewMode] = useState<"card" | "list">("card");
+  const [imageDialogOpen, setImageDialogOpen] = useState(false);
+  const [selectedCustomerForImages, setSelectedCustomerForImages] = useState<any>(null);
+  const [uploadedImages, setUploadedImages] = useState<string[]>([]);
+  const { toast } = useToast();
 
-  const { data: customers = [], isLoading } = useQuery({
+  const { data: customers = [], isLoading, refetch } = useQuery({
     queryKey: ["customers"],
     queryFn: () => api.customers.list(),
   });
+
+  const uploadImagesMutation = useMutation({
+    mutationFn: () => api.customers.addServiceImages(selectedCustomerForImages._id, uploadedImages),
+    onSuccess: () => {
+      toast({ title: "Success", description: "Service images added successfully" });
+      setImageDialogOpen(false);
+      setUploadedImages([]);
+      refetch();
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to add service images", variant: "destructive" });
+    }
+  });
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+
+    const newImages: string[] = [...uploadedImages];
+    const filesToProcess = Array.from(files).slice(0, 5 - uploadedImages.length);
+
+    filesToProcess.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        if (event.target?.result) {
+          newImages.push(event.target.result as string);
+          setUploadedImages(newImages);
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+  };
 
   // Extract unique values for filters
   const filterOptions = useMemo(() => {
@@ -464,6 +502,20 @@ export default function RegisteredCustomers() {
                     </Link>
                     <Button
                       size="sm"
+                      variant="outline"
+                      className="flex items-center gap-2"
+                      onClick={() => {
+                        setSelectedCustomerForImages(customer);
+                        setUploadedImages([]);
+                        setImageDialogOpen(true);
+                      }}
+                      data-testid={`button-add-images-${customer._id}`}
+                    >
+                      <ImagePlus className="w-4 h-4" />
+                      Images
+                    </Button>
+                    <Button
+                      size="sm"
                       variant="ghost"
                       className="text-red-600 hover:text-red-700 hover:bg-red-50"
                       data-testid={`button-delete-${customer._id}`}
@@ -549,6 +601,75 @@ export default function RegisteredCustomers() {
           ))}
         </div>
       )}
+
+      {/* Image Upload Dialog */}
+      <Dialog open={imageDialogOpen} onOpenChange={setImageDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Add After Service Images</DialogTitle>
+            <DialogDescription>
+              Upload up to 5 images for {selectedCustomerForImages?.name}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div className="border-2 border-dashed border-slate-300 rounded-lg p-6 text-center hover:border-slate-400 transition-colors cursor-pointer">
+              <input
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={handleImageUpload}
+                disabled={uploadedImages.length >= 5}
+                className="hidden"
+                id="image-input"
+              />
+              <label htmlFor="image-input" className="cursor-pointer block">
+                <ImagePlus className="w-8 h-8 mx-auto text-slate-400 mb-2" />
+                <p className="text-sm font-medium text-slate-700">Click to select images</p>
+                <p className="text-xs text-slate-500">or drag and drop</p>
+                <p className="text-xs text-slate-500 mt-1">({uploadedImages.length}/5 selected)</p>
+              </label>
+            </div>
+
+            {uploadedImages.length > 0 && (
+              <div className="grid grid-cols-5 gap-2">
+                {uploadedImages.map((img, idx) => (
+                  <div key={idx} className="relative aspect-square rounded-lg overflow-hidden bg-slate-100">
+                    <img src={img} alt={`Upload ${idx + 1}`} className="w-full h-full object-cover" />
+                    <button
+                      onClick={() => setUploadedImages(uploadedImages.filter((_, i) => i !== idx))}
+                      className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold hover:bg-red-600"
+                      data-testid={`button-remove-image-${idx}`}
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="flex gap-2 justify-end pt-4">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setImageDialogOpen(false);
+                  setUploadedImages([]);
+                }}
+                data-testid="button-cancel-images"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={() => uploadImagesMutation.mutate()}
+                disabled={uploadedImages.length === 0 || uploadImagesMutation.isPending}
+                data-testid="button-save-images"
+              >
+                {uploadImagesMutation.isPending ? "Saving..." : "Save Images"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

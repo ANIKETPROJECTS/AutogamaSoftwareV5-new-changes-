@@ -126,6 +126,20 @@ export async function registerRoutes(
     }
   });
 
+  app.post("/api/customers/:id/service-images", async (req, res) => {
+    try {
+      const { images } = req.body;
+      if (!Array.isArray(images)) {
+        return res.status(400).json({ message: "Images must be an array" });
+      }
+      const customer = await storage.addServiceImages(req.params.id, images.slice(0, 5));
+      if (!customer) return res.status(404).json({ message: "Customer not found" });
+      res.json(customer);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to add service images" });
+    }
+  });
+
   app.get("/api/customers/:id/jobs", async (req, res) => {
     try {
       const jobs = await storage.getJobsByCustomer(req.params.id);

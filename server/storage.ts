@@ -101,6 +101,15 @@ export class MongoStorage implements IStorage {
     );
   }
 
+  async addServiceImages(customerId: string, images: string[]): Promise<ICustomer | null> {
+    if (!mongoose.Types.ObjectId.isValid(customerId)) return null;
+    return Customer.findByIdAndUpdate(
+      customerId,
+      { serviceImages: images },
+      { new: true }
+    );
+  }
+
   async getJobs(): Promise<IJob[]> {
     return Job.find().sort({ updatedAt: -1 });
   }

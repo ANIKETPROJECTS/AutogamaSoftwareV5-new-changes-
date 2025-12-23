@@ -3,14 +3,17 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Phone, MapPin, Car, Mail, DollarSign, Wrench, ArrowLeft, Calendar, User } from "lucide-react";
+import { Phone, MapPin, Car, Mail, DollarSign, Wrench, ArrowLeft, Calendar, User, X } from "lucide-react";
 import { Link, useRoute } from "wouter";
 import { useToast } from "@/hooks/use-toast";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 export default function CustomerDetails() {
   const [match, params] = useRoute("/customer-details/:id");
   const customerId = params?.id;
   const { toast } = useToast();
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [imageIndex, setImageIndex] = useState(0);
 
   const { data: customers = [] } = useQuery({
     queryKey: ["customers"],
@@ -121,6 +124,31 @@ export default function CustomerDetails() {
         </CardContent>
       </Card>
 
+      {/* After Service Images */}
+      {customer?.serviceImages && customer.serviceImages.length > 0 && (
+        <div className="space-y-3">
+          <h2 className="font-semibold text-lg">After Service Images ({customer.serviceImages.length})</h2>
+          <div className="grid grid-cols-5 gap-3">
+            {customer.serviceImages.map((img: string, idx: number) => (
+              <button
+                key={idx}
+                onClick={() => {
+                  setSelectedImage(img);
+                  setImageIndex(idx);
+                }}
+                className="relative aspect-square rounded-lg overflow-hidden bg-slate-100 hover:ring-2 hover:ring-blue-500 transition-all"
+                data-testid={`image-thumbnail-${idx}`}
+              >
+                <img src={img} alt={`Service Image ${idx + 1}`} className="w-full h-full object-cover" />
+                <div className="absolute inset-0 bg-black/0 hover:bg-black/20 transition-colors flex items-center justify-center">
+                  <span className="text-white text-xs font-semibold opacity-0 hover:opacity-100">#{idx + 1}</span>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Service History - Show all below */}
       {jobHistory.length > 0 && (
         <div className="space-y-3">
@@ -206,6 +234,53 @@ export default function CustomerDetails() {
           </div>
         </div>
       )}
+
+      {/* Image Viewer Dialog */}
+      <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
+        <DialogContent className="max-w-4xl bg-black border-0">
+          <button
+            onClick={() => setSelectedImage(null)}
+            className="absolute top-4 right-4 text-white hover:bg-white/20 rounded-full p-1 z-10"
+            data-testid="button-close-image-viewer"
+          >
+            <X className="w-6 h-6" />
+          </button>
+
+          <div className="relative w-full aspect-video flex items-center justify-center">
+            {selectedImage && (
+              <img src={selectedImage} alt={`Service Image ${imageIndex + 1}`} className="max-h-96 max-w-full object-contain" />
+            )}
+          </div>
+
+          <div className="flex items-center justify-between mt-4 text-white">
+            <button
+              onClick={() => {
+                const newIdx = imageIndex === 0 ? customer.serviceImages.length - 1 : imageIndex - 1;
+                setImageIndex(newIdx);
+                setSelectedImage(customer.serviceImages[newIdx]);
+              }}
+              className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded transition-colors"
+              data-testid="button-prev-image"
+            >
+              Previous
+            </button>
+            <span className="text-sm">
+              Image {imageIndex + 1} of {customer?.serviceImages?.length || 0}
+            </span>
+            <button
+              onClick={() => {
+                const newIdx = imageIndex === (customer?.serviceImages?.length || 1) - 1 ? 0 : imageIndex + 1;
+                setImageIndex(newIdx);
+                setSelectedImage(customer?.serviceImages?.[newIdx] || null);
+              }}
+              className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded transition-colors"
+              data-testid="button-next-image"
+            >
+              Next
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
