@@ -70,11 +70,13 @@ export async function registerRoutes(
 
   app.get("/api/customers", async (req, res) => {
     try {
-      const { search } = req.query;
-      const customers = search 
-        ? await storage.searchCustomers(search as string)
-        : await storage.getCustomers();
-      res.json(customers);
+      const { search, page = '1', limit = '10' } = req.query;
+      const result = await storage.getCustomers({
+        search: search as string,
+        page: parseInt(page as string, 10),
+        limit: parseInt(limit as string, 10)
+      });
+      res.json(result);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch customers" });
     }
@@ -184,11 +186,13 @@ export async function registerRoutes(
 
   app.get("/api/jobs", async (req, res) => {
     try {
-      const { stage } = req.query;
-      const jobs = stage 
-        ? await storage.getJobsByStage(stage as JobStage)
-        : await storage.getJobs();
-      res.json(jobs);
+      const { stage, page = '1', limit = '10' } = req.query;
+      const result = await storage.getJobs({
+        stage: stage as JobStage,
+        page: parseInt(page as string, 10),
+        limit: parseInt(limit as string, 10)
+      });
+      res.json(result);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch jobs" });
     }
@@ -425,11 +429,13 @@ export async function registerRoutes(
 
   app.get("/api/appointments", async (req, res) => {
     try {
-      const { date } = req.query;
-      const appointments = date 
-        ? await storage.getAppointmentsByDate(new Date(date as string))
-        : await storage.getAppointments();
-      res.json(appointments);
+      const { date, page = '1', limit = '10' } = req.query;
+      const result = await storage.getAppointments({
+        date: date ? new Date(date as string) : undefined,
+        page: parseInt(page as string, 10),
+        limit: parseInt(limit as string, 10)
+      });
+      res.json(result);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch appointments" });
     }
@@ -571,8 +577,12 @@ export async function registerRoutes(
   // Price Inquiries
   app.get("/api/price-inquiries", async (req, res) => {
     try {
-      const inquiries = await storage.getPriceInquiries();
-      res.json(inquiries);
+      const { page = '1', limit = '10' } = req.query;
+      const result = await storage.getPriceInquiries({
+        page: parseInt(page as string, 10),
+        limit: parseInt(limit as string, 10)
+      });
+      res.json(result);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch price inquiries" });
     }

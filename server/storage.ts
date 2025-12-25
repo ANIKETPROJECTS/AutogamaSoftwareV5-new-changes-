@@ -3,7 +3,7 @@ import type { ICustomer, IJob, ITechnician, IInventoryItem, IAppointment, IWhats
 import mongoose from 'mongoose';
 
 export interface IStorage {
-  getCustomers(): Promise<ICustomer[]>;
+  getCustomers(options?: { page?: number; limit?: number; search?: string }): Promise<{ customers: ICustomer[]; total: number }>;
   getCustomer(id: string): Promise<ICustomer | null>;
   searchCustomers(query: string): Promise<ICustomer[]>;
   createCustomer(data: Partial<ICustomer>): Promise<ICustomer>;
@@ -11,7 +11,7 @@ export interface IStorage {
   deleteCustomer(id: string): Promise<void>;
   addVehicleToCustomer(customerId: string, vehicle: any): Promise<ICustomer | null>;
   
-  getJobs(): Promise<IJob[]>;
+  getJobs(options?: { page?: number; limit?: number; stage?: JobStage }): Promise<{ jobs: IJob[]; total: number }>;
   getJob(id: string): Promise<IJob | null>;
   getJobsByCustomer(customerId: string): Promise<IJob[]>;
   getJobsByStage(stage: JobStage): Promise<IJob[]>;
@@ -39,7 +39,7 @@ export interface IStorage {
   deleteRoll(inventoryId: string, rollId: string): Promise<IInventoryItem | null>;
   deductRoll(inventoryId: string, rollId: string, metersUsed: number): Promise<IInventoryItem | null>;
   
-  getAppointments(): Promise<IAppointment[]>;
+  getAppointments(options?: { page?: number; limit?: number; date?: Date }): Promise<{ appointments: IAppointment[]; total: number }>;
   getAppointmentsByDate(date: Date): Promise<IAppointment[]>;
   createAppointment(data: Partial<IAppointment>): Promise<IAppointment>;
   updateAppointment(id: string, data: Partial<IAppointment>): Promise<IAppointment | null>;
@@ -49,7 +49,7 @@ export interface IStorage {
   getWhatsAppTemplates(): Promise<IWhatsAppTemplate[]>;
   updateWhatsAppTemplate(stage: JobStage, message: string, isActive: boolean): Promise<IWhatsAppTemplate | null>;
   
-  getPriceInquiries(): Promise<IPriceInquiry[]>;
+  getPriceInquiries(options?: { page?: number; limit?: number }): Promise<{ inquiries: IPriceInquiry[]; total: number }>;
   createPriceInquiry(data: Partial<IPriceInquiry>): Promise<IPriceInquiry>;
   deletePriceInquiry(id: string): Promise<void>;
   
@@ -70,8 +70,28 @@ export interface IStorage {
 }
 
 export class MongoStorage implements IStorage {
-  async getCustomers(): Promise<ICustomer[]> {
-    return Customer.find().sort({ createdAt: -1 });
+  async getCustomers(options: { page?: number; limit?: number; search?: string } = {}): Promise<{ customers: ICustomer[]; total: number }> {
+    const { page = 1, limit = 10, search } = options;
+    const skip = (page - 1) * limit;
+    
+    let query = {};
+    if (search) {
+      const regex = new RegExp(search, 'i');
+      query = {
+        $or: [
+          { name: regex },
+          { phone: regex },
+          { 'vehicles.plateNumber': regex }
+        ]
+      };
+    }
+    
+    const [customers, total] = await Promise.all([
+      Customer.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit),
+      Customer.countDocuments(query)
+    ]);
+    
+    return { customers, total };
   }
 
   async getCustomer(id: string): Promise<ICustomer | null> {
@@ -125,8 +145,21 @@ export class MongoStorage implements IStorage {
     );
   }
 
-  async getJobs(): Promise<IJob[]> {
-    return Job.find().sort({ updatedAt: -1 });
+  async getJobs(options: { page?: number; limit?: number; stage?: JobStage } = {}): Promise<{ jobs: IJob[]; total: number }> {
+    const { page = 1, limit = 10, stage } = options;
+    const skip = (page - 1) * limit;
+    
+    let query = {};
+    if (stage) {
+      query = { stage };
+    }
+    
+    const [jobs, total] = await Promise.all([
+      Job.find(query).sort({ updatedAt: -1 }).skip(skip).limit(limit),
+      Job.countDocuments(query)
+    ]);
+    
+    return { jobs, total };
   }
 
   async getJob(id: string): Promise<IJob | null> {
@@ -301,8 +334,25 @@ export class MongoStorage implements IStorage {
     return item;
   }
 
-  async getAppointments(): Promise<IAppointment[]> {
-    return Appointment.find().sort({ date: 1, time: 1 });
+  async getAppointments(options: { page?: number; limit?: number; date?: Date } = {}): Promise<{ appointments: IAppointment[]; total: number }> {
+    const { page = 1, limit = 10, date } = options;
+    const skip = (page - 1) * limit;
+    
+    let query = {};
+    if (date) {
+      const startOfDay = new Date(date);
+      startOfDay.setHours(0, 0, 0, 0);
+      const endOfDay = new Date(date);
+      endOfDay.setHours(23, 59, 59, 999);
+      query = { date: { $gte: startOfDay, $lte: endOfDay } };
+    }
+    
+    const [appointments, total] = await Promise.all([
+      Appointment.find(query).sort({ date: 1, time: 1 }).skip(skip).limit(limit),
+      Appointment.countDocuments(query)
+    ]);
+    
+    return { appointments, total };
   }
 
   async getAppointmentsByDate(date: Date): Promise<IAppointment[]> {
@@ -382,8 +432,16 @@ export class MongoStorage implements IStorage {
     );
   }
 
-  async getPriceInquiries(): Promise<IPriceInquiry[]> {
-    return PriceInquiry.find().sort({ createdAt: -1 });
+  async getPriceInquiries(options: { page?: number; limit?: number } = {}): Promise<{ inquiries: IPriceInquiry[]; total: number }> {
+    const { page = 1, limit = 10 } = options;
+    const skip = (page - 1) * limit;
+    
+    const [inquiries, total] = await Promise.all([
+      PriceInquiry.find().sort({ createdAt: -1 }).skip(skip).limit(limit),
+      PriceInquiry.countDocuments()
+    ]);
+    
+    return { inquiries, total };
   }
 
   async createPriceInquiry(data: Partial<IPriceInquiry>): Promise<IPriceInquiry> {
