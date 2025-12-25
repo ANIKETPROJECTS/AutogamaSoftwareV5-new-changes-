@@ -275,50 +275,54 @@ export default function CustomerDetails() {
             {jobHistory.map((job: any) => (
               <Card
                 key={job._id}
-                className="border border-amber-200 dark:border-amber-800"
+                className="border-none shadow-md overflow-hidden bg-white max-w-5xl mx-auto w-full"
                 data-testid={`card-history-detail-${job._id}`}
               >
                 <CardContent className="p-4 space-y-3">
                   {/* Header - Service Title if available */}
-                  {job.serviceName && (
-                    <div className="text-sm font-bold text-primary">{job.serviceName}</div>
-                  )}
+                  <div className="flex items-center justify-between">
+                    {job.serviceName && (
+                      <div className="text-sm font-bold text-red-600">{job.serviceName}</div>
+                    )}
+                    <Badge variant="outline" className="bg-white text-black border-slate-200 text-[10px] font-semibold h-5 px-2">
+                      {job.stage?.toUpperCase()}
+                    </Badge>
+                  </div>
                   
                   {/* Header - Vehicle Info */}
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1">
-                      <h3 className="font-bold text-base">{job.vehicleName}</h3>
-                      <p className="text-xs text-muted-foreground">{job.plateNumber}</p>
+                      <h3 className="font-bold text-base text-slate-900">{job.vehicleName}</h3>
+                      <p className="text-xs text-slate-400 font-mono uppercase">{job.plateNumber}</p>
                     </div>
-                    <span className="text-xs bg-accent px-2 py-1 rounded font-medium">{job.stage}</span>
                   </div>
 
                   {/* Details Grid */}
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-xs">
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-xs">
                     <div>
-                      <p className="text-muted-foreground font-medium">Date</p>
-                      <p className="mt-1">{new Date(job.createdAt).toLocaleDateString('en-IN')}</p>
+                      <p className="text-slate-400 font-bold uppercase tracking-wider text-[10px]">Date</p>
+                      <p className="font-semibold text-slate-900 mt-1">{new Date(job.createdAt).toLocaleDateString('en-IN')}</p>
                     </div>
                     <div>
-                      <p className="text-muted-foreground font-medium">Technician</p>
-                      <p className="mt-1">{job.technicianName || 'Not assigned'}</p>
+                      <p className="text-slate-400 font-bold uppercase tracking-wider text-[10px]">Technician</p>
+                      <p className="font-semibold text-slate-900 mt-1">{job.technicianName || 'Not assigned'}</p>
                     </div>
                     <div>
-                      <p className="text-muted-foreground font-medium">Amount</p>
-                      <p className="font-bold text-primary mt-1">₹{job.totalAmount?.toLocaleString('en-IN') || '0'}</p>
+                      <p className="text-slate-400 font-bold uppercase tracking-wider text-[10px]">Amount</p>
+                      <p className="font-bold text-red-700 mt-1">₹{job.totalAmount?.toLocaleString('en-IN') || '0'}</p>
                     </div>
                   </div>
 
                   {/* Service Items */}
                   {job.serviceItems && job.serviceItems.length > 0 && (
-                    <div className="border-t pt-3">
-                      <p className="font-semibold text-xs mb-2">Services</p>
+                    <div className="border-t border-slate-100 pt-3">
+                      <p className="text-slate-400 font-bold uppercase tracking-wider text-[10px] mb-2">Services</p>
                       <div className="space-y-1">
                         {job.serviceItems.map((item: any, idx: number) => (
-                          <div key={idx} className="flex items-center justify-between text-xs bg-gray-50 p-2 rounded border border-gray-200">
-                            <span className="truncate">{item.description || item.name || 'Service'}</span>
-                            {item.cost && <span className="font-medium whitespace-nowrap ml-2">₹{item.cost.toLocaleString('en-IN')}</span>}
-                            {item.price && <span className="font-medium whitespace-nowrap ml-2">₹{item.price.toLocaleString('en-IN')}</span>}
+                          <div key={idx} className="flex items-center justify-between text-xs bg-slate-50 p-2 rounded-lg border border-slate-100">
+                            <span className="font-medium text-slate-700 truncate">{item.description || item.name || 'Service'}</span>
+                            {item.cost && <span className="font-bold text-slate-900 whitespace-nowrap ml-2">₹{item.cost.toLocaleString('en-IN')}</span>}
+                            {item.price && <span className="font-bold text-slate-900 whitespace-nowrap ml-2">₹{item.price.toLocaleString('en-IN')}</span>}
                           </div>
                         ))}
                       </div>
@@ -326,24 +330,24 @@ export default function CustomerDetails() {
                   )}
 
                   {/* Payment Status */}
-                  <div className="border-t pt-3 flex items-center justify-between">
-                    <div className="text-xs">
-                      <p className="text-muted-foreground font-medium">Payment Status</p>
-                      <p className="mt-1">{job.paymentStatus}</p>
+                  <div className="border-t border-slate-100 pt-3 flex items-center justify-between">
+                    <div>
+                      <p className="text-slate-400 font-bold uppercase tracking-wider text-[10px]">Payment Status</p>
+                      <p className="font-semibold text-slate-900 mt-1">{job.paymentStatus}</p>
                     </div>
                     {job.paidAmount > 0 && (
-                      <div className="text-xs text-right">
-                        <p className="text-muted-foreground font-medium">Paid</p>
-                        <p className="mt-1 font-bold">₹{job.paidAmount.toLocaleString('en-IN')}</p>
+                      <div className="text-right">
+                        <p className="text-slate-400 font-bold uppercase tracking-wider text-[10px]">Paid</p>
+                        <p className="font-bold text-slate-900 mt-1">₹{job.paidAmount.toLocaleString('en-IN')}</p>
                       </div>
                     )}
                   </div>
 
                   {/* Notes */}
                   {job.notes && (
-                    <div className="border-t pt-3">
-                      <p className="font-semibold text-xs mb-1">Notes</p>
-                      <p className="text-xs text-muted-foreground">{job.notes}</p>
+                    <div className="border-t border-slate-100 pt-3">
+                      <p className="text-slate-400 font-bold uppercase tracking-wider text-[10px] mb-1">Notes</p>
+                      <p className="text-xs text-slate-600 leading-relaxed">{job.notes}</p>
                     </div>
                   )}
                 </CardContent>
