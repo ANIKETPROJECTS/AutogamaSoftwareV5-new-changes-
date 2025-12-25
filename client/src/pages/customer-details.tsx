@@ -278,6 +278,7 @@ export default function CustomerDetails() {
                 className="border-none shadow-md overflow-hidden bg-white max-w-5xl mx-auto w-full"
                 data-testid={`card-history-detail-${job._id}`}
               >
+                <div className="h-1.5 bg-gradient-to-r from-red-500 to-red-600" />
                 <CardContent className="p-4 space-y-3">
                   {/* Header - Service Title if available */}
                   <div className="flex items-center justify-between">
