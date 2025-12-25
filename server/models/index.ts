@@ -45,6 +45,8 @@ export interface ICustomer extends Document {
   vehicles: IVehicle[];
   requiresGST?: boolean;
   serviceImages?: string[];
+  referrerName?: string;
+  referrerPhone?: string;
   createdAt: Date;
 }
 
@@ -219,6 +221,8 @@ const CustomerSchema = new Schema<ICustomer>({
   vehicles: [VehicleSchema],
   requiresGST: { type: Boolean, default: false },
   serviceImages: [{ type: String }],
+  referrerName: { type: String },
+  referrerPhone: { type: String },
   createdAt: { type: Date, default: Date.now }
 });
 
