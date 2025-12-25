@@ -39,9 +39,10 @@ export const api = {
   },
   
   jobs: {
-    list: (options?: { stage?: string; page?: number; limit?: number }) => 
+    list: (options?: { stage?: string; search?: string; page?: number; limit?: number }) => 
       request<{ jobs: any[]; total: number }>(`/jobs?${new URLSearchParams({
         ...(options?.stage && { stage: options.stage }),
+        ...(options?.search && { search: options.search }),
         ...(options?.page && { page: options.page.toString() }),
         ...(options?.limit && { limit: options.limit.toString() }),
       })}`),

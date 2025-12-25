@@ -28,10 +28,16 @@ export default function RegisteredCustomers() {
   const [customerToDelete, setCustomerToDelete] = useState<any>(null);
   const { toast } = useToast();
 
-  const { data: customers = [], isLoading, refetch } = useQuery({
-    queryKey: ["customers"],
-    queryFn: () => api.customers.list(),
+  const { data: customersData, isLoading, refetch } = useQuery({
+    queryKey: ["customers", searchQuery, selectedCity, selectedDistrict, selectedState, selectedStatus, dateRange, fromDate, toDate],
+    queryFn: () => api.customers.list({ 
+      search: searchQuery,
+      page: 1,
+      limit: 100 // Large limit for now as we haven't implemented pagination UI
+    }),
   });
+  const customers = customersData?.customers || [];
+  const totalCustomers = customersData?.total || 0;
 
   const uploadImagesMutation = useMutation({
     mutationFn: () => api.customers.addServiceImages(selectedCustomerForImages._id, uploadedImages),

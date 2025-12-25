@@ -60,30 +60,34 @@ export default function Dashboard() {
     queryFn: api.dashboard.stats,
   });
 
-  const { data: jobs = [] } = useQuery({
+  const { data: jobsData } = useQuery({
     queryKey: ["jobs"],
-    queryFn: () => api.jobs.list(),
+    queryFn: () => api.jobs.list({ page: 1, limit: 1000 }),
   });
+  const jobs = jobsData?.jobs || [];
 
-  const { data: inquiries = [] } = useQuery({
+  const { data: inquiriesData } = useQuery({
     queryKey: ["/api/price-inquiries"],
-    queryFn: () => api.priceInquiries.list(),
+    queryFn: () => api.priceInquiries.list({ page: 1, limit: 1000 }),
   });
+  const inquiries = inquiriesData?.inquiries || [];
 
-  const { data: customers = [] } = useQuery({
+  const { data: customersData } = useQuery({
     queryKey: ["customers"],
-    queryFn: () => api.customers.list(),
+    queryFn: () => api.customers.list({ page: 1, limit: 1000 }),
   });
+  const customers = customersData?.customers || [];
 
   const { data: inventory = [] } = useQuery({
     queryKey: ["inventory"],
     queryFn: api.inventory.list,
   });
 
-  const { data: appointments = [] } = useQuery({
+  const { data: appointmentsData } = useQuery({
     queryKey: ["appointments"],
-    queryFn: () => api.appointments.list(),
+    queryFn: () => api.appointments.list({ page: 1, limit: 1000 }),
   });
+  const appointments = appointmentsData?.appointments || [];
 
   const customerStatusCount = JOB_STAGES.reduce((acc: Record<string, number>, stage) => {
     acc[stage.key] = 0;

@@ -233,10 +233,12 @@ export default function PriceInquiries() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: inquiries = [], isLoading } = useQuery({
-    queryKey: ['/api/price-inquiries'],
-    queryFn: api.priceInquiries.list,
+  const { data: inquiriesData, isLoading } = useQuery({
+    queryKey: ['/api/price-inquiries', searchQuery, filterService],
+    queryFn: () => api.priceInquiries.list({ page: 1, limit: 100 }),
   });
+  const inquiries = inquiriesData?.inquiries || [];
+  const totalInquiries = inquiriesData?.total || 0;
 
   const createMutation = useMutation({
     mutationFn: api.priceInquiries.create,

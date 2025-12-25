@@ -37,10 +37,12 @@ export default function Appointments() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: appointments = [], isLoading } = useQuery({
-    queryKey: ['appointments'],
-    queryFn: () => api.appointments.list(),
+  const { data: appointmentsData, isLoading } = useQuery({
+    queryKey: ['appointments', searchQuery],
+    queryFn: () => api.appointments.list({ page: 1, limit: 100 }),
   });
+  const appointments = appointmentsData?.appointments || [];
+  const totalAppointments = appointmentsData?.total || 0;
 
   const createAppointmentMutation = useMutation({
     mutationFn: (data: any) => api.appointments.create(data),

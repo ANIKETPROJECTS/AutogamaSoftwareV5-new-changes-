@@ -51,15 +51,23 @@ export default function ServiceFunnel() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: jobs = [], isLoading } = useQuery({
-    queryKey: ['jobs'],
-    queryFn: () => api.jobs.list(),
+  const { data: jobsData, isLoading } = useQuery({
+    queryKey: ['jobs', search, stageFilter],
+    queryFn: () => api.jobs.list({ 
+      search, 
+      stage: stageFilter === 'all' ? undefined : stageFilter,
+      page: 1,
+      limit: 100
+    }),
   });
+  const jobs = jobsData?.jobs || [];
+  const totalJobs = jobsData?.total || 0;
 
-  const { data: customers = [] } = useQuery({
+  const { data: customersData } = useQuery({
     queryKey: ['customers'],
     queryFn: () => api.customers.list(),
   });
+  const customers = customersData?.customers || [];
 
   const { data: technicians = [] } = useQuery({
     queryKey: ['technicians'],

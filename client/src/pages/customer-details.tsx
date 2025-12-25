@@ -16,15 +16,18 @@ export default function CustomerDetails() {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [imageIndex, setImageIndex] = useState(0);
 
-  const { data: customers = [] } = useQuery({
+  const { data: customersData } = useQuery({
     queryKey: ["customers"],
-    queryFn: () => api.customers.list(),
+    queryFn: () => api.customers.list({ page: 1, limit: 1000 }),
   });
 
-  const { data: jobs = [] } = useQuery({
+  const { data: jobsData } = useQuery({
     queryKey: ["jobs"],
-    queryFn: () => api.jobs.list(),
+    queryFn: () => api.jobs.list({ page: 1, limit: 1000 }),
   });
+
+  const customers = customersData?.customers || [];
+  const jobs = jobsData?.jobs || [];
 
   const customer = customers.find((c: any) => c._id === customerId);
   const jobHistory = jobs.filter((job: any) => job.customerId === customerId);
