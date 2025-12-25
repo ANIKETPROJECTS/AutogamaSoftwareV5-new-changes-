@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, RequireAuth } from "@/contexts/auth-context";
+import { PageProvider } from "@/contexts/page-context";
 import { Layout } from "@/components/layout";
 import Login from "@/pages/login";
 import Dashboard from "@/pages/dashboard";
@@ -23,8 +24,9 @@ import NotFound from "@/pages/not-found";
 function ProtectedRoutes() {
   return (
     <RequireAuth>
-      <Layout>
-        <Switch>
+      <PageProvider>
+        <Layout>
+          <Switch>
           <Route path="/" component={Dashboard} />
           <Route path="/register" component={CustomerRegistration} />
           <Route path="/registered-customers" component={RegisteredCustomers} />
@@ -39,8 +41,9 @@ function ProtectedRoutes() {
           <Route path="/appointments" component={Appointments} />
           <Route path="/settings" component={Settings} />
           <Route component={NotFound} />
-        </Switch>
-      </Layout>
+          </Switch>
+        </Layout>
+      </PageProvider>
     </RequireAuth>
   );
 }

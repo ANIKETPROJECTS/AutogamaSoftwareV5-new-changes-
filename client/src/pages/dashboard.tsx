@@ -1,10 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { api } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MetricCard } from "@/components/metric-card";
 import { useAuth } from "@/contexts/auth-context";
+import { usePageContext } from "@/contexts/page-context";
 import {
   IndianRupee,
   Package,
@@ -147,15 +149,14 @@ export default function Dashboard() {
   const jobCompletion = jobs.length > 0 ? Math.round((completedJobs / jobs.length) * 100) : 0;
 
   const { user, logout } = useAuth();
+  const { setPageTitle } = usePageContext();
+
+  useEffect(() => {
+    setPageTitle("Dashboard", `Welcome back, ${user?.name || 'Admin'}!`);
+  }, [user, setPageTitle]);
 
   return (
     <div className="space-y-8">
-      {/* Header */}
-      <div className="pb-4 border-b border-slate-200">
-        <h1 className="text-3xl font-bold text-slate-900 mb-1">Dashboard</h1>
-        <p className="text-sm font-medium text-slate-600">Welcome back, {user?.name || 'Admin'}!</p>
-      </div>
-
       {/* Metric Cards Grid */}
       <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
         <MetricCard

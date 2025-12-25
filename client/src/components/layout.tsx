@@ -3,6 +3,7 @@ import { Menu, X, LayoutDashboard, UserPlus, Filter, Users, Wrench, UserCog, Fil
 import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/auth-context';
+import { usePageContext } from '@/contexts/page-context';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -35,6 +36,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const { user, logout } = useAuth();
+  const { title: pageTitle, subtitle: pageSubtitle } = usePageContext();
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
   const handleClearNotifications = () => {
@@ -107,7 +109,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
         "bg-card border-b border-border sticky top-0 z-30 transition-all duration-300 ease-in-out",
         sidebarOpen ? "ml-64" : "ml-20"
       )}>
-        <div className="px-4 md:px-8 py-4 flex items-center justify-end gap-4">
+        <div className="px-4 md:px-8 py-4 flex items-center justify-between gap-4">
+          {/* Page Title and Subtitle */}
+          {(pageTitle || pageSubtitle) && (
+            <div>
+              {pageTitle && <h1 className="text-2xl font-bold text-slate-900">{pageTitle}</h1>}
+              {pageSubtitle && <p className="text-sm text-slate-600">{pageSubtitle}</p>}
+            </div>
+          )}
+          <div className="flex items-center gap-4 ml-auto">
           {/* Notification Button */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -177,7 +187,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-
+          </div>
         </div>
       </header>
 
