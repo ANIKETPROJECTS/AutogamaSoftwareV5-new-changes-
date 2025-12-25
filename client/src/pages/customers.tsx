@@ -14,6 +14,22 @@ import { Link } from 'wouter';
 
 const CUSTOMER_STATUSES = ['Inquired', 'Working', 'Waiting', 'Completed'];
 
+const VEHICLE_DATA: Record<string, string[]> = {
+  'Toyota': ['Fortuner', 'Innova', 'Fortuner Legender', 'Glanza', 'Urban Cruiser', 'Other'],
+  'Maruti': ['Swift', 'Wagon R', 'Alto', 'Dzire', 'Celerio', 'Vitara Brezza', 'XL5', 'Other'],
+  'Hyundai': ['Creta', 'i20', 'Venue', 'Verna', 'Tucson', 'Kona Electric', 'Other'],
+  'Mahindra': ['XUV500', 'XUV700', 'Bolero', 'Scorpio', 'Thar', 'KUV100', 'Other'],
+  'Tata': ['Nexon', 'Harrier', 'Safari', 'Punch', 'Tigor', 'Altroz', 'Other'],
+  'Honda': ['City', 'Civic', 'CR-V', 'Jazz', 'WR-V', 'Other'],
+  'Skoda': ['Superb', 'Octavia', 'Slavia', 'Kushaq', 'Other'],
+  'Volkswagen': ['Vento', 'Polo', 'Tiguan', 'T-Roc', 'Other'],
+  'Kia': ['Sonet', 'Seltos', 'Carens', 'EV6', 'Other'],
+  'MG': ['Hector', 'ZS EV', 'Astor', 'Gloster', 'Other'],
+  'Other': ['Other']
+};
+
+const VEHICLE_MAKES = ['Toyota', 'Maruti', 'Hyundai', 'Mahindra', 'Tata', 'Honda', 'Skoda', 'Volkswagen', 'Kia', 'MG', 'Other'];
+
 const validatePhone = (phone: string): boolean => {
   const phoneRegex = /^[0-9]{10}$/;
   const cleanedPhone = phone.replace(/[\s+\-]/g, '');
@@ -261,7 +277,7 @@ export default function Customers() {
 
       {showServiceForm && (
         <Card className="card-modern">
-          <CardHeader className="flex flex-row items-center justify-between gap-4 pb-4">
+          <CardHeader className="flex flex-row items-center justify-between gap-4 pb-4 pt-6">
             <CardTitle>Add Customer Service</CardTitle>
             <Button 
               variant="ghost" 
@@ -383,23 +399,33 @@ export default function Customers() {
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                     <div className="space-y-2">
                       <Label>Make *</Label>
-                      <Input 
-                        value={formData.vehicleMake}
-                        onChange={(e) => setFormData({...formData, vehicleMake: e.target.value})}
-                        required 
-                        placeholder="Toyota" 
-                        data-testid="input-vehicle-make" 
-                      />
+                      <Select value={formData.vehicleMake} onValueChange={(value) => setFormData({...formData, vehicleMake: value, vehicleModel: ''})}>
+                        <SelectTrigger data-testid="input-vehicle-make">
+                          <SelectValue placeholder="Select make" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {VEHICLE_MAKES.map((make) => (
+                            <SelectItem key={make} value={make}>
+                              {make}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                     <div className="space-y-2">
                       <Label>Model *</Label>
-                      <Input 
-                        value={formData.vehicleModel}
-                        onChange={(e) => setFormData({...formData, vehicleModel: e.target.value})}
-                        required 
-                        placeholder="Fortuner" 
-                        data-testid="input-vehicle-model" 
-                      />
+                      <Select value={formData.vehicleModel} onValueChange={(value) => setFormData({...formData, vehicleModel: value})} disabled={!formData.vehicleMake}>
+                        <SelectTrigger data-testid="input-vehicle-model">
+                          <SelectValue placeholder="Select model" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {formData.vehicleMake && VEHICLE_DATA[formData.vehicleMake]?.map((model) => (
+                            <SelectItem key={model} value={model}>
+                              {model}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                     <div className="space-y-2">
                       <Label>Year</Label>
@@ -570,22 +596,22 @@ export default function Customers() {
                   </div>
                 </div>
 
-                <div className="flex gap-2 mt-4">
-                  <Link href={`/customers/${customer._id}`} className="flex-1">
-                    <Button variant="outline" className="w-full" data-testid={`button-view-customer-${customer._id}`}>
-                      Details
-                    </Button>
-                  </Link>
-                  <Button 
-                    variant="destructive" 
-                    size="icon"
-                    onClick={() => handleDeleteCustomer(customer._id)}
-                    disabled={deleteCustomerMutation.isPending}
-                    data-testid={`button-delete-customer-${customer._id}`}
-                  >
-                    <Trash2 className="w-4 h-4" />
+                <Link href={`/customers/${customer._id}`} className="w-full">
+                  <Button variant="outline" className="w-full" data-testid={`button-view-customer-${customer._id}`}>
+                    Details
                   </Button>
-                </div>
+                </Link>
+                
+                <Button 
+                  variant="destructive" 
+                  className="w-full"
+                  onClick={() => handleDeleteCustomer(customer._id)}
+                  disabled={deleteCustomerMutation.isPending}
+                  data-testid={`button-delete-customer-${customer._id}`}
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Delete Customer
+                </Button>
               </CardContent>
             </Card>
           ))
@@ -598,14 +624,44 @@ export default function Customers() {
             <DialogTitle>Add Vehicle</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleAddVehicle} className="space-y-4">
-            <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-4">
               <div className="space-y-2">
                 <Label>Make *</Label>
-                <Input name="make" required placeholder="Toyota" />
+                <Select name="make" required onValueChange={(value) => {
+                  const formElement = document.querySelector('input[name="make"]') as HTMLInputElement;
+                  if (formElement) formElement.value = value;
+                }}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select make" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {VEHICLE_MAKES.map((make) => (
+                      <SelectItem key={make} value={make}>
+                        {make}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <input type="hidden" name="make" />
               </div>
               <div className="space-y-2">
                 <Label>Model *</Label>
-                <Input name="model" required placeholder="Fortuner" />
+                <Select name="model" required onValueChange={(value) => {
+                  const formElement = document.querySelector('input[name="model"]') as HTMLInputElement;
+                  if (formElement) formElement.value = value;
+                }}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select model" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {VEHICLE_MAKES.map((make) => VEHICLE_DATA[make]).flat().filter((v, i, a) => a.indexOf(v) === i).map((model) => (
+                      <SelectItem key={model} value={model}>
+                        {model}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <input type="hidden" name="model" />
               </div>
               <div className="space-y-2">
                 <Label>Year</Label>
