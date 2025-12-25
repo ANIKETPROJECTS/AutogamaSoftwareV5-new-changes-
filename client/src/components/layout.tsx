@@ -48,10 +48,21 @@ export function Layout({ children }: { children: React.ReactNode }) {
     queryFn: () => api.appointments.list(),
   });
 
+  const { data: jobs = [] } = useQuery({
+    queryKey: ['jobs'],
+    queryFn: () => api.jobs.list(),
+  });
+
   const pendingAppointments = appointments.filter((appt: any) => {
     const apptDate = new Date(appt.date);
     const today = new Date();
     return apptDate.toDateString() === today.toDateString() && appt.status === 'Scheduled';
+  }).length;
+
+  const todayCompletedJobs = jobs.filter((job: any) => {
+    const jobDate = new Date(job.createdAt);
+    const today = new Date();
+    return job.stage === 'Completed' && jobDate.toDateString() === today.toDateString();
   }).length;
 
   const handleClearNotifications = () => {
@@ -153,15 +164,33 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 className="relative"
               >
                 <Bell className="w-5 h-5" />
-                {notifications.length > 0 && (
-                  <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
+                {(todayCompletedJobs > 0 || notifications.length > 0) && (
+                  <span className={cn(
+                    "absolute top-1 right-1 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold text-white",
+                    todayCompletedJobs > 0 ? "bg-green-500" : "bg-red-500"
+                  )}>
+                    {todayCompletedJobs > 0 ? todayCompletedJobs : notifications.length}
+                  </span>
                 )}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-80">
               <div className="p-2">
-                <h3 className="font-semibold text-sm mb-2">Notifications</h3>
-                {notifications.length === 0 ? (
+                <h3 className="font-semibold text-sm mb-3">Notifications</h3>
+                
+                {/* Completed Services Section */}
+                {todayCompletedJobs > 0 && (
+                  <div className="mb-3 p-2 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-md">
+                    <div className="flex items-center gap-2 mb-1">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <p className="text-xs font-semibold text-green-700 dark:text-green-300">
+                        {todayCompletedJobs} service{todayCompletedJobs !== 1 ? 's' : ''} completed today
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {todayCompletedJobs === 0 && notifications.length === 0 ? (
                   <div className="text-center py-6">
                     <Bell className="w-8 h-8 mx-auto mb-2 text-muted-foreground opacity-50" />
                     <p className="text-sm text-muted-foreground" data-testid="text-no-notifications">No notifications</p>
@@ -176,15 +205,17 @@ export function Layout({ children }: { children: React.ReactNode }) {
                         </p>
                       </div>
                     ))}
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={handleClearNotifications}
-                      className="w-full"
-                      data-testid="button-clear-notifications"
-                    >
-                      Clear All
-                    </Button>
+                    {(todayCompletedJobs > 0 || notifications.length > 0) && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleClearNotifications}
+                        className="w-full"
+                        data-testid="button-clear-notifications"
+                      >
+                        Clear All
+                      </Button>
+                    )}
                   </div>
                 )}
               </div>
