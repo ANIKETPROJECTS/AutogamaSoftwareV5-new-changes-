@@ -190,28 +190,6 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-8">
-      {/* Service Funnel Stages Cards */}
-      <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-6">
-        {JOB_STAGES.map((stage) => (
-          <div 
-            key={stage.key}
-            className="bg-gradient-to-br from-white to-slate-50 border rounded-lg p-4 shadow-sm hover:shadow-md transition-all"
-            style={{ borderColor: stage.color }}
-            data-testid={`card-stage-${stage.key}`}
-          >
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-xs font-semibold text-slate-600 uppercase">{stage.label}</p>
-              <div 
-                className="w-2 h-2 rounded-full"
-                style={{ backgroundColor: stage.color }}
-              />
-            </div>
-            <p className="text-3xl font-bold text-slate-900">{stageCounts[stage.key] || 0}</p>
-            <p className="text-xs text-slate-500 mt-2">Jobs in {stage.label.toLowerCase()}</p>
-          </div>
-        ))}
-      </div>
-
       {/* Summary Metric Cards */}
       <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
         <MetricCard
