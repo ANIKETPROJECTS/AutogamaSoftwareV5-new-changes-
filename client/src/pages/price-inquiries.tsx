@@ -249,27 +249,61 @@ export default function PriceInquiries() {
 
   const createMutation = useMutation({
     mutationFn: api.priceInquiries.create,
+    onMutate: async (newInquiry) => {
+      await queryClient.cancelQueries({ queryKey: ['/api/price-inquiries'] });
+      const previousInquiries = queryClient.getQueryData(['/api/price-inquiries', searchQuery, filterService, currentPage]);
+      
+      const optimisticInquiry = {
+        ...newInquiry,
+        _id: 'temp-' + Date.now(),
+        createdAt: new Date().toISOString(),
+      };
+
+      queryClient.setQueryData(['/api/price-inquiries', searchQuery, filterService, currentPage], (old: any) => ({
+        ...old,
+        inquiries: [optimisticInquiry, ...(old?.inquiries || [])]
+      }));
+
+      return { previousInquiries };
+    },
+    onError: (err, newInquiry, context: any) => {
+      queryClient.setQueryData(['/api/price-inquiries', searchQuery, filterService, currentPage], context.previousInquiries);
+      toast({ title: 'Failed to save inquiry', variant: 'destructive' });
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/price-inquiries'] });
       setShowForm(false);
       setSelectedServiceItems([]);
       setTempServiceName('');
       setTempCarType('');
       toast({ title: 'Price inquiry saved successfully' });
     },
-    onError: () => {
-      toast({ title: 'Failed to save inquiry', variant: 'destructive' });
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/price-inquiries'] });
     }
   });
 
   const deleteMutation = useMutation({
     mutationFn: api.priceInquiries.delete,
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ['/api/price-inquiries'] });
+      const previousInquiries = queryClient.getQueryData(['/api/price-inquiries', searchQuery, filterService, currentPage]);
+      
+      queryClient.setQueryData(['/api/price-inquiries', searchQuery, filterService, currentPage], (old: any) => ({
+        ...old,
+        inquiries: old?.inquiries?.filter((i: any) => i._id !== id)
+      }));
+
+      return { previousInquiries };
+    },
+    onError: (err, id, context: any) => {
+      queryClient.setQueryData(['/api/price-inquiries', searchQuery, filterService, currentPage], context.previousInquiries);
+      toast({ title: 'Failed to delete inquiry', variant: 'destructive' });
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/price-inquiries'] });
       toast({ title: 'Inquiry deleted' });
     },
-    onError: () => {
-      toast({ title: 'Failed to delete inquiry', variant: 'destructive' });
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/price-inquiries'] });
     }
   });
 

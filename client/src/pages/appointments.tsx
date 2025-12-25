@@ -53,33 +53,83 @@ export default function Appointments() {
 
   const createAppointmentMutation = useMutation({
     mutationFn: (data: any) => api.appointments.create(data),
+    onMutate: async (newAppointment) => {
+      await queryClient.cancelQueries({ queryKey: ['appointments'] });
+      const previousAppointments = queryClient.getQueryData(['appointments', searchQuery, currentPage]);
+      
+      const optimisticAppointment = {
+        ...newAppointment,
+        _id: 'temp-' + Date.now(),
+        createdAt: new Date().toISOString(),
+      };
+
+      queryClient.setQueryData(['appointments', searchQuery, currentPage], (old: any) => ({
+        ...old,
+        appointments: [optimisticAppointment, ...(old?.appointments || [])]
+      }));
+
+      return { previousAppointments };
+    },
+    onError: (err, newAppointment, context: any) => {
+      queryClient.setQueryData(['appointments', searchQuery, currentPage], context.previousAppointments);
+      toast({ title: 'Failed to book appointment', variant: 'destructive' });
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['appointments'] });
       setShowForm(false);
       setFormErrors({});
       toast({ title: 'Appointment booked successfully' });
     },
-    onError: () => {
-      toast({ title: 'Failed to book appointment', variant: 'destructive' });
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['appointments'] });
     }
   });
 
   const deleteAppointmentMutation = useMutation({
     mutationFn: (id: string) => api.appointments.delete(id),
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ['appointments'] });
+      const previousAppointments = queryClient.getQueryData(['appointments', searchQuery, currentPage]);
+      
+      queryClient.setQueryData(['appointments', searchQuery, currentPage], (old: any) => ({
+        ...old,
+        appointments: old?.appointments?.filter((a: any) => a._id !== id)
+      }));
+
+      return { previousAppointments };
+    },
+    onError: (err, id, context: any) => {
+      queryClient.setQueryData(['appointments', searchQuery, currentPage], context.previousAppointments);
+      toast({ title: 'Failed to delete appointment', variant: 'destructive' });
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['appointments'] });
       toast({ title: 'Appointment deleted' });
     },
-    onError: () => {
-      toast({ title: 'Failed to delete appointment', variant: 'destructive' });
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['appointments'] });
     }
   });
 
   const updateStatusMutation = useMutation({
     mutationFn: ({ id, status }: { id: string; status: string }) => api.appointments.update(id, { status }),
+    onMutate: async ({ id, status }) => {
+      await queryClient.cancelQueries({ queryKey: ['appointments'] });
+      const previousAppointments = queryClient.getQueryData(['appointments', searchQuery, currentPage]);
+      
+      queryClient.setQueryData(['appointments', searchQuery, currentPage], (old: any) => ({
+        ...old,
+        appointments: old?.appointments?.map((a: any) => a._id === id ? { ...a, status } : a)
+      }));
+
+      return { previousAppointments };
+    },
+    onError: (err, { id, status }, context: any) => {
+      queryClient.setQueryData(['appointments', searchQuery, currentPage], context.previousAppointments);
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['appointments'] });
       toast({ title: 'Status updated' });
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['appointments'] });
     }
   });
 

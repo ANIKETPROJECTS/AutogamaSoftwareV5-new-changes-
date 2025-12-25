@@ -89,8 +89,22 @@ export default function ServiceFunnel() {
 
   const updateStageMutation = useMutation({
     mutationFn: ({ id, stage }: { id: string; stage: string }) => api.jobs.updateStage(id, stage),
+    onMutate: async ({ id, stage }) => {
+      await queryClient.cancelQueries({ queryKey: ['jobs'] });
+      const previousJobs = queryClient.getQueryData(['jobs', search, stageFilter, currentPage]);
+      
+      queryClient.setQueryData(['jobs', search, stageFilter, currentPage], (old: any) => ({
+        ...old,
+        jobs: old?.jobs?.map((j: any) => j._id === id ? { ...j, stage } : j)
+      }));
+
+      return { previousJobs };
+    },
+    onError: (err, { id, stage }, context: any) => {
+      queryClient.setQueryData(['jobs', search, stageFilter, currentPage], context.previousJobs);
+      toast({ title: 'Cannot change stage after invoice is created', variant: 'destructive' });
+    },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['jobs'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       if (variables.stage === 'Completed') {
         queryClient.invalidateQueries({ queryKey: ['invoices'] });
@@ -100,8 +114,8 @@ export default function ServiceFunnel() {
         description: 'WhatsApp notification sent & invoice created if needed'
       });
     },
-    onError: () => {
-      toast({ title: 'Cannot change stage after invoice is created', variant: 'destructive' });
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['jobs'] });
     }
   });
 

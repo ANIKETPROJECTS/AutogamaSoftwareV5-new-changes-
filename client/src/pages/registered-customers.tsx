@@ -58,14 +58,28 @@ export default function RegisteredCustomers() {
 
   const deleteCustomerMutation = useMutation({
     mutationFn: (customerId: string) => api.customers.delete(customerId),
+    onMutate: async (customerId) => {
+      await queryClient.cancelQueries({ queryKey: ["customers"] });
+      const previousCustomers = queryClient.getQueryData(["customers", searchQuery, selectedCity, selectedDistrict, selectedState, selectedStatus, dateRange, fromDate, toDate, currentPage]);
+      
+      queryClient.setQueryData(["customers", searchQuery, selectedCity, selectedDistrict, selectedState, selectedStatus, dateRange, fromDate, toDate, currentPage], (old: any) => ({
+        ...old,
+        customers: old?.customers?.filter((c: any) => c._id !== customerId)
+      }));
+
+      return { previousCustomers };
+    },
+    onError: (err, customerId, context: any) => {
+      queryClient.setQueryData(["customers", searchQuery, selectedCity, selectedDistrict, selectedState, selectedStatus, dateRange, fromDate, toDate, currentPage], context.previousCustomers);
+      toast({ title: "Error", description: "Failed to delete customer", variant: "destructive" });
+    },
     onSuccess: () => {
       toast({ title: "Success", description: "Customer deleted successfully" });
       setDeleteDialogOpen(false);
       setCustomerToDelete(null);
-      refetch();
     },
-    onError: () => {
-      toast({ title: "Error", description: "Failed to delete customer", variant: "destructive" });
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["customers"] });
     }
   });
 
