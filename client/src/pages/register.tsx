@@ -261,7 +261,6 @@ export default function CustomerRegistration() {
     state: "Maharashtra",
     referralSource: "",
     referrerName: "",
-    status: "Inquired",
     ppfCategory: "",
     ppfVehicleType: "",
     ppfWarranty: "",
@@ -337,7 +336,6 @@ export default function CustomerRegistration() {
       phone: customerData.phone,
       email: customerData.email || undefined,
       address: `${customerData.address}, ${customerData.city}, ${customerData.district}, ${customerData.state}`,
-      status: customerData.status,
       service: servicesList,
       serviceCost: totalServiceCost,
       referrerName: customerData.referrerName || undefined,
@@ -507,29 +505,6 @@ export default function CustomerRegistration() {
                   </div>
                 )}
 
-                <div className="space-y-6">
-                  <Label>Customer Status</Label>
-                  <Select
-                    value={customerData.status}
-                    onValueChange={(value) =>
-                      setCustomerData({
-                        ...customerData,
-                        status: value,
-                      })
-                    }
-                  >
-                    <SelectTrigger className="border-slate-300" data-testid="select-status">
-                      <SelectValue placeholder="Select status" />
-                    </SelectTrigger>
-                    <SelectContent position="popper" className="max-h-60 w-[var(--radix-select-trigger-width)]">
-                      {CUSTOMER_STATUSES.map((status) => (
-                        <SelectItem key={status.value} value={status.value}>
-                          {status.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
 
                 {/* PPF & Services in 2 Columns */}
                 <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">

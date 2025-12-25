@@ -77,13 +77,20 @@ export default function Dashboard() {
     queryFn: api.inventory.list,
   });
 
+  const getCustomerStatus = (customerId: string) => {
+    const customerJobs = jobs.filter((job: any) => job.customerId === customerId);
+    if (customerJobs.length === 0) return "Inquired";
+    const lastJob = customerJobs[customerJobs.length - 1];
+    return lastJob.stage || "Inquired";
+  };
+
   const customerStatusCount = FUNNEL_STAGES.reduce((acc: Record<string, number>, stage) => {
     acc[stage.key] = 0;
     return acc;
   }, {});
 
   customers.forEach((customer: any) => {
-    const status = customer.status || "Inquired";
+    const status = getCustomerStatus(customer._id);
     if (customerStatusCount.hasOwnProperty(status)) {
       customerStatusCount[status]++;
     }
