@@ -5,14 +5,36 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Trash2, Phone, Mail, DollarSign } from 'lucide-react';
+import { Trash2, Phone, Mail, DollarSign } from 'lucide-react';
 import { format } from 'date-fns';
 
+const SERVICES = [
+  'PPF - Elite',
+  'PPF - Garware Plus',
+  'PPF - Garware Premium',
+  'PPF - Garware Matt',
+  'Foam Washing',
+  'Premium Washing',
+  'Interior Cleaning',
+  'Interior Steam Cleaning',
+  'Leather Treatment',
+  'Detailing',
+  'Ceramic Coating',
+  'Other',
+];
+
 export default function PriceInquiries() {
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [showForm, setShowForm] = useState(false);
+  const [selectedService, setSelectedService] = useState('');
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -25,7 +47,8 @@ export default function PriceInquiries() {
     mutationFn: api.priceInquiries.create,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/price-inquiries'] });
-      setDialogOpen(false);
+      setShowForm(false);
+      setSelectedService('');
       toast({ title: 'Price inquiry saved successfully' });
     },
     onError: () => {
@@ -49,11 +72,16 @@ export default function PriceInquiries() {
     const form = e.currentTarget;
     const formData = new FormData(form);
 
+    if (!selectedService) {
+      toast({ title: 'Please select a service', variant: 'destructive' });
+      return;
+    }
+
     createMutation.mutate({
       name: formData.get('name'),
       phone: formData.get('phone'),
       email: formData.get('email') || '',
-      service: formData.get('service'),
+      service: selectedService,
       priceOffered: parseFloat(formData.get('priceOffered') as string),
       priceStated: parseFloat(formData.get('priceStated') as string),
       notes: formData.get('notes') || ''
@@ -64,105 +92,134 @@ export default function PriceInquiries() {
 
   return (
     <div className="space-y-6 p-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Price Inquiries</h1>
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild>
-            <Button data-testid="button-add-inquiry">
-              <Plus className="w-4 h-4" />
-              New Inquiry
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle>Record Price Inquiry</DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <Label htmlFor="name">Customer Name</Label>
-                <Input
-                  id="name"
-                  name="name"
-                  placeholder="John Doe"
-                  required
-                  data-testid="input-name"
-                />
-              </div>
-              <div>
-                <Label htmlFor="phone">Phone</Label>
-                <Input
-                  id="phone"
-                  name="phone"
-                  placeholder="9876543210"
-                  required
-                  data-testid="input-phone"
-                />
-              </div>
-              <div>
-                <Label htmlFor="email">Email (optional)</Label>
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  placeholder="john@example.com"
-                  data-testid="input-email"
-                />
-              </div>
-              <div>
-                <Label htmlFor="service">Service Inquired</Label>
-                <Input
-                  id="service"
-                  name="service"
-                  placeholder="PPF, Ceramic Coating, etc."
-                  required
-                  data-testid="input-service"
-                />
-              </div>
-              <div>
-                <Label htmlFor="priceOffered">Price Offered (₹)</Label>
-                <Input
-                  id="priceOffered"
-                  name="priceOffered"
-                  type="number"
-                  min="0"
-                  placeholder="0"
-                  required
-                  data-testid="input-price-offered"
-                />
-              </div>
-              <div>
-                <Label htmlFor="priceStated">Price Stated by Customer (₹)</Label>
-                <Input
-                  id="priceStated"
-                  name="priceStated"
-                  type="number"
-                  min="0"
-                  placeholder="0"
-                  required
-                  data-testid="input-price-stated"
-                />
-              </div>
-              <div>
-                <Label htmlFor="notes">Notes (optional)</Label>
-                <Textarea
-                  id="notes"
-                  name="notes"
-                  placeholder="Any additional notes..."
-                  className="min-h-20"
-                  data-testid="textarea-notes"
-                />
-              </div>
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={createMutation.isPending}
-                data-testid="button-submit-inquiry"
-              >
-                {createMutation.isPending ? 'Saving...' : 'Save Inquiry'}
-              </Button>
-            </form>
-          </DialogContent>
-        </Dialog>
+      <div>
+        <h1 className="text-3xl font-bold mb-6">Inquiry</h1>
+        
+        {!showForm ? (
+          <Button 
+            onClick={() => setShowForm(true)}
+            className="mb-6"
+            data-testid="button-add-inquiry"
+          >
+            Add Inquiry
+          </Button>
+        ) : (
+          <Card className="mb-6">
+            <CardContent className="pt-6">
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="name">Customer Name</Label>
+                    <Input
+                      id="name"
+                      name="name"
+                      placeholder="John Doe"
+                      required
+                      data-testid="input-name"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="phone">Phone</Label>
+                    <Input
+                      id="phone"
+                      name="phone"
+                      placeholder="9876543210"
+                      required
+                      data-testid="input-phone"
+                    />
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="email">Email (optional)</Label>
+                    <Input
+                      id="email"
+                      name="email"
+                      type="email"
+                      placeholder="john@example.com"
+                      data-testid="input-email"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="service">Service Inquired</Label>
+                    <Select value={selectedService} onValueChange={setSelectedService}>
+                      <SelectTrigger id="service" data-testid="select-service">
+                        <SelectValue placeholder="Select a service" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {SERVICES.map((service) => (
+                          <SelectItem key={service} value={service} data-testid={`option-service-${service}`}>
+                            {service}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="priceOffered">Price Offered (₹)</Label>
+                    <Input
+                      id="priceOffered"
+                      name="priceOffered"
+                      type="number"
+                      min="0"
+                      placeholder="0"
+                      required
+                      data-testid="input-price-offered"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="priceStated">Price Stated by Customer (₹)</Label>
+                    <Input
+                      id="priceStated"
+                      name="priceStated"
+                      type="number"
+                      min="0"
+                      placeholder="0"
+                      required
+                      data-testid="input-price-stated"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="notes">Notes (optional)</Label>
+                  <Textarea
+                    id="notes"
+                    name="notes"
+                    placeholder="Any additional notes..."
+                    className="min-h-20"
+                    data-testid="textarea-notes"
+                  />
+                </div>
+
+                <div className="flex gap-3">
+                  <Button
+                    type="submit"
+                    disabled={createMutation.isPending}
+                    data-testid="button-submit-inquiry"
+                  >
+                    {createMutation.isPending ? 'Saving...' : 'Save Inquiry'}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      setShowForm(false);
+                      setSelectedService('');
+                    }}
+                    data-testid="button-cancel-inquiry"
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       {isLoading ? (
