@@ -14,7 +14,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { Trash2, Phone, Mail, Search, X, AlertCircle } from 'lucide-react';
+import { Trash2, Phone, Mail, Search, X, AlertCircle, LayoutGrid, List } from 'lucide-react';
 import { format } from 'date-fns';
 
 const validatePhone = (phone: string): boolean => {
@@ -221,6 +221,7 @@ export default function PriceInquiries() {
   const [autoPrice, setAutoPrice] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterService, setFilterService] = useState('');
+  const [viewMode, setViewMode] = useState<'card' | 'list'>('card');
   const [errors, setErrors] = useState<{ phone?: string; email?: string }>({});
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -325,7 +326,31 @@ export default function PriceInquiries() {
     <div className="space-y-6">
       {/* Header and Search/Filter Section */}
       <div>
-        <h1 className="text-3xl font-bold mb-6">Inquiry</h1>
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-3xl font-bold">Inquiry</h1>
+          <div className="flex gap-2">
+            <Button
+              variant={viewMode === "card" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setViewMode("card")}
+              className="flex items-center gap-2"
+              data-testid="button-view-card"
+            >
+              <LayoutGrid className="w-4 h-4" />
+              Card
+            </Button>
+            <Button
+              variant={viewMode === "list" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setViewMode("list")}
+              className="flex items-center gap-2"
+              data-testid="button-view-list"
+            >
+              <List className="w-4 h-4" />
+              List
+            </Button>
+          </div>
+        </div>
         
         {/* Search and Filter at Top */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
@@ -546,87 +571,125 @@ export default function PriceInquiries() {
               {inquiries.length === 0 ? 'No inquiries yet. Start by adding one!' : 'No inquiries match your search or filter.'}
             </CardContent>
           </Card>
+        ) : viewMode === "card" ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredInquiries.map((inquiry: any) => {
+              const priceDifference = inquiry.priceOffered - inquiry.priceStated;
+              const percentageDifference = inquiry.priceOffered > 0 ? ((priceDifference / inquiry.priceOffered) * 100).toFixed(1) : "0";
+
+              return (
+                <Card
+                  key={inquiry._id}
+                  className="border border-orange-200 rounded-lg hover:shadow-lg transition-all duration-300 group relative"
+                  data-testid={`inquiry-card-${inquiry._id}`}
+                >
+                  <CardContent className="p-4">
+                    <div className="flex flex-col h-full gap-3">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h3 className="font-semibold text-lg text-slate-900 group-hover:text-primary transition-colors truncate">
+                            {inquiry.name}
+                          </h3>
+                          <p className="text-sm text-slate-700 font-medium">{inquiry.phone}</p>
+                        </div>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
+                          onClick={() => deleteMutation.mutate(inquiry._id.toString ? inquiry._id.toString() : inquiry._id)}
+                          disabled={deleteMutation.isPending}
+                          data-testid={`button-delete-${inquiry._id}`}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2 text-xs text-slate-600">
+                          <Mail className="w-3 h-3" />
+                          <span className="truncate">{inquiry.email || 'No email provided'}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-xs font-medium text-slate-900 bg-slate-100 px-2 py-1 rounded">
+                          {inquiry.service}
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-100">
+                        <div className="text-center">
+                          <p className="text-[10px] text-slate-500 uppercase tracking-wider font-bold">Our Price</p>
+                          <p className="text-sm font-bold text-primary">₹{inquiry.priceOffered.toLocaleString()}</p>
+                        </div>
+                        <div className="text-center border-x border-slate-100 px-1">
+                          <p className="text-[10px] text-slate-500 uppercase tracking-wider font-bold">Customer</p>
+                          <p className="text-sm font-bold text-destructive">₹{inquiry.priceStated.toLocaleString()}</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-[10px] text-slate-500 uppercase tracking-wider font-bold">Diff</p>
+                          <p className={`text-sm font-bold ${priceDifference >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            {priceDifference >= 0 ? '+' : ''}₹{priceDifference.toLocaleString()}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex justify-between items-center text-[10px] text-slate-400 font-medium">
+                        <span>{inquiry.createdAt ? format(new Date(inquiry.createdAt), 'MMM dd, yyyy') : 'N/A'}</span>
+                        <span className={priceDifference >= 0 ? 'text-green-600' : 'text-red-600'}>{percentageDifference}%</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
         ) : (
           <div className="space-y-4">
             {filteredInquiries.map((inquiry: any) => {
               const priceDifference = inquiry.priceOffered - inquiry.priceStated;
-              const percentageDifference = ((priceDifference / inquiry.priceOffered) * 100).toFixed(1);
+              const percentageDifference = inquiry.priceOffered > 0 ? ((priceDifference / inquiry.priceOffered) * 100).toFixed(1) : "0";
 
               return (
                 <Card key={inquiry._id} className="hover-elevate">
-                  <CardHeader className="pb-3">
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1">
-                        <CardTitle className="text-lg" data-testid={`text-name-${inquiry._id}`}>
-                          {inquiry.name}
-                        </CardTitle>
-                        <div className="flex flex-wrap items-center gap-4 mt-2 text-sm text-secondary">
-                          <a href={`tel:${inquiry.phone}`} className="flex items-center gap-1 hover:text-primary" data-testid={`link-phone-${inquiry._id}`}>
-                            <Phone className="w-4 h-4" />
-                            {inquiry.phone}
-                          </a>
-                          {inquiry.email && (
-                            <a href={`mailto:${inquiry.email}`} className="flex items-center gap-1 hover:text-primary" data-testid={`link-email-${inquiry._id}`}>
-                              <Mail className="w-4 h-4" />
-                              {inquiry.email}
-                            </a>
-                          )}
-                        </div>
+                  <CardContent className="p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div className="flex-1 space-y-1">
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-bold text-lg" data-testid={`text-name-${inquiry._id}`}>{inquiry.name}</h3>
+                        <span className="text-xs text-secondary">
+                          {inquiry.createdAt ? format(new Date(inquiry.createdAt), 'MMM dd, yyyy') : 'N/A'}
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap gap-4 text-sm text-secondary">
+                        <span className="flex items-center gap-1"><Phone className="h-3 w-3" /> {inquiry.phone}</span>
+                        {inquiry.email && <span className="flex items-center gap-1"><Mail className="h-3 w-3" /> {inquiry.email}</span>}
+                        <span className="font-medium text-foreground">{inquiry.service}</span>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-6 text-sm">
+                      <div className="text-center">
+                        <p className="text-xs text-secondary">Our Price</p>
+                        <p className="font-bold">₹{inquiry.priceOffered.toLocaleString()}</p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-xs text-secondary">Customer</p>
+                        <p className="font-bold text-destructive">₹{inquiry.priceStated.toLocaleString()}</p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-xs text-secondary">Diff</p>
+                        <p className={`font-bold ${priceDifference >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          {priceDifference >= 0 ? '+' : ''}₹{priceDifference.toLocaleString()} ({percentageDifference}%)
+                        </p>
                       </div>
                       <Button
-                        size="sm"
-                        variant="outline"
-                        className="text-red-600 hover:text-red-700"
+                        size="icon"
+                        variant="ghost"
+                        className="text-red-600 h-8 w-8 hover:bg-red-50"
                         onClick={() => deleteMutation.mutate(inquiry._id.toString ? inquiry._id.toString() : inquiry._id)}
                         disabled={deleteMutation.isPending}
-                        data-testid={`button-delete-${inquiry._id}`}
+                        data-testid={`button-delete-list-${inquiry._id}`}
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <p className="text-sm text-secondary">Service</p>
-                        <p className="font-semibold" data-testid={`text-service-${inquiry._id}`}>{inquiry.service}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-secondary">Date</p>
-                        <p className="font-semibold" data-testid={`text-date-${inquiry._id}`}>
-                          {inquiry.createdAt ? format(new Date(inquiry.createdAt), 'MMM dd, yyyy') : 'N/A'}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-3 gap-4 bg-secondary/10 p-4 rounded-lg">
-                      <div>
-                        <p className="text-xs text-secondary mb-1">Our Price</p>
-                        <p className="text-lg font-bold text-primary" data-testid={`text-offered-${inquiry._id}`}>
-                          ₹{inquiry.priceOffered.toLocaleString()}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-secondary mb-1">Customer Price</p>
-                        <p className="text-lg font-bold text-destructive" data-testid={`text-stated-${inquiry._id}`}>
-                          ₹{inquiry.priceStated.toLocaleString()}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-secondary mb-1">Difference</p>
-                        <p className={`text-lg font-bold ${priceDifference >= 0 ? 'text-green-600' : 'text-red-600'}`} data-testid={`text-difference-${inquiry._id}`}>
-                          {priceDifference >= 0 ? '+' : ''}₹{priceDifference.toLocaleString()}
-                          <span className="text-sm ml-1">({percentageDifference}%)</span>
-                        </p>
-                      </div>
-                    </div>
-
-                    {inquiry.notes && (
-                      <div>
-                        <p className="text-sm text-secondary mb-1">Notes</p>
-                        <p className="text-sm" data-testid={`text-notes-${inquiry._id}`}>{inquiry.notes}</p>
-                      </div>
-                    )}
                   </CardContent>
                 </Card>
               );
