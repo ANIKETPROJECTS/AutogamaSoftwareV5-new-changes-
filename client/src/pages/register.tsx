@@ -216,6 +216,29 @@ const VEHICLE_MAKES = [
   "Toyota", "Honda", "Maruti Suzuki", "Hyundai", "Tata", "Mahindra", "Kia", "MG", "Volkswagen", "Skoda", "BMW", "Mercedes-Benz", "Audi", "Land Rover", "Jaguar", "Volvo", "Porsche", "Lexus", "Jeep", "Other"
 ];
 
+const VEHICLE_MODELS: Record<string, string[]> = {
+  "Toyota": ["Fortuner", "Innova", "Innova Crysta", "Creta", "Fortuner GR-S", "Vios", "Yaris", "Glanza", "Urban Cruiser", "Rumion"],
+  "Honda": ["City", "Accord", "Civic", "CR-V", "Jazz", "Amaze", "WR-V", "Elevate", "BR-V"],
+  "Maruti Suzuki": ["Swift", "Alto", "WagonR", "Celerio", "Ertiga", "XL5", "Vitara Brezza", "S-Cross", "Jimny", "Baleno"],
+  "Hyundai": ["Creta", "Tucson", "Kona", "Venue", "i20", "i10", "Grand i10 Nios", "Aura", "Alcazar", "Santa Fe"],
+  "Tata": ["Nexon", "Harrier", "Safari", "Punch", "Altroz", "Tigor", "Tiago", "Hexa", "Nexon EV"],
+  "Mahindra": ["XUV500", "XUV700", "Scorpio", "Bolero", "TUV300", "Xylo", "Quanto", "KUV100"],
+  "Kia": ["Seltos", "Sonet", "Niro", "Carens", "EV6"],
+  "MG": ["Hector", "Astor", "ZS EV", "Gloster", "Comet"],
+  "Volkswagen": ["Polo", "Vento", "Tiguan", "Taigun", "Passat"],
+  "Skoda": ["Slavia", "Superb", "Karoq", "Octavia"],
+  "BMW": ["3 Series", "5 Series", "7 Series", "X1", "X3", "X5", "X7", "Z4"],
+  "Mercedes-Benz": ["C-Class", "E-Class", "S-Class", "GLA", "GLC", "GLE", "GLS", "A-Class"],
+  "Audi": ["A4", "A6", "A8", "Q3", "Q5", "Q7", "Q8"],
+  "Land Rover": ["Range Rover", "Range Rover Evoque", "Discovery", "Defender"],
+  "Jaguar": ["XE", "XF", "F-PACE", "E-PACE"],
+  "Volvo": ["S60", "S90", "XC60", "XC90", "V90"],
+  "Porsche": ["911", "Cayenne", "Panamera", "Macan"],
+  "Lexus": ["LX", "RX", "NX", "ES", "CT"],
+  "Jeep": ["Wrangler", "Compass", "Meridian", "Cherokee"],
+  "Other": ["Other"]
+};
+
 const VEHICLE_COLORS = [
   "White", "Silver", "Grey", "Black", "Red", "Blue", "Brown", "Beige", "Golden", "Orange", "Yellow", "Green", "Maroon", "Purple", "Other"
 ];
@@ -758,11 +781,11 @@ export default function CustomerRegistration() {
             <CardContent className="space-y-6 pt-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-6">
-                  <Label>Vehicle Make *</Label>
+                  <Label>Vehicle Name *</Label>
                   <Select
                     value={vehicleData.make}
                     onValueChange={(value) =>
-                      setVehicleData({ ...vehicleData, make: value })
+                      setVehicleData({ ...vehicleData, make: value, model: "" })
                     }
                   >
                     <SelectTrigger className="border-slate-300" data-testid="select-vehicle-make">
@@ -780,14 +803,24 @@ export default function CustomerRegistration() {
 
                 <div className="space-y-6">
                   <Label>Vehicle Model *</Label>
-                  <Input
+                  <Select
                     value={vehicleData.model}
-                    onChange={(e) =>
-                      setVehicleData({ ...vehicleData, model: e.target.value })
+                    onValueChange={(value) =>
+                      setVehicleData({ ...vehicleData, model: value })
                     }
-                    placeholder="e.g., Fortuner, 3 Series"
-                    data-testid="input-vehicle-model"
-                  />
+                    disabled={!vehicleData.make}
+                  >
+                    <SelectTrigger className="border-slate-300" data-testid="select-vehicle-model">
+                      <SelectValue placeholder={vehicleData.make ? "Select model" : "Select vehicle name first"} />
+                    </SelectTrigger>
+                    <SelectContent position="popper" className="max-h-60 w-[var(--radix-select-trigger-width)]">
+                      {vehicleData.make && VEHICLE_MODELS[vehicleData.make as keyof typeof VEHICLE_MODELS]?.map((model) => (
+                        <SelectItem key={model} value={model}>
+                          {model}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="space-y-6">
@@ -821,21 +854,6 @@ export default function CustomerRegistration() {
                     }
                     placeholder="e.g., MH02 AB 1234"
                     data-testid="input-plate-number"
-                  />
-                </div>
-
-                <div className="space-y-6">
-                  <Label>Chassis Number</Label>
-                  <Input
-                    value={vehicleData.chassisNumber}
-                    onChange={(e) =>
-                      setVehicleData({
-                        ...vehicleData,
-                        chassisNumber: e.target.value,
-                      })
-                    }
-                    placeholder="Vehicle chassis number"
-                    data-testid="input-chassis"
                   />
                 </div>
 
