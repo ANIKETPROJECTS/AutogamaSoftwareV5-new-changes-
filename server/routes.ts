@@ -575,7 +575,7 @@ export async function registerRoutes(
         return res.status(400).json({ message: "Missing required fields" });
       }
       const inquiry = {
-        _id: new (require('mongoose')).Types.ObjectId(),
+        _id: new mongoose.Types.ObjectId(),
         name,
         phone,
         email: email || '',
@@ -589,7 +589,8 @@ export async function registerRoutes(
       (global as any).priceInquiries.push(inquiry);
       res.status(201).json(inquiry);
     } catch (error) {
-      res.status(500).json({ message: "Failed to create price inquiry" });
+      console.error("Price inquiry creation error:", error);
+      res.status(500).json({ message: "Failed to create price inquiry", error: error instanceof Error ? error.message : "Unknown error" });
     }
   });
 
