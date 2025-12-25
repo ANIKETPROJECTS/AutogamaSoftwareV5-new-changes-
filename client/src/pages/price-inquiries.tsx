@@ -216,9 +216,9 @@ function getPriceForService(service: string, carType: string): number | null {
 
 export default function PriceInquiries() {
   const [showForm, setShowForm] = useState(false);
-  const [selectedService, setSelectedService] = useState('');
+  const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [selectedCarType, setSelectedCarType] = useState('');
-  const [autoPrice, setAutoPrice] = useState<number | null>(null);
+  const [autoPrice, setAutoPrice] = useState<number>(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterService, setFilterService] = useState('');
   const [viewMode, setViewMode] = useState<'card' | 'list'>('card');
@@ -236,9 +236,9 @@ export default function PriceInquiries() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/price-inquiries'] });
       setShowForm(false);
-      setSelectedService('');
+      setSelectedServices([]);
       setSelectedCarType('');
-      setAutoPrice(null);
+      setAutoPrice(0);
       toast({ title: 'Price inquiry saved successfully' });
     },
     onError: () => {
@@ -258,15 +258,31 @@ export default function PriceInquiries() {
   });
 
   const handleServiceChange = (service: string) => {
-    setSelectedService(service);
-    setSelectedCarType('');
-    setAutoPrice(null);
+    setSelectedServices(prev => 
+      prev.includes(service) 
+        ? prev.filter(s => s !== service)
+        : [...prev, service]
+    );
+    // Recalculate price if car type is selected
+    if (selectedCarType && selectedServices.length > 0) {
+      calculateTotalPrice([...selectedServices.filter(s => s !== service), service], selectedCarType);
+    }
   };
 
   const handleCarTypeChange = (carType: string) => {
     setSelectedCarType(carType);
-    const price = getPriceForService(selectedService, carType);
-    setAutoPrice(price);
+    calculateTotalPrice(selectedServices, carType);
+  };
+
+  const calculateTotalPrice = (services: string[], carType: string) => {
+    let total = 0;
+    services.forEach(service => {
+      const price = getPriceForService(service, carType);
+      if (price !== null) {
+        total += price;
+      }
+    });
+    setAutoPrice(total);
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -290,8 +306,8 @@ export default function PriceInquiries() {
       return;
     }
 
-    if (!selectedService || !selectedCarType || autoPrice === null) {
-      toast({ title: 'Please select service and car type', variant: 'destructive' });
+    if (selectedServices.length === 0 || !selectedCarType) {
+      toast({ title: 'Please select at least one service and car type', variant: 'destructive' });
       return;
     }
 
@@ -300,12 +316,15 @@ export default function PriceInquiries() {
       name: formData.get('name'),
       phone: phone,
       email: email || '',
-      service: `${selectedService} - ${selectedCarType}`,
+      service: `${selectedServices.join(', ')} - ${selectedCarType}`,
       priceOffered: autoPrice,
       priceStated: parseFloat(formData.get('priceStated') as string),
       notes: formData.get('notes') || ''
     });
     
+    setSelectedServices([]);
+    setSelectedCarType('');
+    setAutoPrice(0);
     form.reset();
   };
 
@@ -457,10 +476,10 @@ export default function PriceInquiries() {
                     )}
                   </div>
                   <div>
-                    <Label htmlFor="service">Service Type</Label>
-                    <Select value={selectedService} onValueChange={handleServiceChange}>
+                    <Label htmlFor="service">Service Type (Select Multiple)</Label>
+                    <Select value="" onValueChange={handleServiceChange}>
                       <SelectTrigger id="service" data-testid="select-service">
-                        <SelectValue placeholder="Select a service" />
+                        <SelectValue placeholder="Click to add services" />
                       </SelectTrigger>
                       <SelectContent>
                         {ALL_SERVICES.map((service) => (
@@ -470,11 +489,32 @@ export default function PriceInquiries() {
                         ))}
                       </SelectContent>
                     </Select>
+                    {selectedServices.length > 0 && (
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {selectedServices.map((service) => (
+                          <div
+                            key={service}
+                            className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm flex items-center gap-2"
+                            data-testid={`tag-service-${service}`}
+                          >
+                            {service}
+                            <button
+                              type="button"
+                              onClick={() => handleServiceChange(service)}
+                              className="text-blue-600 hover:text-blue-900 font-bold"
+                              data-testid={`button-remove-service-${service}`}
+                            >
+                              ×
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
 
                 {/* Row 3: Car Type and Auto Price */}
-                {selectedService && (
+                {selectedServices.length > 0 && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="carType">Car Type</Label>
@@ -545,9 +585,9 @@ export default function PriceInquiries() {
                     variant="outline"
                     onClick={() => {
                       setShowForm(false);
-                      setSelectedService('');
+                      setSelectedServices([]);
                       setSelectedCarType('');
-                      setAutoPrice(null);
+                      setAutoPrice(0);
                     }}
                     data-testid="button-cancel-inquiry"
                   >
