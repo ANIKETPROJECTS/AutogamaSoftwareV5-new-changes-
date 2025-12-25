@@ -37,6 +37,13 @@ import {
 
 const COLORS = ["#3B82F6", "#22C55E", "#F97316", "#dc2626"];
 
+const FUNNEL_STAGES = [
+  { key: "Inquired", label: "Inquired", color: "#3B82F6" },
+  { key: "Working", label: "Working", color: "#F97316" },
+  { key: "Waiting", label: "Waiting", color: "#EAB308" },
+  { key: "Completed", label: "Completed", color: "#22C55E" },
+];
+
 const STATUS_COLORS: Record<string, string> = {
   Inquired: "#3B82F6",
   Working: "#F97316",
@@ -70,16 +77,22 @@ export default function Dashboard() {
     queryFn: api.inventory.list,
   });
 
-  const customerStatusCount = customers.reduce((acc: Record<string, number>, customer: any) => {
-    const status = customer.status || "Inquired";
-    acc[status] = (acc[status] || 0) + 1;
+  const customerStatusCount = FUNNEL_STAGES.reduce((acc: Record<string, number>, stage) => {
+    acc[stage.key] = 0;
     return acc;
   }, {});
 
-  const customerStatusData = Object.entries(customerStatusCount).map(([name, value]) => ({
-    name,
-    value,
-  }));
+  customers.forEach((customer: any) => {
+    const status = customer.status || "Inquired";
+    if (customerStatusCount.hasOwnProperty(status)) {
+      customerStatusCount[status]++;
+    }
+  });
+
+  const customerStatusData = FUNNEL_STAGES.map(stage => ({
+    name: stage.label,
+    value: customerStatusCount[stage.key] || 0,
+  })).filter(item => item.value > 0);
 
   const last7Days = Array.from({ length: 7 }, (_, i) => {
     const date = new Date();
