@@ -17,6 +17,7 @@ import {
   Activity,
   Zap,
   LogOut,
+  MessageSquare,
 } from "lucide-react";
 import {
   BarChart,
@@ -54,9 +55,9 @@ export default function Dashboard() {
     queryFn: () => api.jobs.list(),
   });
 
-  const { data: lowStock = [] } = useQuery({
-    queryKey: ["inventory", "low-stock"],
-    queryFn: api.inventory.lowStock,
+  const { data: inquiries = [] } = useQuery({
+    queryKey: ["/api/price-inquiries"],
+    queryFn: () => api.priceInquiries.list(),
   });
 
   const { data: customers = [] } = useQuery({
@@ -144,6 +145,12 @@ export default function Dashboard() {
     return sum;
   }, 0);
 
+  const todayInquiries = inquiries.filter((inquiry: any) => {
+    const inquiryDate = new Date(inquiry.createdAt);
+    const today = new Date();
+    return inquiryDate.toDateString() === today.toDateString();
+  }).length;
+
   const totalRevenue = jobs.reduce((sum: number, job: any) => sum + (job.paidAmount || 0), 0);
   const completedJobs = jobs.filter((j: any) => j.stage === "Completed").length;
   const jobCompletion = jobs.length > 0 ? Math.round((completedJobs / jobs.length) * 100) : 0;
@@ -176,11 +183,11 @@ export default function Dashboard() {
         />
 
         <MetricCard
-          title="Low Stock Items"
-          value={lowStock.length}
-          icon={AlertTriangle}
-          description="Items running low"
-          data-testid="card-low-stock-items"
+          title="Inquiries Today"
+          value={todayInquiries}
+          icon={MessageSquare}
+          description="Inquiries received today"
+          data-testid="card-inquiries-today"
         />
 
         <MetricCard
