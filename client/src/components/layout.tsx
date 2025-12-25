@@ -15,7 +15,7 @@ import { Card } from '@/components/ui/card';
 
 const menuItems = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/price-inquiries', label: 'Price Inquiries', icon: DollarSign },
+  { href: '/price-inquiries', label: 'Inquiry', icon: DollarSign },
   { href: '/register', label: 'Register Customers', icon: UserPlus },
   { href: '/registered-customers', label: 'Registered Customers', icon: Filter },
   { href: '/customer-service', label: 'Customers Service', icon: Wrench },
