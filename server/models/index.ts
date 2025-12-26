@@ -146,6 +146,7 @@ export interface IPriceInquiry extends Document {
   phone: string;
   email?: string;
   service: string;
+  serviceDetailsJson?: string;
   priceOffered: number;
   priceStated: number;
   notes?: string;
@@ -335,6 +336,7 @@ const PriceInquirySchema = new Schema<IPriceInquiry>({
   phone: { type: String, required: true },
   email: { type: String },
   service: { type: String, required: true },
+  serviceDetailsJson: { type: String },
   priceOffered: { type: Number, required: true },
   priceStated: { type: Number, required: true },
   notes: { type: String },

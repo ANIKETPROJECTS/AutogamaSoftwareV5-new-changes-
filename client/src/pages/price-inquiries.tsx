@@ -937,20 +937,33 @@ export default function PriceInquiries() {
                     </thead>
                     <tbody>
                       {selectedInquiry.serviceDetailsJson ? (
-                        JSON.parse(selectedInquiry.serviceDetailsJson).map((service: any, idx: number) => {
-                          const diff = (service.customerPrice || 0) - (service.servicePrice || 0);
-                          return (
-                            <tr key={idx} className="border-t">
-                              <td className="p-3">{service.name}</td>
-                              <td className="p-3">{service.carType}</td>
-                              <td className="p-3 text-right font-semibold">₹{service.servicePrice?.toLocaleString()}</td>
-                              <td className="p-3 text-right font-semibold">₹{service.customerPrice?.toLocaleString() || '0'}</td>
-                              <td className={`p-3 text-right font-bold ${diff >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                {diff >= 0 ? '+' : ''}₹{diff.toLocaleString()}
-                              </td>
-                            </tr>
-                          );
-                        })
+                        (() => {
+                          try {
+                            const details = JSON.parse(selectedInquiry.serviceDetailsJson);
+                            return details.map((service: any, idx: number) => {
+                              const diff = (service.customerPrice || 0) - (service.servicePrice || 0);
+                              return (
+                                <tr key={idx} className="border-t">
+                                  <td className="p-3">{service.name}</td>
+                                  <td className="p-3">{service.carType}</td>
+                                  <td className="p-3 text-right font-semibold">₹{service.servicePrice?.toLocaleString()}</td>
+                                  <td className="p-3 text-right font-semibold">₹{service.customerPrice?.toLocaleString() || '0'}</td>
+                                  <td className={`p-3 text-right font-bold ${diff >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                    {diff >= 0 ? '+' : ''}₹{diff.toLocaleString()}
+                                  </td>
+                                </tr>
+                              );
+                            });
+                          } catch (e) {
+                            return (
+                              <tr className="border-t">
+                                <td colSpan={5} className="p-3 text-center text-muted-foreground">
+                                  {selectedInquiry.service}
+                                </td>
+                              </tr>
+                            );
+                          }
+                        })()
                       ) : (
                         <tr className="border-t">
                           <td colSpan={5} className="p-3 text-center text-muted-foreground">
