@@ -50,7 +50,7 @@ export default function Invoices() {
 
   const markPaidMutation = useMutation({
     mutationFn: (data: { invoiceId: string; paymentMode: string }) => 
-      api.invoices.markPaid(data.invoiceId, undefined, data.paymentMode),
+      api.invoices.markPaid(data.invoiceId),
     onSuccess: (updatedInvoice: any) => {
       queryClient.invalidateQueries({ queryKey: ["invoices"] });
       queryClient.invalidateQueries({ queryKey: ["jobs"] });
@@ -113,54 +113,192 @@ export default function Invoices() {
     }
   };
 
-  const handlePrint = () => {
-    if (printRef.current) {
-      const printWindow = window.open("", "_blank");
-      if (printWindow) {
-        printWindow.document.write(`
-          <html>
-            <head>
-              <title>Invoice ${selectedInvoice?.invoiceNumber}</title>
-              <style>
-                body { font-family: Arial, sans-serif; padding: 20px; }
-                .header { text-align: center; margin-bottom: 20px; }
-                .logo { height: 40px; margin: 0 auto 10px auto; display: block; object-fit: contain; }
-                .company-name { font-size: 20px; font-weight: bold; }
-                .invoice-info { display: flex; justify-content: space-between; margin-bottom: 20px; }
-                .customer-info { margin-bottom: 20px; }
-                table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-                th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
-                th { background-color: #f5f5f5; }
-                .totals { text-align: right; }
-                .total-row { font-weight: bold; font-size: 18px; }
-                @media print { body { print-color-adjust: exact; } }
-              </style>
-            </head>
-            <body>
-              ${printRef.current.innerHTML}
-            </body>
-          </html>
-        `);
-        printWindow.document.close();
-        printWindow.focus();
-        setTimeout(() => {
-          printWindow.print();
-        }, 500);
+  const getInvoiceHTML = (): string => {
+    if (!selectedInvoice) return "";
+    
+    const getPaymentModeHTML = () => {
+      if (selectedInvoice.paymentStatus === "Paid" && selectedInvoice.paymentMode) {
+        return `<div style="background-color: #d1fae5; border: 1px solid #a7f3d0; border-radius: 6px; padding: 8px; width: fit-content; margin-top: 16px; display: flex; align-items: center; gap: 8px;">
+          <span style="color: #047857; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">
+            Paid via ${selectedInvoice.paymentMode}
+          </span>
+        </div>`;
       }
+      return "";
+    };
+
+    return `
+      <div style="font-family: Arial, sans-serif; max-width: 900px; margin: 0 auto; padding: 0;">
+        <div style="text-align: center; margin-bottom: 30px;">
+          <img src="/logo.png" alt="Auto Gamma Logo" style="height: 40px; display: block; margin: 0 auto 10px; object-fit: contain;" />
+          <p style="color: #9ca3af; font-size: 12px; margin: 0;">Tax Invoice</p>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; gap: 20px; margin-bottom: 30px; flex-wrap: wrap;">
+          <div>
+            <p style="color: #9ca3af; font-size: 12px; margin: 0;">Invoice Number</p>
+            <p style="font-weight: bold; font-size: 14px; margin: 4px 0 0 0;">${selectedInvoice.invoiceNumber}</p>
+          </div>
+          <div style="text-align: right;">
+            <p style="color: #9ca3af; font-size: 12px; margin: 0;">Date</p>
+            <p style="font-weight: bold; font-size: 14px; margin: 4px 0 0 0;">${new Date(selectedInvoice.createdAt).toLocaleDateString("en-IN", {
+              day: "2-digit",
+              month: "short",
+              year: "numeric",
+            })}</p>
+          </div>
+        </div>
+
+        <div style="border-top: 1px solid #e5e7eb; border-bottom: 1px solid #e5e7eb; padding: 20px 0; margin: 30px 0;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div>
+              <h3 style="font-weight: 600; margin: 0 0 8px 0; font-size: 14px;">Customer Details</h3>
+              <p style="font-weight: 500; margin: 4px 0; font-size: 13px;">${selectedInvoice.customerName}</p>
+              ${selectedInvoice.customerPhone ? `<p style="color: #6b7280; font-size: 12px; margin: 2px 0;">Tel: ${selectedInvoice.customerPhone}</p>` : ""}
+              ${selectedInvoice.customerEmail ? `<p style="color: #6b7280; font-size: 12px; margin: 2px 0;">Email: ${selectedInvoice.customerEmail}</p>` : ""}
+              ${selectedInvoice.customerAddress ? `<p style="color: #6b7280; font-size: 12px; margin: 2px 0;">Address: ${selectedInvoice.customerAddress}</p>` : ""}
+            </div>
+            <div>
+              <h3 style="font-weight: 600; margin: 0 0 8px 0; font-size: 14px;">Vehicle Details</h3>
+              <p style="font-weight: 500; margin: 4px 0; font-size: 13px;">${selectedInvoice.vehicleName}</p>
+              <p style="color: #6b7280; font-size: 12px; margin: 2px 0;">Plate: ${selectedInvoice.plateNumber}</p>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin: 30px 0;">
+          <h3 style="font-weight: 600; margin: 0 0 12px 0; font-size: 14px;">Items & Services</h3>
+          <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+            <thead>
+              <tr style="background-color: #f3f4f6;">
+                <th style="text-align: left; padding: 10px; border: 1px solid #e5e7eb; font-weight: 600;">Description</th>
+                <th style="text-align: right; padding: 10px; border: 1px solid #e5e7eb; font-weight: 600;">Unit Price</th>
+                <th style="text-align: right; padding: 10px; border: 1px solid #e5e7eb; font-weight: 600;">Discount</th>
+                <th style="text-align: right; padding: 10px; border: 1px solid #e5e7eb; font-weight: 600;">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${selectedInvoice.items?.filter((item: any) => item.type === 'service' && !item.description.toLowerCase().includes('labor')).map((item: any) => `
+                <tr>
+                  <td style="padding: 10px; border: 1px solid #e5e7eb;">${item.description}</td>
+                  <td style="text-align: right; padding: 10px; border: 1px solid #e5e7eb;">₹${item.unitPrice.toLocaleString("en-IN")}</td>
+                  <td style="text-align: right; padding: 10px; border: 1px solid #e5e7eb; color: #dc2626;">${item.discount > 0 ? `-₹${item.discount.toLocaleString("en-IN")}` : "—"}</td>
+                  <td style="text-align: right; padding: 10px; border: 1px solid #e5e7eb; font-weight: 500;">₹${item.total.toLocaleString("en-IN")}</td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 280px; gap: 30px; margin: 30px 0;">
+          <div>
+            ${selectedInvoice.notes ? `
+              <div style="font-size: 12px; margin-bottom: 20px;">
+                <p style="font-weight: 600; margin: 0 0 4px 0;">Notes:</p>
+                <p style="color: #6b7280; margin: 0; font-style: italic;">${selectedInvoice.notes}</p>
+              </div>
+            ` : ""}
+            ${getPaymentModeHTML()}
+          </div>
+          <div style="border: 1px solid #e5e7eb; border-radius: 6px; padding: 16px; background-color: #f9fafb;">
+            <div style="display: flex; justify-content: space-between; font-size: 12px; color: #4b5563; margin-bottom: 8px;">
+              <span>Subtotal:</span>
+              <span>₹${selectedInvoice.subtotal.toLocaleString("en-IN")}</span>
+            </div>
+            ${selectedInvoice.tax > 0 ? `
+              <div style="display: flex; justify-content: space-between; font-size: 12px; color: #4b5563; margin-bottom: 8px;">
+                <span>Tax (${selectedInvoice.taxRate}%):</span>
+                <span>₹${selectedInvoice.tax.toLocaleString("en-IN")}</span>
+              </div>
+            ` : ""}
+            ${selectedInvoice.discount > 0 ? `
+              <div style="display: flex; justify-content: space-between; font-size: 12px; color: #dc2626; margin-bottom: 8px;">
+                <span>Total Discount:</span>
+                <span>-₹${selectedInvoice.discount.toLocaleString("en-IN")}</span>
+              </div>
+            ` : ""}
+            <div style="border-top: 1px solid #d1d5db; padding-top: 8px; margin-bottom: 8px;"></div>
+            <div style="display: flex; justify-content: space-between; font-weight: 600; font-size: 14px; color: #111827; margin-bottom: 8px;">
+              <span>Grand Total:</span>
+              <span>₹${selectedInvoice.totalAmount.toLocaleString("en-IN")}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 11px; color: #6b7280; margin-bottom: 8px;">
+              <span>Amount Paid:</span>
+              <span>₹${selectedInvoice.paidAmount.toLocaleString("en-IN")}</span>
+            </div>
+            ${(selectedInvoice.totalAmount - selectedInvoice.paidAmount) > 0 ? `
+              <div style="display: flex; justify-content: space-between; font-size: 11px; font-weight: 600; color: #dc2626;">
+                <span>Balance Due:</span>
+                <span>₹${(selectedInvoice.totalAmount - selectedInvoice.paidAmount).toLocaleString("en-IN")}</span>
+              </div>
+            ` : ""}
+          </div>
+        </div>
+
+        <div style="border-top: 1px solid #e5e7eb; text-align: center; padding-top: 20px; margin-top: 30px;">
+          <p style="color: #9ca3af; font-size: 11px; margin: 0;">This is a computer-generated invoice. No signature is required.</p>
+          <p style="color: #111827; font-size: 12px; font-weight: 600; margin: 4px 0 0 0;">AUTOGAMMA - Premium Auto Detailing Studio</p>
+        </div>
+      </div>
+    `;
+  };
+
+  const handlePrint = () => {
+    const printWindow = window.open("", "_blank");
+    if (printWindow) {
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8" />
+            <title>Invoice ${selectedInvoice?.invoiceNumber}</title>
+            <style>
+              * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+              }
+              body {
+                font-family: Arial, sans-serif;
+                line-height: 1.6;
+                color: #111827;
+                padding: 20px;
+              }
+              @media print {
+                body {
+                  padding: 10mm;
+                  print-color-adjust: exact;
+                  -webkit-print-color-adjust: exact;
+                }
+              }
+            </style>
+          </head>
+          <body>
+            ${getInvoiceHTML()}
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+      printWindow.focus();
+      setTimeout(() => {
+        printWindow.print();
+      }, 300);
     }
   };
 
   const handleDownload = async () => {
-    if (!selectedInvoice || !printRef.current) return;
+    if (!selectedInvoice) return;
     
     const html2pdf = (await import('html2pdf.js')).default;
-    const element = printRef.current;
+    const element = document.createElement('div');
+    element.innerHTML = getInvoiceHTML();
+    
     const opt = {
-      margin: 1,
+      margin: 10,
       filename: `Invoice_${selectedInvoice.invoiceNumber}.pdf`,
       image: { type: 'jpeg' as const, quality: 0.98 },
-      html2canvas: { scale: 2 },
-      jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' as const }
+      html2canvas: { scale: 2, useCORS: true, logging: false },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' as const }
     };
 
     html2pdf().set(opt).from(element).save();
