@@ -335,6 +335,10 @@ export default function PriceInquiries() {
     return selectedServiceItems.reduce((sum, item) => sum + item.price, 0);
   };
 
+  const getTotalCustomerPrice = () => {
+    return selectedServiceItems.reduce((sum, item) => sum + item.customerPrice, 0);
+  };
+
   const updateServiceCustomerPrice = (id: string, newPrice: number) => {
     setSelectedServiceItems(selectedServiceItems.map(item =>
       item.id === id ? { ...item, customerPrice: newPrice } : item
@@ -375,7 +379,7 @@ export default function PriceInquiries() {
       email: email || '',
       service: serviceDetails,
       priceOffered: getTotalPrice(),
-      priceStated: parseFloat(formData.get('priceStated') as string),
+      priceStated: getTotalCustomerPrice(),
       notes: formData.get('notes') || ''
     });
     
@@ -638,29 +642,15 @@ export default function PriceInquiries() {
                   )}
                 </div>
 
-                {/* Customer Price and Notes */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="priceStated">Price Stated by Customer (₹)</Label>
-                    <Input
-                      id="priceStated"
-                      name="priceStated"
-                      type="number"
-                      min="0"
-                      placeholder="0"
-                      required
-                      data-testid="input-price-stated"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="notes">Notes (optional)</Label>
-                    <Input
-                      id="notes"
-                      name="notes"
-                      placeholder="Any additional notes..."
-                      data-testid="input-notes"
-                    />
-                  </div>
+                {/* Notes */}
+                <div>
+                  <Label htmlFor="notes">Notes (optional)</Label>
+                  <Input
+                    id="notes"
+                    name="notes"
+                    placeholder="Any additional notes..."
+                    data-testid="input-notes"
+                  />
                 </div>
 
                 {/* Action Buttons */}
