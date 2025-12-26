@@ -729,10 +729,22 @@ export default function PriceInquiries() {
                           </h3>
                           <p className="text-sm text-slate-700 font-medium">{inquiry.phone}</p>
                         </div>
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-8 w-8 text-primary hover:text-primary hover:bg-primary/10"
+                            onClick={() => {
+                              setSelectedInquiry(inquiry);
+                              setViewDialogOpen(true);
+                            }}
+                            data-testid={`button-view-${inquiry._id}`}
+                          >
+                            <ChevronDown className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
                           onClick={() => {
                             setInquiryToDelete(inquiry);
                             setDeleteDialogOpen(true);
@@ -804,8 +816,20 @@ export default function PriceInquiries() {
                       </div>
                     </div>
                     
-                    <div className="flex items-center gap-6 text-sm">
-                      <div className="text-center">
+                      <div className="flex items-center gap-6 text-sm">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-primary hover:text-primary hover:bg-primary/10 flex items-center gap-1"
+                          onClick={() => {
+                            setSelectedInquiry(inquiry);
+                            setViewDialogOpen(true);
+                          }}
+                          data-testid={`button-view-details-list-${inquiry._id}`}
+                        >
+                          View Details
+                        </Button>
+                        <div className="text-center">
                         <p className="text-xs text-muted-foreground">Our Price</p>
                         <p className="font-bold text-foreground">₹{inquiry.priceOffered.toLocaleString()}</p>
                       </div>
