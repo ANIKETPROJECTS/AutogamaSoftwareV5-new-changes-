@@ -454,7 +454,9 @@ export class MongoStorage implements IStorage {
   }
 
   async getWhatsAppTemplates(): Promise<IWhatsAppTemplate[]> {
-    return WhatsAppTemplate.find().sort({ stage: 1 });
+    const templates = await WhatsAppTemplate.find();
+    const stageOrder = ['New Lead', 'Inspection Done', 'Work In Progress', 'Completed', 'Cancelled'];
+    return templates.sort((a, b) => stageOrder.indexOf(a.stage) - stageOrder.indexOf(b.stage));
   }
 
   async updateWhatsAppTemplate(stage: JobStage, message: string, isActive: boolean): Promise<IWhatsAppTemplate | null> {
