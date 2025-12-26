@@ -313,7 +313,7 @@ export default function Invoices() {
       const opt = {
         margin: 5,
         filename: `Invoice_${invoiceToDownload.invoiceNumber}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
+        image: { type: 'jpeg' as const, quality: 0.98 },
         html2canvas: { 
           scale: 2, 
           useCORS: true, 
@@ -321,9 +321,9 @@ export default function Invoices() {
           letterRendering: true
         },
         jsPDF: { 
-          unit: 'mm', 
+          unit: 'mm' as const, 
           format: 'a4', 
-          orientation: 'portrait',
+          orientation: 'portrait' as const,
           compress: true
         }
       };
