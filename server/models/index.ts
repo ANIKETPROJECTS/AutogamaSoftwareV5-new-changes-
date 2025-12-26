@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
-export type JobStage = 'New Lead' | 'Inspection Done' | 'Work In Progress' | 'Ready for Delivery' | 'Completed' | 'Cancelled';
+export type JobStage = 'New Lead' | 'Inspection Done' | 'Work In Progress' | 'Completed' | 'Cancelled';
 export type PaymentStatus = 'Pending' | 'Partially Paid' | 'Paid';
 export type TechnicianStatus = 'Available' | 'Busy' | 'Off';
 export type InventoryCategory = 'Elite' | 'Garware Plus' | 'Garware Premium' | 'Garware Matt';
@@ -181,7 +181,6 @@ export interface IInvoice extends Document {
   totalAmount: number;
   paidAmount: number;
   paymentStatus: PaymentStatus;
-  paymentMode?: PaymentMode;
   notes?: string;
   createdAt: Date;
 }
@@ -372,7 +371,6 @@ const InvoiceSchema = new Schema<IInvoice>({
   totalAmount: { type: Number, required: true },
   paidAmount: { type: Number, default: 0 },
   paymentStatus: { type: String, enum: ['Pending', 'Partially Paid', 'Paid'], default: 'Pending' },
-  paymentMode: { type: String, enum: ['Cash', 'UPI', 'Card', 'Bank Transfer'] },
   notes: { type: String },
   createdAt: { type: Date, default: Date.now }
 });

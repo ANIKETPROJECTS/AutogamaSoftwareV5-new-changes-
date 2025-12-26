@@ -123,10 +123,9 @@ export default function Invoices() {
               <title>Invoice ${selectedInvoice?.invoiceNumber}</title>
               <style>
                 body { font-family: Arial, sans-serif; padding: 20px; }
-                .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-                .logo { height: 60px; }
-                .company-info { text-align: right; }
-                .company-name { font-size: 24px; font-weight: bold; }
+                .header { text-align: center; margin-bottom: 20px; }
+                .logo { height: 40px; margin: 0 auto 10px auto; display: block; object-fit: contain; }
+                .company-name { font-size: 20px; font-weight: bold; }
                 .invoice-info { display: flex; justify-content: space-between; margin-bottom: 20px; }
                 .customer-info { margin-bottom: 20px; }
                 table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
@@ -134,7 +133,6 @@ export default function Invoices() {
                 th { background-color: #f5f5f5; }
                 .totals { text-align: right; }
                 .total-row { font-weight: bold; font-size: 18px; }
-                .footer { margin-top: 50px; text-align: center; font-size: 12px; color: #666; }
                 @media print { body { print-color-adjust: exact; } }
               </style>
             </head>
@@ -169,17 +167,6 @@ export default function Invoices() {
   };
 
   const isLoading = invoicesLoading;
-
-  const getLogo = () => {
-    return (
-      <div className="flex items-center gap-2">
-        <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-          <Car className="w-6 h-6 text-white" />
-        </div>
-        <span className="text-xl font-bold tracking-tight text-slate-900">AUTOGAMMA</span>
-      </div>
-    );
-  };
 
   return (
     <div className="space-y-8">
@@ -399,15 +386,31 @@ export default function Invoices() {
 
           {selectedInvoice && (
             <div ref={printRef} className="space-y-6">
-              <div className="header flex justify-between items-center">
-                {getLogo()}
-                <div className="text-right">
-                  <h2 className="text-xl font-bold">Tax Invoice</h2>
-                  <p className="text-sm text-muted-foreground">{selectedInvoice.invoiceNumber}</p>
-                </div>
+              <div className="header text-center">
+                <img src="/logo.png" alt="Auto Gamma Logo" className="h-10 mx-auto mb-2 object-contain" />
+                <p className="text-muted-foreground">Tax Invoice</p>
               </div>
 
               <div className="flex justify-between gap-4 flex-wrap">
+                <div>
+                  <p className="text-sm text-muted-foreground">Invoice Number</p>
+                  <p className="font-bold">{selectedInvoice.invoiceNumber}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm text-muted-foreground">Date</p>
+                  <p className="font-bold">
+                    {new Date(selectedInvoice.createdAt).toLocaleDateString("en-IN", {
+                      day: "2-digit",
+                      month: "short",
+                      year: "numeric",
+                    })}
+                  </p>
+                </div>
+              </div>
+
+              <Separator />
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <h3 className="font-semibold mb-2">Customer Details</h3>
                   <p className="font-medium">{selectedInvoice.customerName}</p>
@@ -427,24 +430,14 @@ export default function Invoices() {
                     </p>
                   )}
                 </div>
-                <div className="text-right">
+                <div>
                   <h3 className="font-semibold mb-2">Vehicle Details</h3>
-                  <p className="font-medium flex items-center justify-end gap-1">
+                  <p className="font-medium flex items-center gap-1">
                     <Car className="w-4 h-4" /> {selectedInvoice.vehicleName}
                   </p>
                   <p className="text-sm text-muted-foreground">
                     Plate: {selectedInvoice.plateNumber}
                   </p>
-                  <div className="mt-2">
-                    <p className="text-xs text-muted-foreground uppercase tracking-wider">Invoice Date</p>
-                    <p className="font-bold">
-                      {new Date(selectedInvoice.createdAt).toLocaleDateString("en-IN", {
-                        day: "2-digit",
-                        month: "short",
-                        year: "numeric",
-                      })}
-                    </p>
-                  </div>
                 </div>
               </div>
 
@@ -463,7 +456,7 @@ export default function Invoices() {
                       </tr>
                     </thead>
                     <tbody>
-                      {selectedInvoice.items?.map((item: any, index: number) => (
+                      {selectedInvoice.items?.filter((item: any) => item.type === 'service' && !item.description.toLowerCase().includes('labor')).map((item: any, index: number) => (
                         <tr key={`item-${index}`} className="border-t">
                           <td className="p-3">
                             {item.description}
@@ -571,7 +564,7 @@ export default function Invoices() {
             </div>
           )}
 
-          <DialogFooter className="flex justify-start items-center gap-3 mt-6 sm:justify-start">
+          <DialogFooter className="flex justify-end items-center gap-3 mt-6 sm:justify-end">
             <Button 
               className="flex items-center gap-2"
               onClick={handlePrint}
