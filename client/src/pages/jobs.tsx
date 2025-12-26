@@ -97,7 +97,8 @@ export default function ServiceFunnel() {
     },
     onError: (err, { id, stage }, context: any) => {
       queryClient.setQueryData(['jobs', search, stageFilter], context.previousJobs);
-      toast({ title: 'Cannot change stage after invoice is created', variant: 'destructive' });
+      const errorMsg = (err as any)?.message || 'Failed to update status';
+      toast({ title: errorMsg, variant: 'destructive' });
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });

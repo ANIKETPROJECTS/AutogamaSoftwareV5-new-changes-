@@ -273,9 +273,9 @@ export async function registerRoutes(
     try {
       const { stage, discount = 0 } = req.body;
       
-      // Check if job has an invoice - if so, block stage changes
+      // Check if job has an invoice - only block if changing to non-Completed stages
       const existingInvoice = await storage.getInvoiceByJob(req.params.id);
-      if (existingInvoice) {
+      if (existingInvoice && stage !== 'Completed') {
         return res.status(409).json({ message: "Cannot change stage after invoice has been created" });
       }
       
