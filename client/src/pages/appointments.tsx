@@ -555,34 +555,36 @@ export default function Appointments() {
           </div>
         )}
       </div>
-      <div className="flex items-center justify-between mt-4">
-        <div className="text-sm text-muted-foreground">
-          Showing {appointments.length} of {totalAppointments} appointments
-        </div>
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-            disabled={currentPage === 1}
-            data-testid="button-pagination-prev"
-          >
-            Previous
-          </Button>
-          <div className="flex items-center px-2 text-sm font-medium">
-            Page {currentPage} of {totalPages || 1}
+      {totalAppointments > 0 && (
+        <div className="flex items-center justify-between mt-4">
+          <div className="text-sm text-muted-foreground">
+            Showing {appointments.length} of {totalAppointments} appointments
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-            disabled={currentPage >= totalPages}
-            data-testid="button-pagination-next"
-          >
-            Next
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+              disabled={currentPage === 1}
+              data-testid="button-pagination-prev"
+            >
+              Previous
+            </Button>
+            <div className="flex items-center px-2 text-sm font-medium">
+              Page {currentPage} of {totalPages || 1}
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+              disabled={currentPage >= totalPages}
+              data-testid="button-pagination-next"
+            >
+              Next
+            </Button>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
