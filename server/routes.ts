@@ -584,8 +584,8 @@ export async function registerRoutes(
 
   app.patch("/api/invoices/:id/pay", async (req, res) => {
     try {
-      const { paidAmount } = req.body;
-      const invoice = await storage.markInvoicePaid(req.params.id, paidAmount);
+      const { paidAmount, paymentMode } = req.body;
+      const invoice = await storage.markInvoicePaid(req.params.id, paidAmount, paymentMode);
       if (!invoice) return res.status(404).json({ message: "Invoice not found" });
       res.json(invoice);
     } catch (error) {

@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import {
   IndianRupee,
@@ -20,6 +20,7 @@ import {
   CheckCircle,
   Filter,
   ArrowUpDown,
+  CreditCard,
 } from "lucide-react";
 import { useState, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -37,6 +38,8 @@ export default function Invoices() {
   const [filterStatus, setFilterStatus] = useState<"all" | "paid" | "unpaid">("all");
   const [selectedInvoice, setSelectedInvoice] = useState<any>(null);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
+  const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
+  const [paymentMode, setPaymentMode] = useState<string>("Cash");
   const printRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -46,7 +49,8 @@ export default function Invoices() {
   });
 
   const markPaidMutation = useMutation({
-    mutationFn: (invoiceId: string) => api.invoices.markPaid(invoiceId),
+    mutationFn: (data: { invoiceId: string; paymentMode: string }) => 
+      api.apiRequest("PATCH", `/api/invoices/${data.invoiceId}/pay`, { paymentMode: data.paymentMode }),
     onSuccess: (updatedInvoice: any) => {
       queryClient.invalidateQueries({ queryKey: ["invoices"] });
       queryClient.invalidateQueries({ queryKey: ["jobs"] });
@@ -54,6 +58,7 @@ export default function Invoices() {
       if (selectedInvoice && updatedInvoice) {
         setSelectedInvoice(updatedInvoice);
       }
+      setPaymentDialogOpen(false);
       toast({ title: "Invoice marked as paid" });
     },
     onError: () => {
@@ -62,13 +67,11 @@ export default function Invoices() {
   });
 
   let filteredInvoices = invoices.filter((invoice: any) => {
-    // Search filter
     const matchesSearch =
       invoice.customerName?.toLowerCase().includes(search.toLowerCase()) ||
       invoice.plateNumber?.toLowerCase().includes(search.toLowerCase()) ||
       invoice.invoiceNumber?.toLowerCase().includes(search.toLowerCase());
     
-    // Status filter
     const matchesStatus = 
       filterStatus === "all" ||
       (filterStatus === "paid" && invoice.paymentStatus === "Paid") ||
@@ -77,7 +80,6 @@ export default function Invoices() {
     return matchesSearch && matchesStatus;
   });
 
-  // Sort
   filteredInvoices = [...filteredInvoices].sort((a: any, b: any) => {
     switch (sortBy) {
       case "date-desc":
@@ -121,7 +123,9 @@ export default function Invoices() {
               <title>Invoice ${selectedInvoice?.invoiceNumber}</title>
               <style>
                 body { font-family: Arial, sans-serif; padding: 20px; }
-                .header { text-align: center; margin-bottom: 30px; }
+                .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+                .logo { height: 60px; }
+                .company-info { text-align: right; }
                 .company-name { font-size: 24px; font-weight: bold; }
                 .invoice-info { display: flex; justify-content: space-between; margin-bottom: 20px; }
                 .customer-info { margin-bottom: 20px; }
@@ -130,6 +134,7 @@ export default function Invoices() {
                 th { background-color: #f5f5f5; }
                 .totals { text-align: right; }
                 .total-row { font-weight: bold; font-size: 18px; }
+                .footer { margin-top: 50px; text-align: center; font-size: 12px; color: #666; }
                 @media print { body { print-color-adjust: exact; } }
               </style>
             </head>
@@ -139,47 +144,42 @@ export default function Invoices() {
           </html>
         `);
         printWindow.document.close();
-        printWindow.print();
+        printWindow.focus();
+        setTimeout(() => {
+          printWindow.print();
+        }, 500);
       }
     }
   };
 
-  const handleDownload = () => {
-    if (!selectedInvoice) return;
+  const handleDownload = async () => {
+    if (!selectedInvoice || !printRef.current) return;
     
-    const invoiceText = `
-Invoice: ${selectedInvoice.invoiceNumber}
-Date: ${new Date(selectedInvoice.createdAt).toLocaleDateString('en-IN')}
+    const html2pdf = (await import('html2pdf.js')).default;
+    const element = printRef.current;
+    const opt = {
+      margin: 1,
+      filename: `Invoice_${selectedInvoice.invoiceNumber}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+    };
 
-Customer: ${selectedInvoice.customerName}
-Phone: ${selectedInvoice.customerPhone}
-Vehicle: ${selectedInvoice.vehicleName} - ${selectedInvoice.plateNumber}
-
-Items:
-${selectedInvoice.items.map((item: any) => 
-  `${item.description} - Qty: ${item.quantity} x Rs.${item.unitPrice} = Rs.${item.total}`
-).join('\n')}
-
-Subtotal: Rs.${selectedInvoice.subtotal.toLocaleString('en-IN')}
-Tax (${selectedInvoice.taxRate}%): Rs.${selectedInvoice.tax.toLocaleString('en-IN')}
-Discount: Rs.${selectedInvoice.discount.toLocaleString('en-IN')}
-Total: Rs.${selectedInvoice.totalAmount.toLocaleString('en-IN')}
-Paid: Rs.${selectedInvoice.paidAmount.toLocaleString('en-IN')}
-Balance: Rs.${(selectedInvoice.totalAmount - selectedInvoice.paidAmount).toLocaleString('en-IN')}
-    `;
-    
-    const blob = new Blob([invoiceText], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${selectedInvoice.invoiceNumber}.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    html2pdf().set(opt).from(element).save();
   };
 
   const isLoading = invoicesLoading;
+
+  const getLogo = () => {
+    return (
+      <div className="flex items-center gap-2">
+        <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+          <Car className="w-6 h-6 text-white" />
+        </div>
+        <span className="text-xl font-bold tracking-tight text-slate-900">AUTOGAMMA</span>
+      </div>
+    );
+  };
 
   return (
     <div className="space-y-8">
@@ -369,7 +369,10 @@ Balance: Rs.${(selectedInvoice.totalAmount - selectedInvoice.paidAmount).toLocal
                         <Button
                           size="sm"
                           className="bg-gradient-to-r from-slate-600 to-slate-700 text-white hover:shadow-lg transition-all"
-                          onClick={() => markPaidMutation.mutate(invoice._id)}
+                          onClick={() => {
+                            setSelectedInvoice(invoice);
+                            setPaymentDialogOpen(true);
+                          }}
                           disabled={markPaidMutation.isPending}
                           data-testid={`button-mark-paid-${invoice._id}`}
                         >
@@ -391,44 +394,20 @@ Balance: Rs.${(selectedInvoice.totalAmount - selectedInvoice.paidAmount).toLocal
           <DialogHeader>
             <DialogTitle className="flex items-center justify-between gap-4">
               <span>Invoice {selectedInvoice?.invoiceNumber}</span>
-              <div className="flex gap-2">
-                <Button variant="outline" size="icon" onClick={handlePrint}>
-                  <Printer className="w-4 h-4" />
-                </Button>
-                <Button variant="outline" size="icon" onClick={handleDownload}>
-                  <Download className="w-4 h-4" />
-                </Button>
-              </div>
             </DialogTitle>
           </DialogHeader>
 
           {selectedInvoice && (
             <div ref={printRef} className="space-y-6">
-              <div className="header text-center">
-                <h2 className="company-name text-2xl font-bold">Auto Garage CRM</h2>
-                <p className="text-muted-foreground">Tax Invoice</p>
+              <div className="header flex justify-between items-center">
+                {getLogo()}
+                <div className="text-right">
+                  <h2 className="text-xl font-bold">Tax Invoice</h2>
+                  <p className="text-sm text-muted-foreground">{selectedInvoice.invoiceNumber}</p>
+                </div>
               </div>
 
               <div className="flex justify-between gap-4 flex-wrap">
-                <div>
-                  <p className="text-sm text-muted-foreground">Invoice Number</p>
-                  <p className="font-bold">{selectedInvoice.invoiceNumber}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm text-muted-foreground">Date</p>
-                  <p className="font-bold">
-                    {new Date(selectedInvoice.createdAt).toLocaleDateString("en-IN", {
-                      day: "2-digit",
-                      month: "short",
-                      year: "numeric",
-                    })}
-                  </p>
-                </div>
-              </div>
-
-              <Separator />
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <h3 className="font-semibold mb-2">Customer Details</h3>
                   <p className="font-medium">{selectedInvoice.customerName}</p>
@@ -448,14 +427,24 @@ Balance: Rs.${(selectedInvoice.totalAmount - selectedInvoice.paidAmount).toLocal
                     </p>
                   )}
                 </div>
-                <div>
+                <div className="text-right">
                   <h3 className="font-semibold mb-2">Vehicle Details</h3>
-                  <p className="font-medium flex items-center gap-1">
+                  <p className="font-medium flex items-center justify-end gap-1">
                     <Car className="w-4 h-4" /> {selectedInvoice.vehicleName}
                   </p>
                   <p className="text-sm text-muted-foreground">
                     Plate: {selectedInvoice.plateNumber}
                   </p>
+                  <div className="mt-2">
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider">Invoice Date</p>
+                    <p className="font-bold">
+                      {new Date(selectedInvoice.createdAt).toLocaleDateString("en-IN", {
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric",
+                      })}
+                    </p>
+                  </div>
                 </div>
               </div>
 
@@ -470,134 +459,177 @@ Balance: Rs.${(selectedInvoice.totalAmount - selectedInvoice.paidAmount).toLocal
                         <th className="text-left p-3">Description</th>
                         <th className="text-right p-3">Unit Price</th>
                         <th className="text-right p-3">Discount</th>
-                        <th className="text-right p-3">Discounted Price</th>
+                        <th className="text-right p-3">Total</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {selectedInvoice.items?.filter((i: any) => i.type === 'service' && i.description !== 'Labor Charge').map((item: any, index: number) => {
-                        const discountedPrice = item.total;
-                        return (
-                          <tr key={`service-${index}`} className="border-t">
-                            <td className="p-3">
-                              {item.description}
-                              <Badge variant="outline" className="ml-2 text-xs bg-blue-50 text-blue-700 border-blue-200">
-                                Service
-                              </Badge>
-                            </td>
-                            <td className="text-right p-3">
-                              <IndianRupee className="w-3 h-3 inline" />
-                              {item.unitPrice.toLocaleString("en-IN")}
-                            </td>
-                            <td className="text-right p-3">
-                              {item.discount && item.discount > 0 ? (
-                                <>
-                                  -<IndianRupee className="w-3 h-3 inline" />
-                                  {item.discount.toLocaleString("en-IN")}
-                                </>
-                              ) : (
-                                <span className="text-gray-400">—</span>
-                              )}
-                            </td>
-                            <td className="text-right p-3 font-semibold">
-                              <IndianRupee className="w-3 h-3 inline" />
-                              {discountedPrice.toLocaleString("en-IN")}
-                            </td>
-                          </tr>
-                        );
-                      })}
+                      {selectedInvoice.items?.map((item: any, index: number) => (
+                        <tr key={`item-${index}`} className="border-t">
+                          <td className="p-3">
+                            {item.description}
+                            <Badge variant="outline" className="ml-2 text-xs bg-slate-50">
+                              {item.type}
+                            </Badge>
+                          </td>
+                          <td className="text-right p-3">
+                            <IndianRupee className="w-3 h-3 inline" />
+                            {item.unitPrice.toLocaleString("en-IN")}
+                          </td>
+                          <td className="text-right p-3 text-red-600">
+                            {item.discount > 0 ? (
+                              <>
+                                -<IndianRupee className="w-3 h-3 inline" />
+                                {item.discount.toLocaleString("en-IN")}
+                              </>
+                            ) : "—"}
+                          </td>
+                          <td className="text-right p-3 font-semibold">
+                            <IndianRupee className="w-3 h-3 inline" />
+                            {item.total.toLocaleString("en-IN")}
+                          </td>
+                        </tr>
+                      ))}
                     </tbody>
                   </table>
                 </div>
-
-                {selectedInvoice.items?.length > 0 && (
-                  <div className="mt-3 p-3 bg-gray-50 rounded-lg space-y-1 border border-gray-200">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Service Cost:</span>
-                      <span className="flex items-center">
-                        <IndianRupee className="w-3 h-3" />
-                        {(selectedInvoice.items?.filter((i: any) => i.type === 'service' && i.description !== 'Labor Charge')?.reduce((sum: number, i: any) => sum + i.total, 0) || 0).toLocaleString("en-IN")}
-                      </span>
-                    </div>
-                  </div>
-                )}
               </div>
 
-              <div className="flex justify-end mt-6">
-                <div className="w-72 space-y-2">
-                  {selectedInvoice.items?.some((i: any) => i.description === 'Labor Charge') && (
-                    <div className="flex justify-between text-slate-700">
-                      <span>Labor Cost:</span>
-                      <span className="flex items-center font-medium">
-                        <IndianRupee className="w-3 h-3" />
-                        {(selectedInvoice.items?.find((i: any) => i.description === 'Labor Charge')?.total || 0).toLocaleString("en-IN")}
+              <div className="flex justify-between items-start gap-8">
+                <div className="flex-1">
+                  {selectedInvoice.notes && (
+                    <div className="text-sm">
+                      <p className="font-semibold mb-1">Notes:</p>
+                      <p className="text-muted-foreground italic">{selectedInvoice.notes}</p>
+                    </div>
+                  )}
+                  {selectedInvoice.paymentStatus === "Paid" && selectedInvoice.paymentMode && (
+                    <div className="mt-4 flex items-center gap-2 text-green-700 bg-green-50 p-2 rounded-md w-fit border border-green-200">
+                      <CreditCard className="w-4 h-4" />
+                      <span className="text-sm font-semibold uppercase tracking-wider">
+                        Paid via {selectedInvoice.paymentMode}
                       </span>
                     </div>
                   )}
-                  
-                  <div className="flex justify-between font-semibold text-slate-700 border-t pt-2">
+                </div>
+                <div className="w-72 space-y-2">
+                  <div className="flex justify-between text-slate-600">
                     <span>Subtotal:</span>
                     <span className="flex items-center">
                       <IndianRupee className="w-3 h-3" />
                       {selectedInvoice.subtotal.toLocaleString("en-IN")}
                     </span>
                   </div>
-
-                  {selectedInvoice.taxRate > 0 && (
-                    <div className="flex justify-between text-slate-700">
-                      <span>GST ({selectedInvoice.taxRate}%):</span>
+                  {selectedInvoice.tax > 0 && (
+                    <div className="flex justify-between text-slate-600">
+                      <span>Tax ({selectedInvoice.taxRate}%):</span>
                       <span className="flex items-center">
                         <IndianRupee className="w-3 h-3" />
                         {selectedInvoice.tax.toLocaleString("en-IN")}
                       </span>
                     </div>
                   )}
-                  
+                  {selectedInvoice.discount > 0 && (
+                    <div className="flex justify-between text-red-600">
+                      <span>Total Discount:</span>
+                      <span className="flex items-center">
+                        -<IndianRupee className="w-3 h-3" />
+                        {selectedInvoice.discount.toLocaleString("en-IN")}
+                      </span>
+                    </div>
+                  )}
                   <Separator />
-                  
-                  <div className="flex justify-between font-bold text-lg text-slate-900">
-                    <span>Total Amount:</span>
-                    <span className="flex items-center text-red-600">
+                  <div className="flex justify-between font-bold text-lg text-slate-900 pt-2">
+                    <span>Grand Total:</span>
+                    <span className="flex items-center">
                       <IndianRupee className="w-4 h-4" />
                       {selectedInvoice.totalAmount.toLocaleString("en-IN")}
                     </span>
                   </div>
-
-                  <div className="flex justify-between text-slate-600 pt-2">
-                    <span>Paid:</span>
+                  <div className="flex justify-between text-sm text-slate-500">
+                    <span>Amount Paid:</span>
                     <span className="flex items-center">
                       <IndianRupee className="w-3 h-3" />
                       {selectedInvoice.paidAmount.toLocaleString("en-IN")}
                     </span>
                   </div>
-
-                  <div className="flex justify-between font-semibold text-orange-600">
-                    <span>Balance Due:</span>
-                    <span className="flex items-center">
-                      <IndianRupee className="w-3 h-3" />
-                      {(selectedInvoice.totalAmount - selectedInvoice.paidAmount).toLocaleString("en-IN")}
-                    </span>
-                  </div>
+                  {(selectedInvoice.totalAmount - selectedInvoice.paidAmount) > 0 && (
+                    <div className="flex justify-between text-sm font-semibold text-red-600">
+                      <span>Balance Due:</span>
+                      <span className="flex items-center">
+                        <IndianRupee className="w-3 h-3" />
+                        {(selectedInvoice.totalAmount - selectedInvoice.paidAmount).toLocaleString("en-IN")}
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
 
-              <div className="flex items-center gap-4">
-                <Badge className={`${getPaymentStatusColor(selectedInvoice.paymentStatus)} w-fit`}>
-                  {selectedInvoice.paymentStatus}
-                </Badge>
-                {selectedInvoice.paymentStatus !== "Paid" && (
-                  <Button
-                    className="bg-slate-600 hover:bg-green-700"
-                    onClick={() => markPaidMutation.mutate(selectedInvoice._id)}
-                    disabled={markPaidMutation.isPending}
-                    data-testid="button-mark-paid-dialog"
-                  >
-                    <CheckCircle className="w-4 h-4 mr-2" />
-                    Mark as Paid
-                  </Button>
-                )}
+              <div className="footer mt-12 text-center text-xs text-slate-400">
+                <p>This is a computer-generated invoice. No signature is required.</p>
+                <p className="mt-1 font-bold">AUTOGAMMA - Premium Auto Detailing Studio</p>
               </div>
             </div>
           )}
+
+          <DialogFooter className="flex justify-start items-center gap-3 mt-6 sm:justify-start">
+            <Button 
+              className="flex items-center gap-2"
+              onClick={handlePrint}
+              data-testid="button-print-modal"
+            >
+              <Printer className="w-4 h-4" />
+              Print Invoice
+            </Button>
+            <Button 
+              variant="outline" 
+              className="flex items-center gap-2"
+              onClick={handleDownload}
+              data-testid="button-download-modal"
+            >
+              <Download className="w-4 h-4" />
+              Download PDF
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={paymentDialogOpen} onOpenChange={setPaymentDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Mark as Paid</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Payment Method</label>
+              <Select value={paymentMode} onValueChange={setPaymentMode}>
+                <SelectTrigger data-testid="select-payment-mode">
+                  <SelectValue placeholder="Select payment method" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Cash">Cash</SelectItem>
+                  <SelectItem value="UPI">UPI</SelectItem>
+                  <SelectItem value="Card">Card</SelectItem>
+                  <SelectItem value="Bank Transfer">Bank Transfer</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <p className="text-sm text-slate-500">
+              This will record a full payment for invoice <span className="font-bold">{selectedInvoice?.invoiceNumber}</span>.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPaymentDialogOpen(false)}>Cancel</Button>
+            <Button 
+              onClick={() => markPaidMutation.mutate({ 
+                invoiceId: selectedInvoice?._id, 
+                paymentMode 
+              })}
+              disabled={markPaidMutation.isPending}
+              data-testid="button-confirm-payment"
+            >
+              Confirm Payment
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

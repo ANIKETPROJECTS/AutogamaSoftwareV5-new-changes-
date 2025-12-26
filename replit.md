@@ -50,6 +50,11 @@ Preferred communication style: Simple, everyday language.
 - Job cards track services, materials, payments, and technician assignments
 - Inventory tracks stock levels with low-stock alerts
 - Stock automatically reduces when materials are used in services (Stock In remains manual)
+- Enhanced Invoice system:
+  - Supports multiple payment modes (Cash, UPI, Card, Bank Transfer)
+  - PDF generation for invoice downloads via html2pdf.js
+  - Branded invoices with AUTOGAMMA logo
+  - Relocated actions for better accessibility (bottom-left in modals)
 
 ## External Dependencies
 
