@@ -56,15 +56,19 @@ export default function CustomerFunnel() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: customers = [], isLoading } = useQuery({
+  const { data: customersData = [], isLoading } = useQuery({
     queryKey: ["customers"],
     queryFn: () => api.customers.list(),
   });
 
-  const { data: jobs = [] } = useQuery({
+  const customers = Array.isArray(customersData) ? customersData : (customersData?.customers || []);
+
+  const { data: jobsData = [] } = useQuery({
     queryKey: ["jobs"],
     queryFn: () => api.jobs.list(),
   });
+
+  const jobs = Array.isArray(jobsData) ? jobsData : (jobsData?.jobs || []);
 
   const getCustomerJobHistory = (customerId: string) => {
     return jobs.filter((job: any) => job.customerId === customerId);

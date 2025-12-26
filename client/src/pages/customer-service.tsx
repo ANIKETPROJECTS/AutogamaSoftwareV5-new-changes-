@@ -68,20 +68,26 @@ export default function CustomerService() {
     }
   }, [location]);
 
-  const { data: customers = [] } = useQuery({
+  const { data: customersData = [] } = useQuery({
     queryKey: ['customers'],
     queryFn: () => api.customers.list(),
   });
 
-  const { data: inventory = [] } = useQuery({
+  const customers = Array.isArray(customersData) ? customersData : (customersData?.customers || []);
+
+  const { data: inventoryData = [] } = useQuery({
     queryKey: ['inventory'],
     queryFn: api.inventory.list,
   });
 
-  const { data: technicians = [] } = useQuery({
+  const inventory = Array.isArray(inventoryData) ? inventoryData : (inventoryData?.inventory || []);
+
+  const { data: techniciansData = [] } = useQuery({
     queryKey: ['technicians'],
     queryFn: api.technicians.list,
   });
+
+  const technicians = Array.isArray(techniciansData) ? techniciansData : (techniciansData?.technicians || []);
 
   const addVehicleMutation = useMutation({
     mutationFn: async ({ customerId, vehicle }: { customerId: string; vehicle: any }) => {
