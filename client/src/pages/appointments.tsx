@@ -515,36 +515,64 @@ export default function Appointments() {
           </div>
         ) : (
           // List View
-          <div className="space-y-2">
+          <div className="space-y-4">
             {filteredAppointments.map((appt: any) => (
               <Card
                 key={appt._id}
-                className="hover-elevate"
+                className="hover-elevate border-slate-200 shadow-sm overflow-hidden"
                 data-testid={`appointment-row-${appt._id}`}
               >
-                <CardContent className="p-4">
-                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div className="flex-1 space-y-1">
-                      <div className="flex items-center gap-3 flex-wrap">
-                        <span className="font-semibold">{appt.customerName}</span>
-                        <Badge className={cn("text-xs", STATUS_COLORS[appt.status])}>
+                <CardContent className="p-0">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between p-5 gap-6">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-3 flex-wrap mb-2">
+                        <h3 className="font-bold text-lg text-slate-900">{appt.customerName}</h3>
+                        <Badge 
+                          className={cn(
+                            "text-[10px] uppercase tracking-wider font-bold px-2 py-0.5", 
+                            STATUS_COLORS[appt.status]
+                          )}
+                        >
                           {appt.status}
                         </Badge>
+                        <span className="text-sm font-semibold text-slate-500 ml-auto md:ml-0">
+                          {format(new Date(appt.date), 'MMM dd, yyyy')} at {appt.time}
+                        </span>
                       </div>
-                      <div className="text-sm text-muted-foreground space-y-1">
-                        <p>{format(new Date(appt.date), 'MMM dd, yyyy')} at {appt.time}</p>
-                        <p>Phone: {appt.customerPhone}</p>
-                        {appt.customerEmail && <p>Email: {appt.customerEmail}</p>}
-                        <p>Vehicle: {appt.vehicleInfo}</p>
-                        <p>Service: {appt.serviceType}</p>
-                        {appt.notes && <p>Notes: {appt.notes}</p>}
+                      
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div className="space-y-0.5">
+                          <span className="text-[10px] uppercase tracking-wider font-bold text-slate-400">Phone</span>
+                          <p className="text-sm font-medium text-slate-700">{appt.customerPhone}</p>
+                        </div>
+                        <div className="space-y-0.5">
+                          <span className="text-[10px] uppercase tracking-wider font-bold text-slate-400">Vehicle</span>
+                          <p className="text-sm font-medium text-slate-700 truncate">{appt.vehicleInfo}</p>
+                        </div>
+                        <div className="space-y-0.5">
+                          <span className="text-[10px] uppercase tracking-wider font-bold text-slate-400">Service</span>
+                          <p className="text-sm font-medium text-slate-700 truncate">{appt.serviceType}</p>
+                        </div>
+                        {appt.customerEmail && (
+                          <div className="space-y-0.5">
+                            <span className="text-[10px] uppercase tracking-wider font-bold text-slate-400">Email</span>
+                            <p className="text-sm font-medium text-slate-700 truncate">{appt.customerEmail}</p>
+                          </div>
+                        )}
                       </div>
+                      
+                      {appt.notes && (
+                        <p className="text-xs text-slate-500 italic mt-3 bg-slate-50 px-2 py-1 rounded border border-slate-100 inline-block">
+                          Note: {appt.notes}
+                        </p>
+                      )}
                     </div>
 
-                    <div className="flex gap-2">
+                    <div className="flex items-center gap-2 pt-4 md:pt-0 border-t md:border-t-0 border-slate-100">
                       {appt.status === 'Scheduled' && (
                         <Button
                           size="sm"
+                          className="font-bold text-xs h-8 px-4"
                           onClick={() => updateStatusMutation.mutate({ id: appt._id, status: 'Done' })}
                           data-testid={`button-done-${appt._id}`}
                         >
@@ -552,13 +580,13 @@ export default function Appointments() {
                         </Button>
                       )}
                       <Button
-                        size="sm"
+                        size="icon"
                         variant="outline"
-                        className="text-destructive"
+                        className="h-8 w-8 text-destructive border-slate-200 hover:bg-red-50 hover:text-red-600 transition-colors"
                         onClick={() => deleteAppointmentMutation.mutate(appt._id)}
                         data-testid={`button-delete-${appt._id}`}
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="w-3.5 h-3.5" />
                       </Button>
                     </div>
                   </div>
