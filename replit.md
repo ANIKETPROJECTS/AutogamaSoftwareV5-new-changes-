@@ -48,6 +48,8 @@ Preferred communication style: Simple, everyday language.
 - Each vehicle can have multiple service jobs
 - Jobs progress through defined stages with WhatsApp notifications
 - Job cards track services, materials, payments, and technician assignments
+- Invoices track billing and payment status, supporting various payment modes (Cash, UPI, Card, Bank Transfer, Credit Card, Debit Card, Cheque, Other)
+- 'Other' payment mode allows entering specific payment details (e.g. Reference No.)
 - Inventory tracks stock levels with low-stock alerts
 - Stock automatically reduces when materials are used in services (Stock In remains manual)
 

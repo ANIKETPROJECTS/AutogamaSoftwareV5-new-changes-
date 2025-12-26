@@ -691,11 +691,18 @@ export default function Invoices() {
                     </div>
                   )}
                   {selectedInvoice.paymentStatus === "Paid" && selectedInvoice.paymentMode && (
-                    <div className="mt-4 flex items-center gap-2 text-green-700 bg-green-50 p-2 rounded-md w-fit border border-green-200">
-                      <CreditCard className="w-4 h-4" />
-                      <span className="text-sm font-semibold uppercase tracking-wider">
-                        Paid via {selectedInvoice.paymentMode}
-                      </span>
+                    <div className="mt-4 flex flex-col gap-1 text-green-700 bg-green-50 p-2 rounded-md w-fit border border-green-200">
+                      <div className="flex items-center gap-2">
+                        <CreditCard className="w-4 h-4" />
+                        <span className="text-sm font-semibold uppercase tracking-wider">
+                          Paid via {selectedInvoice.paymentMode}
+                        </span>
+                      </div>
+                      {selectedInvoice.paymentMode === 'Other' && selectedInvoice.otherPaymentDetails && (
+                        <p className="text-xs font-medium ml-6">
+                          Details: {selectedInvoice.otherPaymentDetails}
+                        </p>
+                      )}
                     </div>
                   )}
                 </div>
