@@ -293,22 +293,50 @@ export default function Invoices() {
     }
   };
 
-  const handleDownload = async () => {
-    if (!selectedInvoice) return;
+  const handleDownload = async (invoice?: any) => {
+    const invoiceToDownload = invoice || selectedInvoice;
+    if (!invoiceToDownload) {
+      toast({ title: "No invoice selected", variant: "destructive" });
+      return;
+    }
     
-    const html2pdf = (await import('html2pdf.js')).default;
-    const element = document.createElement('div');
-    element.innerHTML = getInvoiceHTML();
-    
-    const opt = {
-      margin: 10,
-      filename: `Invoice_${selectedInvoice.invoiceNumber}.pdf`,
-      image: { type: 'jpeg' as const, quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true, logging: false },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' as const }
-    };
+    try {
+      const html2pdf = (await import('html2pdf.js')).default;
+      
+      // Create a complete HTML document
+      const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8" />
+            <style>
+              * { margin: 0; padding: 0; box-sizing: border-box; }
+              body { font-family: Arial, sans-serif; line-height: 1.6; color: #111827; }
+            </style>
+          </head>
+          <body>
+            ${getInvoiceHTML()}
+          </body>
+        </html>
+      `;
+      
+      const element = document.createElement('div');
+      element.innerHTML = htmlContent;
+      
+      const opt = {
+        margin: 10 as any,
+        filename: `Invoice_${invoiceToDownload.invoiceNumber}.pdf`,
+        image: { type: 'jpeg' as const, quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, logging: false, allowTaint: true },
+        jsPDF: { unit: 'mm' as const, format: 'a4', orientation: 'portrait' as const }
+      };
 
-    html2pdf().set(opt).from(element).save();
+      await html2pdf().set(opt).from(element).save();
+      toast({ title: "Invoice downloaded successfully" });
+    } catch (error) {
+      console.error("Download error:", error);
+      toast({ title: "Failed to download invoice", variant: "destructive" });
+    }
   };
 
   const isLoading = invoicesLoading;
@@ -489,10 +517,7 @@ export default function Invoices() {
                         variant="outline"
                         size="icon"
                         className="border-slate-200 text-slate-700"
-                        onClick={() => {
-                          setSelectedInvoice(invoice);
-                          setTimeout(handleDownload, 100);
-                        }}
+                        onClick={() => handleDownload(invoice)}
                         data-testid={`button-download-invoice-${invoice._id}`}
                       >
                         <Download className="w-4 h-4" />
@@ -721,7 +746,7 @@ export default function Invoices() {
             <Button 
               variant="outline" 
               className="flex items-center gap-2"
-              onClick={handleDownload}
+              onClick={() => handleDownload(selectedInvoice)}
               data-testid="button-download-modal"
             >
               <Download className="w-4 h-4" />
