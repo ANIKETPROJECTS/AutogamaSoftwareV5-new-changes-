@@ -454,11 +454,11 @@ export default function CustomerService() {
     const vehicle = customer.vehicles[vehicleIdx];
     if (!vehicle) return;
 
+    const selectedTechnician = (Array.isArray(technicians) ? technicians : []).find((t: any) => t._id === selectedTechnicianId);
+
     const subtotal = totalServiceCost + parsedLaborCost;
     const gstAmount = includeGst ? subtotal * 0.18 : 0;
     const totalAmount = subtotal + gstAmount;
-
-    const selectedTechnician = (Array.isArray(technicians) ? technicians : []).find((t: any) => t._id === selectedTechnicianId);
 
     const serviceItemsList: { name: string; price: number; discount?: number; category?: string; vehicleType?: string; warranty?: string; type: string; cost: number; description: string }[] = [];
     if (ppfPrice > 0) {
@@ -536,6 +536,10 @@ export default function CustomerService() {
   const subtotal = totalServiceAfterDiscount + parsedLaborCost;
   const gst = includeGst ? subtotal * 0.18 : 0;
   const totalCost = subtotal + gst;
+
+  const handleIncludeGstChange = (checked: boolean) => {
+    setIncludeGst(checked);
+  };
 
   const getAvailableWarranties = () => {
     if (!ppfCategory || !ppfVehicleType) return [];
