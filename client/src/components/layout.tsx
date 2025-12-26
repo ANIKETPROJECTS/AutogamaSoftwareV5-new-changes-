@@ -43,15 +43,17 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const { title: pageTitle, subtitle: pageSubtitle } = usePageContext();
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
-  const { data: appointments = [] } = useQuery({
+  const { data: appointmentsData } = useQuery({
     queryKey: ['appointments'],
     queryFn: () => api.appointments.list(),
   });
+  const appointments = appointmentsData?.appointments || appointmentsData || [];
 
-  const { data: jobs = [] } = useQuery({
+  const { data: jobsData } = useQuery({
     queryKey: ['jobs'],
     queryFn: () => api.jobs.list(),
   });
+  const jobs = jobsData?.jobs || jobsData || [];
 
   const pendingAppointments = (Array.isArray(appointments) ? appointments : []).filter((appt: any) => {
     const apptDate = new Date(appt.date);

@@ -95,12 +95,20 @@ export default function Dashboard() {
   }, {});
 
   customers.forEach((customer: any) => {
-    const customerJobs = jobs.filter((job: any) => job.customerId === customer._id);
-    if (customerJobs.length > 0) {
-      const lastJob = customerJobs[customerJobs.length - 1];
-      const stage = lastJob.stage || "New Lead";
-      if (customerStatusCount.hasOwnProperty(stage)) {
-        customerStatusCount[stage]++;
+    // If customer has a status, use it
+    if (customer.status && customerStatusCount.hasOwnProperty(customer.status)) {
+      customerStatusCount[customer.status]++;
+    } else {
+      // Fallback to checking jobs if status is missing or default
+      const customerJobs = jobs.filter((job: any) => job.customerId === customer._id);
+      if (customerJobs.length > 0) {
+        const lastJob = customerJobs[customerJobs.length - 1];
+        const stage = lastJob.stage || "New Lead";
+        if (customerStatusCount.hasOwnProperty(stage)) {
+          customerStatusCount[stage]++;
+        }
+      } else {
+        customerStatusCount["New Lead"]++;
       }
     }
   });
