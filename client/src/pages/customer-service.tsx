@@ -648,30 +648,15 @@ export default function CustomerService() {
                       <SelectValue placeholder="Choose a technician" />
                     </SelectTrigger>
                     <SelectContent>
-                      {technicians.map((t: any) => {
-                        const isSelected = selectedTechnicianId === t._id;
-                        return (
-                          <SelectItem 
-                            key={t._id} 
-                            value={t._id}
-                            disabled={t.status !== 'Available'}
-                          >
-                            <div className="flex items-center justify-between w-full gap-2">
-                              <span className={isSelected ? "text-black dark:text-white" : ""}>{t.name} - {t.specialty}</span>
-                              <Badge 
-                                variant={t.status === 'Available' ? "outline" : "secondary"}
-                                className={`ml-2 text-[10px] px-1.5 py-0 h-4 ${
-                                  t.status === 'Available' ? "text-green-600 border-green-200" : 
-                                  t.status === 'Busy' ? "text-amber-600 border-amber-200" : 
-                                  "text-slate-500 border-slate-200"
-                                }`}
-                              >
-                                {t.status}
-                              </Badge>
-                            </div>
-                          </SelectItem>
-                        );
-                      })}
+                      {technicians.map((t: any) => (
+                        <SelectItem 
+                          key={t._id} 
+                          value={t._id}
+                          disabled={t.status !== 'Available'}
+                        >
+                          <span>{t.name} - {t.specialty}</span>
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
