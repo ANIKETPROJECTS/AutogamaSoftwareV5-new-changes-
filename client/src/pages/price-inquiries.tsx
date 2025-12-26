@@ -14,7 +14,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { Trash2, Phone, Mail, Search, X, AlertCircle, LayoutGrid, List } from 'lucide-react';
+import { Trash2, Phone, Mail, Search, X, AlertCircle, LayoutGrid, List, ChevronDown } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { format } from 'date-fns';
 
 const validatePhone = (phone: string): boolean => {
@@ -231,6 +233,10 @@ export default function PriceInquiries() {
   const [filterService, setFilterService] = useState('');
   const [viewMode, setViewMode] = useState<'card' | 'list'>('card');
   const [errors, setErrors] = useState<{ phone?: string; email?: string }>({});
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [inquiryToDelete, setInquiryToDelete] = useState<any>(null);
+  const [viewDialogOpen, setViewDialogOpen] = useState(false);
+  const [selectedInquiry, setSelectedInquiry] = useState<any>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -370,11 +376,18 @@ export default function PriceInquiries() {
 
     setErrors({});
     const serviceDetails = selectedServiceItems.map(item => `${item.name} (${item.carType})`).join(', ');
+    const serviceDetailsJson = JSON.stringify(selectedServiceItems.map(item => ({
+      name: item.name,
+      carType: item.carType,
+      servicePrice: item.price,
+      customerPrice: item.customerPrice
+    })));
     createMutation.mutate({
       name: formData.get('name'),
       phone: phone,
       email: email || '',
       service: serviceDetails,
+      serviceDetailsJson: serviceDetailsJson,
       priceOffered: getTotalPrice(),
       priceStated: getTotalCustomerPrice(),
       notes: formData.get('notes') || ''
@@ -712,7 +725,10 @@ export default function PriceInquiries() {
                           size="icon"
                           variant="ghost"
                           className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
-                          onClick={() => deleteMutation.mutate(inquiry._id.toString ? inquiry._id.toString() : inquiry._id)}
+                          onClick={() => {
+                            setInquiryToDelete(inquiry);
+                            setDeleteDialogOpen(true);
+                          }}
                           disabled={deleteMutation.isPending}
                           data-testid={`button-delete-${inquiry._id}`}
                         >
@@ -799,7 +815,10 @@ export default function PriceInquiries() {
                         size="icon"
                         variant="ghost"
                         className="text-red-600 h-8 w-8 hover:bg-red-50"
-                        onClick={() => deleteMutation.mutate(inquiry._id.toString ? inquiry._id.toString() : inquiry._id)}
+                        onClick={() => {
+                          setInquiryToDelete(inquiry);
+                          setDeleteDialogOpen(true);
+                        }}
                         disabled={deleteMutation.isPending}
                         data-testid={`button-delete-list-${inquiry._id}`}
                       >
@@ -813,6 +832,119 @@ export default function PriceInquiries() {
           </div>
         )}
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Inquiry</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete the inquiry for <strong>{inquiryToDelete?.name}</strong>? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="flex gap-3 justify-end">
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (inquiryToDelete) {
+                  deleteMutation.mutate(inquiryToDelete._id.toString ? inquiryToDelete._id.toString() : inquiryToDelete._id);
+                  setDeleteDialogOpen(false);
+                }
+              }}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Delete
+            </AlertDialogAction>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* View Inquiry Details Dialog */}
+      <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
+        <DialogContent className="max-w-3xl max-h-screen overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Inquiry Details</DialogTitle>
+          </DialogHeader>
+          {selectedInquiry && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-muted-foreground">Customer Name</p>
+                  <p className="font-semibold">{selectedInquiry.name}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Phone</p>
+                  <p className="font-semibold">{selectedInquiry.phone}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Email</p>
+                  <p className="font-semibold">{selectedInquiry.email || 'N/A'}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Date</p>
+                  <p className="font-semibold">{selectedInquiry.createdAt ? format(new Date(selectedInquiry.createdAt), 'MMM dd, yyyy') : 'N/A'}</p>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="font-semibold mb-3">Services</h3>
+                <div className="border rounded-lg overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="bg-slate-100">
+                        <th className="p-3 text-left">Service</th>
+                        <th className="p-3 text-left">Car Type</th>
+                        <th className="p-3 text-left">Service Price (₹)</th>
+                        <th className="p-3 text-left">Customer Price (₹)</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {selectedInquiry.serviceDetailsJson ? (
+                        JSON.parse(selectedInquiry.serviceDetailsJson).map((service: any, idx: number) => (
+                          <tr key={idx} className="border-t">
+                            <td className="p-3">{service.name}</td>
+                            <td className="p-3">{service.carType}</td>
+                            <td className="p-3 font-semibold">{service.servicePrice}</td>
+                            <td className="p-3 font-semibold">{service.customerPrice || '-'}</td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr className="border-t">
+                          <td colSpan={4} className="p-3 text-center text-muted-foreground">
+                            {selectedInquiry.service}
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4 pt-4 border-t">
+                <div>
+                  <p className="text-sm text-muted-foreground">Our Price</p>
+                  <p className="text-lg font-bold">₹{selectedInquiry.priceOffered.toLocaleString()}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Customer Price</p>
+                  <p className="text-lg font-bold">₹{selectedInquiry.priceStated.toLocaleString()}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Difference</p>
+                  <p className="text-lg font-bold">₹{Math.abs(selectedInquiry.priceStated - selectedInquiry.priceOffered).toLocaleString()}</p>
+                </div>
+              </div>
+
+              {selectedInquiry.notes && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Notes</p>
+                  <p className="font-semibold">{selectedInquiry.notes}</p>
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
