@@ -401,17 +401,18 @@ export default function CustomerService() {
           unit: 'Square Feet'
         }]);
       } else {
-        if (val > roll.remaining_meters) {
-          toast({ title: `Only ${roll.remaining_meters}m available in this roll`, variant: 'destructive' });
+        // This shouldn't happen since we only use Square Feet, but keep for safety
+        if (val > roll.remaining_sqft) {
+          toast({ title: `Only ${roll.remaining_sqft} sqft available in this roll`, variant: 'destructive' });
           return;
         }
         setSelectedItems([...selectedItems, {
           inventoryId: selectedItemId,
           rollId: selectedRollId,
           metersUsed: val,
-          quantity: val, // Ensure quantity is also set for display
+          quantity: val,
           name: `${item.name} - ${roll.name}`,
-          unit: 'meters'
+          unit: 'Square Feet'
         }]);
       }
     } else {
@@ -874,7 +875,7 @@ export default function CustomerService() {
                           <SelectContent>
                             {inventory.map((item: any) => (
                               <SelectItem key={item._id} value={item._id}>
-                                {item.name} ({item.rolls?.filter((r: any) => r.remaining_meters > 0 || r.remaining_sqft > 0).length || 0} rolls)
+                                {item.name} ({item.rolls?.filter((r: any) => r.remaining_sqft > 0).length || 0} rolls)
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -891,7 +892,7 @@ export default function CustomerService() {
                             <SelectContent>
                               {getAvailableRolls().map((roll: any) => (
                                 <SelectItem key={roll._id} value={roll._id}>
-                                  {roll.name} ({roll.remaining_sqft > 0 ? `${roll.remaining_sqft}sqft` : `${roll.remaining_meters}m`} left)
+                                  {roll.name} ({roll.remaining_sqft} sqft left)
                                 </SelectItem>
                               ))}
                             </SelectContent>
@@ -903,11 +904,7 @@ export default function CustomerService() {
                     {selectedItemId && (
                       <div className="space-y-1">
                         <Label className="text-[10px] text-slate-400 font-bold uppercase">
-                          {selectedRollId ? (() => {
-                            const item = (Array.isArray(inventory) ? inventory : []).find((inv: any) => inv._id === selectedItemId);
-                            const roll = item?.rolls?.find((r: any) => r._id === selectedRollId);
-                            return roll?.remaining_sqft > 0 ? 'Size to be Used (Square Feet)' : 'Size to be Used (Meters)';
-                          })() : 'Quantity'}
+                          {selectedRollId ? 'Amount to be Used (Square Feet)' : 'Quantity'}
                         </Label>
                         <div className="flex gap-2">
                           <Input
@@ -946,7 +943,7 @@ export default function CustomerService() {
                           <div className="flex flex-col">
                             <span className="text-sm font-medium text-slate-700">{item.name}</span>
                             <span className="text-[10px] text-slate-400 font-semibold uppercase">
-                              {item.unit === 'Square Feet' ? `${item.quantity} Sqft` : `${item.quantity} Meters`}
+                              {item.quantity} Sqft
                             </span>
                           </div>
                           <Button
