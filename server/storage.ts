@@ -669,6 +669,3 @@ export class MongoStorage implements IStorage {
 }
 
 export const storage = new MongoStorage();
-}
-
-export const storage = new MongoStorage();
