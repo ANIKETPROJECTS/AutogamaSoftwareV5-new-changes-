@@ -69,26 +69,26 @@ export default function CustomerService() {
     }
   }, [location]);
 
-  const { data: customersData = [] } = useQuery({
+  const { data: customersData = [] } = useQuery<any>({
     queryKey: ['customers'],
     queryFn: () => api.customers.list(),
   });
 
-  const customers = Array.isArray(customersData) ? customersData : (customersData?.customers || []);
+  const customers = Array.isArray(customersData) ? customersData : (customersData as any)?.customers || [];
 
-  const { data: inventoryData = [] } = useQuery({
+  const { data: inventoryData = [] } = useQuery<any>({
     queryKey: ['inventory'],
     queryFn: api.inventory.list,
   });
 
-  const inventory = Array.isArray(inventoryData) ? inventoryData : (inventoryData?.inventory || []);
+  const inventory = Array.isArray(inventoryData) ? inventoryData : (inventoryData as any)?.inventory || [];
 
-  const { data: techniciansData = [] } = useQuery({
+  const { data: techniciansData = [] } = useQuery<any>({
     queryKey: ['technicians'],
     queryFn: api.technicians.list,
   });
 
-  const technicians = Array.isArray(techniciansData) ? techniciansData : (techniciansData?.technicians || []);
+  const technicians = Array.isArray(techniciansData) ? techniciansData : (techniciansData as any)?.technicians || [];
 
   const addVehicleMutation = useMutation({
     mutationFn: async ({ customerId, vehicle }: { customerId: string; vehicle: any }) => {
@@ -460,7 +460,7 @@ export default function CustomerService() {
 
     const selectedTechnician = (Array.isArray(technicians) ? technicians : []).find((t: any) => t._id === selectedTechnicianId);
 
-    const serviceItemsList: { name: string; price: number; discount?: number; category?: string; vehicleType?: string; warranty?: string }[] = [];
+    const serviceItemsList: { name: string; price: number; discount?: number; category?: string; vehicleType?: string; warranty?: string; type: string; cost: number; description: string }[] = [];
     if (ppfPrice > 0) {
       serviceItemsList.push({
         name: `PPF ${ppfCategory} - ${ppfWarranty}`,
@@ -468,7 +468,10 @@ export default function CustomerService() {
         discount: ppfDiscountAmount,
         category: ppfCategory,
         vehicleType: ppfVehicleType,
-        warranty: ppfWarranty
+        warranty: ppfWarranty,
+        type: 'part',
+        cost: ppfPrice,
+        description: `PPF ${ppfCategory} - ${ppfWarranty}`
       });
     }
     selectedOtherServices.forEach(s => {
@@ -476,9 +479,23 @@ export default function CustomerService() {
         name: s.name,
         price: s.price,
         discount: s.discount || 0,
-        vehicleType: s.vehicleType
+        vehicleType: s.vehicleType,
+        type: 'part',
+        cost: s.price,
+        description: s.name
       });
     });
+
+    if (parsedLaborCost > 0) {
+      serviceItemsList.push({
+        name: 'Labor Charge',
+        price: parsedLaborCost,
+        discount: 0,
+        type: 'labor',
+        cost: parsedLaborCost,
+        description: 'Labor Charge'
+      });
+    }
 
     const materialsList = selectedItems.map(item => ({
       inventoryId: item.inventoryId,
@@ -503,7 +520,8 @@ export default function CustomerService() {
       materials: materialsList,
       totalAmount: totalAmount,
       paidAmount: 0,
-      paymentStatus: 'Pending'
+      paymentStatus: 'Pending',
+      requiresGST: includeGst
     });
   };
 

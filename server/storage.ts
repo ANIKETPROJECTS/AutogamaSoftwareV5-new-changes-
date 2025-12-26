@@ -668,101 +668,86 @@ export class MongoStorage implements IStorage {
   }
 
   async generateInvoiceForJob(jobId: string, taxRate: number = 18, discount: number = 0): Promise<IInvoice | null> {
-    const job = await this.getJob(jobId);
-    if (!job) return null;
+    try {
+      if (!mongoose.Types.ObjectId.isValid(jobId)) return null;
+      
+      const job = await Job.findById(jobId);
+      if (!job) return null;
 
-    const existingInvoice = await this.getInvoiceByJob(jobId);
-    if (existingInvoice) return existingInvoice;
+      const customer = await Customer.findById(job.customerId);
+      if (!customer) return null;
 
-    const customer = await this.getCustomer(job.customerId.toString());
+      // Check if invoice already exists
+      const existingInvoice = await Invoice.findOne({ jobId });
+      if (existingInvoice) return existingInvoice;
 
-    const items: any[] = [];
+      // Use job's requiresGST if it exists, otherwise use taxRate parameter
+      const effectiveTaxRate = (job as any).requiresGST === false ? 0 : taxRate;
 
-    // Add service items (PPF service + other services) to invoice (excluding labor)
-    let serviceTotal = 0;
-    if (job.serviceItems && job.serviceItems.length > 0) {
-      for (const service of job.serviceItems) {
-        const originalPrice = (service as any).price || 0;
-        const serviceDiscount = (service as any).discount || 0;
-        const discountedPrice = originalPrice - serviceDiscount;
-        items.push({
-          description: (service as any).name || (service as any).description || 'Service',
-          quantity: 1,
-          unitPrice: originalPrice,
-          total: discountedPrice,
-          type: 'service',
-          discount: serviceDiscount,
-          discountPercentage: (service as any).discountPercentage || 0
-        });
-        serviceTotal += originalPrice;
+      // Generate invoice number
+      const highestInvoice = await Invoice.findOne({ invoiceNumber: { $regex: /^INV/ } })
+        .sort({ invoiceNumber: -1 })
+        .select('invoiceNumber');
+      
+      let nextNumber = 1;
+      if (highestInvoice && highestInvoice.invoiceNumber) {
+        const currentNumber = parseInt(highestInvoice.invoiceNumber.split('-').pop() || '0', 10);
+        nextNumber = currentNumber + 1;
       }
-    }
+      
+      const invoiceNumber = `INV-${new Date().getFullYear()}-${String(nextNumber).padStart(5, '0')}`;
 
-    // Add labor cost if present (separate, will not receive discount)
-    if (job.laborCost && job.laborCost > 0) {
-      items.push({
-        description: 'Labor Charge',
+      // Calculate items
+      const items = job.serviceItems.map((item: any) => ({
+        description: item.name || item.description,
         quantity: 1,
-        unitPrice: job.laborCost,
-        total: job.laborCost,
-        type: 'service',
-        discount: 0,
-        discountPercentage: 0
+        unitPrice: item.price || item.cost,
+        discount: item.discount || 0,
+        total: (item.price || item.cost) - (item.discount || 0),
+        type: 'service'
+      }));
+
+      const subtotal = items.reduce((sum, item) => sum + item.total, 0);
+      const taxAmount = (subtotal * effectiveTaxRate) / 100;
+      const totalAmount = subtotal + taxAmount - discount;
+
+      const invoice = new Invoice({
+        invoiceNumber,
+        jobId: job._id,
+        customerId: customer._id,
+        customerName: customer.name,
+        customerPhone: customer.phone,
+        customerEmail: customer.email,
+        customerAddress: customer.address,
+        vehicleName: job.vehicleName,
+        plateNumber: job.plateNumber,
+        items,
+        subtotal,
+        tax: taxAmount,
+        taxRate: effectiveTaxRate,
+        discount,
+        totalAmount,
+        paidAmount: job.paidAmount,
+        paymentStatus: job.paymentStatus,
+        createdAt: new Date(),
+        updatedAt: new Date()
       });
+
+      const savedInvoice = await invoice.save();
+      
+      // Update job with total amount including tax if it changed
+      if (totalAmount !== job.totalAmount) {
+        await Job.findByIdAndUpdate(jobId, { totalAmount });
+      }
+
+      return savedInvoice;
+    } catch (error) {
+      console.error("Error generating invoice:", error);
+      throw error;
     }
-
-    // If no items found but job has totalAmount, create a generic service item with that amount
-    if (items.length === 0 && job.totalAmount && job.totalAmount > 0) {
-      items.push({
-        description: 'Service & Parts',
-        quantity: 1,
-        unitPrice: job.totalAmount,
-        total: job.totalAmount,
-        type: 'service',
-        discount: 0,
-        discountPercentage: 0
-      });
-      serviceTotal = job.totalAmount;
-    }
-
-    // If still no items found, return null
-    if (items.length === 0) {
-      console.warn(`No service items found for job ${jobId}`);
-      return null;
-    }
-
-    // Calculate totals: Services (with individual discounts) + Labor + GST
-    // Subtotal uses the total field which is already the discounted price
-    const subtotal = items.reduce((sum, item) => sum + item.total, 0);
-    const tax = (subtotal * taxRate) / 100;
-    const totalAmount = subtotal + tax;
-
-    const invoiceCount = await Invoice.countDocuments();
-    const invoiceNumber = `INV-${new Date().getFullYear()}-${String(invoiceCount + 1).padStart(5, '0')}`;
-
-    const invoice = await this.createInvoice({
-      invoiceNumber,
-      jobId: job._id as mongoose.Types.ObjectId,
-      customerId: job.customerId,
-      customerName: job.customerName,
-      customerPhone: customer?.phone || '',
-      customerEmail: customer?.email,
-      customerAddress: customer?.address,
-      vehicleName: job.vehicleName,
-      plateNumber: job.plateNumber,
-      items,
-      subtotal,
-      tax,
-      taxRate,
-      discount,
-      totalAmount,
-      paidAmount: job.paidAmount,
-      paymentStatus: job.paymentStatus,
-      notes: job.notes
-    });
-
-    return invoice;
   }
+
+  async addMaterialsToJob(jobId: string, materials: { inventoryId: string; quantity: number }[]): Promise<IJob | null> {
 }
 
 export const storage = new MongoStorage();
