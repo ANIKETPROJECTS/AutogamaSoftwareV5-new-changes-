@@ -979,7 +979,7 @@ export default function CustomerService() {
                     </div>
                   </div>
 
-                  <div className="flex justify-between text-xl font-black border-t-2 border-dashed pt-4 mt-2 text-red-600">
+                  <div className="flex justify-between text-lg font-semibold border-t-2 border-dashed pt-4 mt-2 text-slate-900">
                     <span>Total Amount:</span>
                     <span>₹{totalCost.toLocaleString('en-IN')}</span>
                   </div>
