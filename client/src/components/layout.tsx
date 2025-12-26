@@ -53,13 +53,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
     queryFn: () => api.jobs.list(),
   });
 
-  const pendingAppointments = appointments.filter((appt: any) => {
+  const pendingAppointments = (Array.isArray(appointments) ? appointments : []).filter((appt: any) => {
     const apptDate = new Date(appt.date);
     const today = new Date();
     return apptDate.toDateString() === today.toDateString() && appt.status === 'Scheduled';
   }).length;
 
-  const completedJobsToday = jobs.filter((job: any) => {
+  const completedJobsToday = (Array.isArray(jobs) ? jobs : []).filter((job: any) => {
     const jobDate = new Date(job.createdAt);
     const today = new Date();
     return job.stage === 'Completed' && jobDate.toDateString() === today.toDateString();
