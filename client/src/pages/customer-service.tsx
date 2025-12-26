@@ -122,10 +122,8 @@ export default function CustomerService() {
         for (const item of selectedItems) {
           try {
             if (item.rollId && item.metersUsed) {
-              // Deduct from roll
               await api.inventory.deductRoll(item.inventoryId, item.rollId, item.metersUsed);
             } else if (item.quantity) {
-              // Deduct from regular inventory
               await api.inventory.adjust(item.inventoryId, -item.quantity);
             }
           } catch (error: any) {
@@ -157,6 +155,7 @@ export default function CustomerService() {
     setIncludeGst(true);
     setSelectedItems([]);
     setSelectedItemId('');
+    setSelectedRollId('');
     setMetersUsed('1');
     setPpfCategory('');
     setPpfVehicleType('');
@@ -185,25 +184,20 @@ export default function CustomerService() {
       try {
         const prefs = await api.customers.getVehiclePreferences(selectedCustomerId, parseInt(selectedVehicleIndex, 10));
         if (prefs) {
-          // Set PPF details
           let category = prefs.ppfCategory || '';
           let vehicleType = prefs.ppfVehicleType || '';
           let warranty = prefs.ppfWarranty || '';
           let price = prefs.ppfPrice || 0;
           
-          // Validate warranty exists for the category/vehicleType combination
           if (category && vehicleType && warranty) {
             const categoryData = PPF_CATEGORIES[category];
             if (!categoryData || !categoryData[vehicleType] || !categoryData[vehicleType][warranty]) {
-              // Warranty doesn't exist for this category/vehicle type, clear it
               warranty = '';
               price = 0;
             } else if (price === 0) {
-              // If warranty is valid but price is 0, calculate it
               price = categoryData[vehicleType][warranty];
             }
           } else {
-            // Missing category or vehicleType, clear warranty and price
             warranty = '';
             price = 0;
           }
@@ -217,7 +211,6 @@ export default function CustomerService() {
             setLaborCost(prefs.laborCost.toString());
           }
           if (Array.isArray(prefs.otherServices) && prefs.otherServices.length > 0) {
-            // Load preferences and look up prices from catalog
             const servicesWithPrices = prefs.otherServices.map((svc: any) => {
               const serviceData = OTHER_SERVICES[svc.name];
               const price = serviceData && serviceData[svc.vehicleType] ? serviceData[svc.vehicleType] : 0;
@@ -235,7 +228,6 @@ export default function CustomerService() {
           }
         }
       } catch (error) {
-        // No preferences found
       } finally {
         setIsLoadingLastService(false);
       }
@@ -245,7 +237,6 @@ export default function CustomerService() {
   }, [selectedCustomerId, selectedVehicleIndex]);
 
   useEffect(() => {
-    // Auto-calculate and update price whenever warranty, category, or vehicle type changes
     if (!ppfCategory || !ppfVehicleType || !ppfWarranty) {
       if (!ppfWarranty) {
         setPpfPrice(0);
@@ -253,13 +244,11 @@ export default function CustomerService() {
       return;
     }
     
-    // Always recalculate price when warranty changes
     const categoryData = PPF_CATEGORIES[ppfCategory];
     if (categoryData && categoryData[ppfVehicleType] && categoryData[ppfVehicleType][ppfWarranty]) {
       const calculatedPrice = categoryData[ppfVehicleType][ppfWarranty];
       setPpfPrice(calculatedPrice);
     } else {
-      // If the warranty doesn't exist for this category/vehicle combo, reset price
       setPpfPrice(0);
     }
   }, [ppfCategory, ppfVehicleType, ppfWarranty]);
@@ -274,7 +263,6 @@ export default function CustomerService() {
       return;
     }
     
-    // Copy preferences from existing vehicle (if available) to new vehicle
     const newVehicle: any = {
       make: newVehicleMake,
       model: newVehicleModel,
@@ -283,7 +271,6 @@ export default function CustomerService() {
       color: newVehicleColor || undefined,
     };
     
-    // Inherit PPF and service preferences from customer's existing vehicle
     if (selectedCustomer?.vehicles?.[0]) {
       const firstVehicle = selectedCustomer.vehicles[0];
       if (firstVehicle.ppfCategory) newVehicle.ppfCategory = firstVehicle.ppfCategory;
@@ -347,7 +334,6 @@ export default function CustomerService() {
     const item = (Array.isArray(inventory) ? inventory : []).find((inv: any) => inv._id === selectedItemId);
     if (!item) return;
 
-    // If item has rolls, user must select one
     if (item.rolls && item.rolls.length > 0) {
       if (!selectedRollId) {
         toast({ title: 'Please select a roll', variant: 'destructive' });
@@ -380,11 +366,10 @@ export default function CustomerService() {
         inventoryId: selectedItemId,
         rollId: selectedRollId,
         metersUsed: meters,
-        name: `${item.name} - ${roll.name}`,
+        name: `${item.name} - ${roll.name} (${roll.remaining_meters}m avail)`,
         unit: 'meters'
       }]);
     } else {
-      // Regular item without rolls - use quantity
       const qty = parseInt(metersUsed, 10);
       if (isNaN(qty) || qty <= 0) {
         toast({ title: 'Please enter a valid quantity', variant: 'destructive' });
@@ -468,7 +453,7 @@ export default function CustomerService() {
     const materialsList = selectedItems.map(item => ({
       inventoryId: item.inventoryId,
       name: item.name,
-      quantity: item.quantity,
+      quantity: item.quantity || item.metersUsed,
       cost: 0
     }));
     
@@ -562,7 +547,6 @@ export default function CustomerService() {
                           onClick={() => setShowAddVehicle(!showAddVehicle)}
                           data-testid="button-toggle-add-vehicle"
                         >
-                           
                           Add New Vehicle
                         </Button>
                       </div>
@@ -577,312 +561,227 @@ export default function CustomerService() {
                             <span>Choose a vehicle</span>
                           )}
                         </SelectTrigger>
-                        <SelectContent position="popper" className="max-h-60 w-[var(--radix-select-trigger-width)]">
-                          {selectedCustomer.vehicles.map((vehicle: any, index: number) => (
-                            <SelectItem key={index} value={index.toString()}>
-                              <div className="flex items-center gap-2">
-                                <Car className="w-4 h-4" />
-                                {vehicle.make} {vehicle.model} - {vehicle.plateNumber}
-                              </div>
+                        <SelectContent>
+                          {selectedCustomer.vehicles.map((v: any, idx: number) => (
+                            <SelectItem key={idx} value={idx.toString()}>
+                              {v.make} {v.model} - {v.plateNumber}
                             </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
                     </div>
 
-                    {showAddVehicle && (
-                      <Card className="bg-gradient-to-br from-slate-50 to-white border border-dashed border-slate-300 shadow-sm">
-                        <CardContent className="pt-4 space-y-3">
-                          <div className="grid grid-cols-2 gap-3">
-                            <div className="space-y-1">
-                              <Label className="text-xs">Make *</Label>
-                              <Input
-                                value={newVehicleMake}
-                                onChange={(e) => setNewVehicleMake(e.target.value)}
-                                placeholder="e.g., Toyota"
-                                data-testid="input-new-vehicle-make"
-                              />
-                            </div>
-                            <div className="space-y-1">
-                              <Label className="text-xs">Model *</Label>
-                              <Input
-                                value={newVehicleModel}
-                                onChange={(e) => setNewVehicleModel(e.target.value)}
-                                placeholder="e.g., Camry"
-                                data-testid="input-new-vehicle-model"
-                              />
-                            </div>
-                          </div>
-                          <div className="grid grid-cols-3 gap-3">
-                            <div className="space-y-1">
-                              <Label className="text-xs">Plate Number *</Label>
-                              <Input
-                                value={newVehiclePlate}
-                                onChange={(e) => setNewVehiclePlate(e.target.value)}
-                                placeholder="e.g., MH12AB1234"
-                                data-testid="input-new-vehicle-plate"
-                              />
-                            </div>
-                            <div className="space-y-1">
-                              <Label className="text-xs">Year</Label>
-                              <Input
-                                type="number"
-                                value={newVehicleYear}
-                                onChange={(e) => setNewVehicleYear(e.target.value)}
-                                placeholder="e.g., 2023"
-                                data-testid="input-new-vehicle-year"
-                              />
-                            </div>
-                            <div className="space-y-1">
-                              <Label className="text-xs">Color</Label>
-                              <Input
-                                value={newVehicleColor}
-                                onChange={(e) => setNewVehicleColor(e.target.value)}
-                                placeholder="e.g., White"
-                                data-testid="input-new-vehicle-color"
-                              />
-                            </div>
-                          </div>
-                          <div className="flex justify-end gap-2 pt-3 border-t border-slate-200">
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="sm"
-                              className="border-slate-300 text-slate-700 hover:bg-slate-100"
-                              onClick={() => setShowAddVehicle(false)}
-                            >
-                              Cancel
-                            </Button>
-                            <Button
-                              type="button"
-                              size="sm"
-                              className="bg-gradient-to-r from-primary to-primary/90 text-white hover:shadow-lg transition-all"
-                              onClick={handleAddVehicle}
-                              disabled={addVehicleMutation.isPending}
-                              data-testid="button-save-new-vehicle"
-                            >
-                              {addVehicleMutation.isPending ? 'Adding...' : 'Add Vehicle'}
-                            </Button>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    )}
-                  </>
-                )}
-
-                <div className="space-y-2">
-                  <Label>Assign Technician</Label>
-                  <Select value={selectedTechnicianId} onValueChange={setSelectedTechnicianId}>
-                    <SelectTrigger data-testid="select-technician">
-                      <SelectValue placeholder="Select a technician (optional)" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {technicians.map((tech: any) => (
-                        <SelectItem key={tech._id} value={tech._id}>
-                          <div className="flex items-center gap-2">
-                            <User className="w-4 h-4" />
-                            {tech.name} - {tech.specialty}
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <Card className="bg-gradient-to-br from-white to-slate-50 border border-red-200">
-                  <CardHeader className="py-4 cursor-pointer hover:bg-slate-50/50 transition-colors border-b border-red-200 bg-gradient-to-r from-primary/5 to-transparent" onClick={() => setShowPpfSection(!showPpfSection)}>
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="text-base font-semibold text-slate-900">PPF Service</CardTitle>
-                      {showPpfSection ? <ChevronUp className="w-4 h-4 text-slate-600" /> : <ChevronDown className="w-4 h-4 text-slate-600" />}
+                    <div className="space-y-2">
+                      <Label>Assign Technician</Label>
+                      <Select value={selectedTechnicianId} onValueChange={setSelectedTechnicianId}>
+                        <SelectTrigger data-testid="select-technician">
+                          <SelectValue placeholder="Choose a technician" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {technicians.map((t: any) => (
+                            <SelectItem key={t._id} value={t._id}>
+                              {t.name} - {t.specialty}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
-                  </CardHeader>
-                  {showPpfSection && (
-                    <CardContent className="space-y-3 pt-4">
-                      {selectedVehicleIndex !== '' && ppfCategory && (
-                        <div className="bg-primary/5 border border-primary/20 rounded-lg p-3 text-sm text-primary font-medium">
-                          Auto-filled from previous service - feel free to edit
+
+                    <Card className="border border-red-200">
+                      <CardHeader className="py-3 cursor-pointer" onClick={() => setShowPpfSection(!showPpfSection)}>
+                        <div className="flex items-center justify-between">
+                          <CardTitle className="text-base">PPF Service</CardTitle>
+                          {showPpfSection ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                         </div>
-                      )}
-                      <div className="space-y-2">
-                        <Label className="text-sm">PPF Category</Label>
-                        <Select value={ppfCategory} onValueChange={(val) => {
-                          setPpfCategory(val);
-                          setPpfWarranty('');
-                        }} disabled={isLoadingLastService}>
-                          <SelectTrigger data-testid="select-ppf-category">
-                            <SelectValue placeholder="Select PPF category" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {Object.keys(PPF_CATEGORIES).map((cat) => (
-                              <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label className="text-sm">Vehicle Type</Label>
-                        <Select value={ppfVehicleType} onValueChange={(val) => {
-                          setPpfVehicleType(val);
-                          setPpfWarranty('');
-                        }} disabled={isLoadingLastService}>
-                          <SelectTrigger data-testid="select-ppf-vehicle-type">
-                            <SelectValue placeholder="Select vehicle type" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {VEHICLE_TYPES.map((type) => (
-                              <SelectItem key={type} value={type}>{type}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label className="text-sm">Warranty / Variant</Label>
-                        <Select value={ppfWarranty} onValueChange={setPpfWarranty} disabled={!ppfCategory || !ppfVehicleType || isLoadingLastService}>
-                          <SelectTrigger data-testid="select-ppf-warranty">
-                            <SelectValue placeholder="Select warranty" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {getAvailableWarranties().map((warranty) => (
-                              <SelectItem key={warranty} value={warranty}>{warranty}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      {ppfPrice > 0 && (
-                        <div className="space-y-3">
-                          <div className="bg-gray-50 p-3 rounded-md border border-gray-200">
-                            <div className="flex justify-between items-center">
-                              <span className="text-sm font-medium">PPF Service Price:</span>
-                              <span className="text-lg font-bold text-primary">₹{ppfPrice.toLocaleString('en-IN')}</span>
+                      </CardHeader>
+                      {showPpfSection && (
+                        <CardContent className="space-y-3">
+                          {selectedVehicleIndex !== '' && ppfCategory && (
+                            <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded p-2 text-xs text-blue-700 dark:text-blue-300">
+                              Auto-filled from previous service - feel free to edit
                             </div>
+                          )}
+                          <div className="space-y-2">
+                            <Label className="text-sm">PPF Category</Label>
+                            <Select value={ppfCategory} onValueChange={(val) => {
+                              setPpfCategory(val);
+                              setPpfWarranty('');
+                            }} disabled={isLoadingLastService}>
+                              <SelectTrigger data-testid="select-ppf-category">
+                                <SelectValue placeholder="Select category" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {Object.keys(PPF_CATEGORIES).map((cat) => (
+                                  <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
                           </div>
-                          <div className="w-full">
-                            <Label className="text-xs">Discount</Label>
-                            <Input
-                              type="number"
-                              min="0"
-                              step="1"
-                              value={ppfDiscount}
-                              onChange={(e) => setPpfDiscount(e.target.value)}
-                              placeholder=""
-                              data-testid="input-ppf-discount-card"
-                              className="mt-1 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&]:appearance-none"
-                            />
+
+                          <div className="space-y-2">
+                            <Label className="text-sm">Vehicle Type</Label>
+                            <Select value={ppfVehicleType} onValueChange={(val) => {
+                              setPpfVehicleType(val);
+                              setPpfWarranty('');
+                            }} disabled={isLoadingLastService}>
+                              <SelectTrigger data-testid="select-ppf-vehicle-type">
+                                <SelectValue placeholder="Select vehicle type" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {VEHICLE_TYPES.map((type) => (
+                                  <SelectItem key={type} value={type}>{type}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
                           </div>
-                        </div>
-                      )}
-                    </CardContent>
-                  )}
-                </Card>
 
-                <Card className="border border-red-200">
-                  <CardHeader className="py-3 cursor-pointer" onClick={() => setShowOtherServicesSection(!showOtherServicesSection)}>
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="text-base">Other Services</CardTitle>
-                      {showOtherServicesSection ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                    </div>
-                  </CardHeader>
-                  {showOtherServicesSection && (
-                    <CardContent className="space-y-3">
-                      {selectedVehicleIndex !== '' && selectedOtherServices.length > 0 && (
-                        <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded p-2 text-sm text-blue-700 dark:text-blue-300">
-                          Auto-filled from previous service - feel free to edit
-                        </div>
-                      )}
-                      <div className="space-y-2">
-                        <Label className="text-sm">Select Service</Label>
-                        <Select value={otherServiceName} onValueChange={setOtherServiceName} disabled={isLoadingLastService}>
-                          <SelectTrigger data-testid="select-other-service">
-                            <SelectValue placeholder="Choose a service" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {Object.keys(OTHER_SERVICES).map((service) => (
-                              <SelectItem key={service} value={service}>{service}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
+                          <div className="space-y-2">
+                            <Label className="text-sm">Warranty / Variant</Label>
+                            <Select value={ppfWarranty} onValueChange={setPpfWarranty} disabled={!ppfCategory || !ppfVehicleType || isLoadingLastService}>
+                              <SelectTrigger data-testid="select-ppf-warranty">
+                                <SelectValue placeholder="Select warranty" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {getAvailableWarranties().map((warranty) => (
+                                  <SelectItem key={warranty} value={warranty}>{warranty}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
 
-                      <div className="space-y-2">
-                        <Label className="text-sm">Vehicle Type</Label>
-                        <Select value={otherServiceVehicleType} onValueChange={setOtherServiceVehicleType} disabled={isLoadingLastService}>
-                          <SelectTrigger data-testid="select-other-service-vehicle-type">
-                            <SelectValue placeholder="Select vehicle type" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {VEHICLE_TYPES.map((type) => (
-                              <SelectItem key={type} value={type}>{type}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={handleAddOtherService}
-                        disabled={!otherServiceName || !otherServiceVehicleType}
-                        className="w-full"
-                        data-testid="button-add-other-service"
-                      >
-                         
-                        Add Service
-                      </Button>
-
-                      {selectedOtherServices.length > 0 && (
-                        <div className="space-y-2 mt-3">
-                          <Label className="text-sm">Selected Services</Label>
-                          <div className="border rounded-lg divide-y">
-                            {selectedOtherServices.map((service, index) => (
-                              <div key={index} className="space-y-2 p-3">
-                                <div className="flex items-center justify-between">
-                                  <div>
-                                    <p className="font-medium text-sm">{service.name}</p>
-                                    <p className="text-xs text-muted-foreground">{service.vehicleType}</p>
-                                  </div>
-                                  <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="icon"
-                                    onClick={() => handleRemoveOtherService(index)}
-                                    data-testid={`button-remove-other-service-${index}`}
-                                  >
-                                    <Trash2 className="w-4 h-4 text-red-500" />
-                                  </Button>
-                                </div>
-                                <div className="flex gap-3 items-end">
-                                  <div className="flex-1">
-                                    <Label className="text-xs">Price: ₹{service.price.toLocaleString('en-IN')}</Label>
-                                  </div>
-                                  <div className="w-32">
-                                    <Label className="text-xs">Discount</Label>
-                                    <Input
-                                      type="number"
-                                      min="0"
-                                      step="1"
-                                      value={service.discount || ''}
-                                      onChange={(e) => {
-                                        const newServices = [...selectedOtherServices];
-                                        newServices[index].discount = parseFloat(e.target.value) || 0;
-                                        setSelectedOtherServices(newServices);
-                                      }}
-                                      placeholder=""
-                                      data-testid={`input-service-discount-${index}`}
-                                      className="mt-1 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&]:appearance-none"
-                                    />
-                                  </div>
+                          {ppfPrice > 0 && (
+                            <div className="space-y-3">
+                              <div className="bg-gray-50 p-3 rounded-md border border-gray-200">
+                                <div className="flex justify-between items-center">
+                                  <span className="text-sm font-medium">PPF Service Price:</span>
+                                  <span className="text-lg font-bold text-primary">₹{ppfPrice.toLocaleString('en-IN')}</span>
                                 </div>
                               </div>
-                            ))}
-                          </div>
-                        </div>
+                              <div className="w-full">
+                                <Label className="text-xs">Discount</Label>
+                                <Input
+                                  type="number"
+                                  min="0"
+                                  step="1"
+                                  value={ppfDiscount}
+                                  onChange={(e) => setPpfDiscount(e.target.value)}
+                                  placeholder=""
+                                  data-testid="input-ppf-discount-card"
+                                  className="mt-1 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&]:appearance-none"
+                                />
+                              </div>
+                            </div>
+                          )}
+                        </CardContent>
                       )}
-                    </CardContent>
-                  )}
-                </Card>
+                    </Card>
+
+                    <Card className="border border-red-200">
+                      <CardHeader className="py-3 cursor-pointer" onClick={() => setShowOtherServicesSection(!showOtherServicesSection)}>
+                        <div className="flex items-center justify-between">
+                          <CardTitle className="text-base">Other Services</CardTitle>
+                          {showOtherServicesSection ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                        </div>
+                      </CardHeader>
+                      {showOtherServicesSection && (
+                        <CardContent className="space-y-3">
+                          {selectedVehicleIndex !== '' && selectedOtherServices.length > 0 && (
+                            <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded p-2 text-sm text-blue-700 dark:text-blue-300">
+                              Auto-filled from previous service - feel free to edit
+                            </div>
+                          )}
+                          <div className="space-y-2">
+                            <Label className="text-sm">Select Service</Label>
+                            <Select value={otherServiceName} onValueChange={setOtherServiceName} disabled={isLoadingLastService}>
+                              <SelectTrigger data-testid="select-other-service">
+                                <SelectValue placeholder="Choose a service" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {Object.keys(OTHER_SERVICES).map((service) => (
+                                  <SelectItem key={service} value={service}>{service}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label className="text-sm">Vehicle Type</Label>
+                            <Select value={otherServiceVehicleType} onValueChange={setOtherServiceVehicleType} disabled={isLoadingLastService}>
+                              <SelectTrigger data-testid="select-other-service-vehicle-type">
+                                <SelectValue placeholder="Select vehicle type" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {VEHICLE_TYPES.map((type) => (
+                                  <SelectItem key={type} value={type}>{type}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={handleAddOtherService}
+                            disabled={!otherServiceName || !otherServiceVehicleType}
+                            className="w-full"
+                            data-testid="button-add-other-service"
+                          >
+                            Add Service
+                          </Button>
+
+                          {selectedOtherServices.length > 0 && (
+                            <div className="space-y-2 mt-3">
+                              <Label className="text-sm">Selected Services</Label>
+                              <div className="border rounded-lg divide-y">
+                                {selectedOtherServices.map((service, index) => (
+                                  <div key={index} className="space-y-2 p-3">
+                                    <div className="flex items-center justify-between">
+                                      <div>
+                                        <p className="font-medium text-sm">{service.name}</p>
+                                        <p className="text-xs text-muted-foreground">{service.vehicleType}</p>
+                                      </div>
+                                      <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="icon"
+                                        onClick={() => handleRemoveOtherService(index)}
+                                        data-testid={`button-remove-other-service-${index}`}
+                                      >
+                                        <Trash2 className="w-4 h-4 text-red-500" />
+                                      </Button>
+                                    </div>
+                                    <div className="flex gap-3 items-end">
+                                      <div className="flex-1">
+                                        <Label className="text-xs">Price: ₹{service.price.toLocaleString('en-IN')}</Label>
+                                      </div>
+                                      <div className="w-32">
+                                        <Label className="text-xs">Discount</Label>
+                                        <Input
+                                          type="number"
+                                          min="0"
+                                          step="1"
+                                          value={service.discount || ''}
+                                          onChange={(e) => {
+                                            const newServices = [...selectedOtherServices];
+                                            newServices[index].discount = parseFloat(e.target.value) || 0;
+                                            setSelectedOtherServices(newServices);
+                                          }}
+                                          placeholder=""
+                                          data-testid={`input-service-discount-${index}`}
+                                          className="mt-1 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&]:appearance-none"
+                                        />
+                                      </div>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </CardContent>
+                      )}
+                    </Card>
+                  </>
+                )}
               </div>
 
               <div className="space-y-6">
@@ -947,29 +846,26 @@ export default function CustomerService() {
                           <SelectValue placeholder="Choose product" />
                         </SelectTrigger>
                         <SelectContent>
-                          {inventory.filter((item: any) => item.rolls?.length > 0).map((item: any) => (
+                          {inventory.map((item: any) => (
                             <SelectItem key={item._id} value={item._id}>
-                              {item.name || item.category} ({item.rolls?.length || 0} rolls)
+                              {item.name || item.category} ({item.rolls && item.rolls.length > 0 ? `${item.rolls.filter((r: any) => r.remaining_meters > 0).length} rolls` : `${item.quantity} ${item.unit}`})
                             </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
                     </div>
 
-                    {selectedItemId && getAvailableRolls().length > 0 && (
-                      <div>
-                        <Label className="text-xs">Select Roll</Label>
-                        <Select value={selectedRollId} onValueChange={(val) => {
-                          setSelectedRollId(val);
-                          setMetersUsed('1');
-                        }}>
-                          <SelectTrigger className="mt-1" data-testid="select-roll">
-                            <SelectValue placeholder="Choose roll" />
+                    {selectedItemId && (Array.isArray(inventory) ? inventory : []).find((inv: any) => inv._id === selectedItemId)?.rolls?.length > 0 && (
+                      <div className="space-y-2">
+                        <Label className="text-xs">Select Roll *</Label>
+                        <Select value={selectedRollId} onValueChange={setSelectedRollId}>
+                          <SelectTrigger className="bg-white" data-testid="select-roll">
+                            <SelectValue placeholder="Select a roll" />
                           </SelectTrigger>
                           <SelectContent>
                             {getAvailableRolls().map((roll: any) => (
                               <SelectItem key={roll._id} value={roll._id}>
-                                {roll.name} ({roll.remaining_meters}m remaining)
+                                {roll.name} - {roll.remaining_meters}m available
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -977,26 +873,27 @@ export default function CustomerService() {
                       </div>
                     )}
 
-                    {selectedRollId && (
+                    {(selectedRollId || (selectedItemId && !(Array.isArray(inventory) ? inventory : []).find((inv: any) => inv._id === selectedItemId)?.rolls?.length)) && (
                       <div>
-                        <Label className="text-xs">Square Feet to be Used</Label>
+                        <Label className="text-xs">{selectedRollId ? 'Meters to be Used' : 'Quantity'}</Label>
                         <Input 
                           type="number"
                           min="0.1"
                           step="0.1"
-                          placeholder="Enter square feet"
+                          placeholder={selectedRollId ? "Enter meters" : "Enter quantity"}
                           value={metersUsed}
                           onChange={(e) => setMetersUsed(e.target.value)}
                           className="mt-1"
-                          data-testid="input-square-feet-used"
+                          data-testid="input-inventory-quantity"
                         />
                       </div>
                     )}
 
                     <Button
+                      type="button"
                       onClick={handleAddItem}
                       className="w-full bg-primary"
-                      disabled={!selectedItemId || !selectedRollId || !metersUsed}
+                      disabled={!selectedItemId || (!!(Array.isArray(inventory) ? inventory : []).find((inv: any) => inv._id === selectedItemId)?.rolls?.length && !selectedRollId) || !metersUsed}
                       data-testid="button-add-item"
                     >
                       <Plus className="w-4 h-4 mr-2" />
@@ -1012,9 +909,9 @@ export default function CustomerService() {
                       {selectedItems.map((item, index) => (
                         <div key={index} className="flex items-center justify-between p-3">
                           <div>
-                            <p className="font-medium">{item.name}</p>
-                            <p className="text-sm text-muted-foreground">
-                              {item.quantity} {item.unit}
+                            <p className="font-medium text-sm">{item.name}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {item.quantity || item.metersUsed} {item.unit}
                             </p>
                           </div>
                           <Button
@@ -1071,51 +968,111 @@ export default function CustomerService() {
                       <span>₹{totalServiceCost.toLocaleString('en-IN')}</span>
                     </div>
                   )}
-                  
+
+                  {parsedLaborCost > 0 && (
+                    <div className="flex justify-between text-sm">
+                      <span>Labor Cost:</span>
+                      <span>₹{parsedLaborCost.toLocaleString('en-IN')}</span>
+                    </div>
+                  )}
+
                   <div className="flex justify-between text-sm">
-                    <span>Labor Cost:</span>
-                    <span>₹{parsedLaborCost.toLocaleString('en-IN')}</span>
-                  </div>
-                  
-                  <div className="flex justify-between text-sm text-muted-foreground">
                     <span>Subtotal:</span>
                     <span>₹{subtotal.toLocaleString('en-IN')}</span>
                   </div>
-                  
+
                   {includeGst && (
-                    <div className="flex justify-between text-sm">
+                    <div className="flex justify-between text-sm text-slate-600">
                       <span>GST (18%):</span>
                       <span>₹{gst.toLocaleString('en-IN')}</span>
                     </div>
                   )}
-                  
-                  <div className="border-t pt-2 mt-2">
-                    <div className="flex justify-between font-bold text-lg">
-                      <span>Total Amount:</span>
-                      <span className="text-primary">₹{totalCost.toLocaleString('en-IN')}</span>
-                    </div>
+
+                  <div className="flex justify-between text-lg font-bold border-t pt-3 text-red-600">
+                    <span>Total Cost:</span>
+                    <span>₹{totalCost.toLocaleString('en-IN')}</span>
                   </div>
+
+                  <Button
+                    type="submit"
+                    className="w-full bg-red-600 hover:bg-red-700 text-white font-bold h-12 rounded-lg mt-4 shadow-lg hover:shadow-xl transition-all duration-300 active:scale-[0.98]"
+                    disabled={createJobMutation.isPending}
+                    data-testid="button-create-service"
+                  >
+                    {createJobMutation.isPending ? 'Creating...' : 'Confirm & Create Service'}
+                  </Button>
                 </div>
               </div>
-            </div>
-
-            <div className="flex justify-end gap-4 pt-4">
-              <Button type="button" variant="outline" onClick={resetForm} className="border-slate-300">
-                <X className="w-4 h-4 mr-2" />
-                Clear Form
-              </Button>
-              <Button
-                type="submit"
-                className="bg-gradient-to-r from-slate-500 to-slate-600 hover:from-green-600 hover:to-green-700 text-white shadow-lg"
-                disabled={createJobMutation.isPending || !selectedCustomerId || !selectedVehicleIndex || (ppfPrice <= 0 && selectedOtherServices.length === 0 && !parsedLaborCost)}
-                data-testid="button-create-service"
-              >
-                {createJobMutation.isPending ? 'Creating...' : 'Create Service'}
-              </Button>
             </div>
           </form>
         </CardContent>
       </Card>
+
+      {showAddVehicle && (
+        <Card className="bg-white border-2 border-red-200">
+          <CardHeader>
+            <CardTitle className="text-lg">Add New Vehicle</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Make *</Label>
+                <Input
+                  value={newVehicleMake}
+                  onChange={(e) => setNewVehicleMake(e.target.value)}
+                  placeholder="e.g. Toyota"
+                  data-testid="input-new-vehicle-make"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Model *</Label>
+                <Input
+                  value={newVehicleModel}
+                  onChange={(e) => setNewVehicleModel(e.target.value)}
+                  placeholder="e.g. Camry"
+                  data-testid="input-new-vehicle-model"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Plate Number *</Label>
+                <Input
+                  value={newVehiclePlate}
+                  onChange={(e) => setNewVehiclePlate(e.target.value)}
+                  placeholder="e.g. ABC 123"
+                  data-testid="input-new-vehicle-plate"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Year</Label>
+                <Input
+                  type="number"
+                  value={newVehicleYear}
+                  onChange={(e) => setNewVehicleYear(e.target.value)}
+                  placeholder="e.g. 2023"
+                  data-testid="input-new-vehicle-year"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Color</Label>
+                <Input
+                  value={newVehicleColor}
+                  onChange={(e) => setNewVehicleColor(e.target.value)}
+                  placeholder="e.g. White"
+                  data-testid="input-new-vehicle-color"
+                />
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button onClick={handleAddVehicle} disabled={addVehicleMutation.isPending} className="flex-1" data-testid="button-confirm-add-vehicle">
+                {addVehicleMutation.isPending ? 'Adding...' : 'Add Vehicle'}
+              </Button>
+              <Button variant="outline" onClick={() => setShowAddVehicle(false)} className="flex-1" data-testid="button-cancel-add-vehicle">
+                Cancel
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
