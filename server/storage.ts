@@ -642,8 +642,11 @@ export class MongoStorage implements IStorage {
       if (!item) {
         throw new Error(`Inventory item not found: ${mat.inventoryId}`);
       }
-      if (item.quantity < mat.quantity) {
-        throw new Error(`Insufficient stock for ${item.name}. Available: ${item.quantity}, Requested: ${mat.quantity}`);
+      // Only validate stock if item doesn't have rolls (rolls are already deducted separately)
+      if (!item.rolls || item.rolls.length === 0) {
+        if (item.quantity < mat.quantity) {
+          throw new Error(`Insufficient stock for ${item.name}. Available: ${item.quantity}, Requested: ${mat.quantity}`);
+        }
       }
       validatedMaterials.push({ item, quantity: mat.quantity });
     }
@@ -675,8 +678,11 @@ export class MongoStorage implements IStorage {
       throw new Error('Failed to update job with materials');
     }
 
+    // Only adjust inventory for items without rolls (rolls were already deducted)
     for (const { item, quantity } of validatedMaterials) {
-      await this.adjustInventory(item._id!.toString(), -quantity);
+      if (!item.rolls || item.rolls.length === 0) {
+        await this.adjustInventory(item._id!.toString(), -quantity);
+      }
     }
 
     return updatedJob;
