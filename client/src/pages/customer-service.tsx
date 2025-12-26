@@ -51,6 +51,7 @@ export default function CustomerService() {
   const [ppfVehicleType, setPpfVehicleType] = useState('');
   const [ppfWarranty, setPpfWarranty] = useState('');
   const [ppfPrice, setPpfPrice] = useState(0);
+  const [ppfWarrantyFromPreferences, setPpfWarrantyFromPreferences] = useState(false);
 
   const [selectedOtherServices, setSelectedOtherServices] = useState<SelectedService[]>([]);
   const [otherServiceName, setOtherServiceName] = useState('');
@@ -161,6 +162,7 @@ export default function CustomerService() {
     setPpfVehicleType('');
     setPpfWarranty('');
     setPpfPrice(0);
+    setPpfWarrantyFromPreferences(false);
     setSelectedOtherServices([]);
     setOtherServiceName('');
     setOtherServiceVehicleType('');
@@ -196,6 +198,9 @@ export default function CustomerService() {
           // This avoids the catalog useEffect clearing the price
           setTimeout(() => {
             setPpfWarranty(warranty);
+            if (warranty) {
+              setPpfWarrantyFromPreferences(true);
+            }
             
             let price = prefs.ppfPrice || 0;
             if (price === 0 && category && vehicleType && warranty) {
@@ -624,6 +629,7 @@ export default function CustomerService() {
                         <Select value={ppfCategory} onValueChange={(val) => {
                           setPpfCategory(val);
                           setPpfWarranty('');
+                          setPpfWarrantyFromPreferences(false);
                         }} disabled={isLoadingLastService}>
                           <SelectTrigger data-testid="select-ppf-category">
                             <SelectValue placeholder="Select category" />
@@ -641,6 +647,7 @@ export default function CustomerService() {
                         <Select value={ppfVehicleType} onValueChange={(val) => {
                           setPpfVehicleType(val);
                           setPpfWarranty('');
+                          setPpfWarrantyFromPreferences(false);
                         }} disabled={isLoadingLastService}>
                           <SelectTrigger data-testid="select-ppf-vehicle-type">
                             <SelectValue placeholder="Select vehicle type" />
@@ -655,8 +662,11 @@ export default function CustomerService() {
 
                       <div className="space-y-2">
                         <Label className="text-sm">Warranty / Variant</Label>
-                        <Select value={ppfWarranty} onValueChange={setPpfWarranty} disabled={!ppfCategory || !ppfVehicleType || isLoadingLastService}>
-                          <SelectTrigger data-testid="select-ppf-warranty" className={ppfWarranty && isLoadingLastService ? 'border-red-500' : ''}>
+                        <Select value={ppfWarranty} onValueChange={(val) => {
+                          setPpfWarranty(val);
+                          setPpfWarrantyFromPreferences(false);
+                        }} disabled={!ppfCategory || !ppfVehicleType || isLoadingLastService}>
+                          <SelectTrigger data-testid="select-ppf-warranty" className={ppfWarranty && ppfWarrantyFromPreferences ? 'border-red-500' : ''}>
                             <SelectValue placeholder="Select warranty" />
                           </SelectTrigger>
                           <SelectContent>
