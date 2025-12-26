@@ -366,7 +366,7 @@ export default function CustomerService() {
         inventoryId: selectedItemId,
         rollId: selectedRollId,
         metersUsed: meters,
-        name: `${item.name} - ${roll.name}`,
+        name: `${item.name} - ${roll.name} (${roll.remaining_meters}m remaining)`,
         unit: 'meters'
       }]);
     } else {
@@ -856,12 +856,12 @@ export default function CustomerService() {
 
                     {(selectedRollId || (selectedItemId && !(Array.isArray(inventory) ? inventory : []).find((inv: any) => inv._id === selectedItemId)?.rolls?.length)) && (
                       <div>
-                        <Label className="text-xs">{selectedRollId ? 'Meters to be Used' : 'Quantity'}</Label>
+                        <Label className="text-xs">{selectedRollId ? 'Size to be Used (meters)' : 'Quantity'}</Label>
                         <Input 
                           type="number"
                           min="0.1"
                           step="0.1"
-                          placeholder={selectedRollId ? "Enter meters" : "Enter quantity"}
+                          placeholder={selectedRollId ? "Enter size to be used" : "Enter quantity"}
                           value={metersUsed}
                           onChange={(e) => setMetersUsed(e.target.value)}
                           className="mt-1"
