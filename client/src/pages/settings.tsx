@@ -54,20 +54,6 @@ export default function Settings() {
     updateTemplateMutation.mutate({ stage, message, isActive });
   };
 
-  const statusTemplates = [
-    { status: 'Inquired', message: 'Thank you for your inquiry! We have received your service request for {{service}}. Our team will contact you shortly.' },
-    { status: 'Working', message: 'Work has started on your vehicle for {{service}}. We will keep you updated on the progress.' },
-    { status: 'Waiting', message: 'Your vehicle service ({{service}}) is currently on hold. We will notify you once we resume work.' },
-    { status: 'Completed', message: 'Great news! Your {{service}} service has been completed. Please visit us to collect your vehicle.' },
-  ];
-
-  return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="font-display text-3xl font-bold tracking-tight text-foreground">Settings</h1>
-        <p className="text-muted-foreground mt-1">Manage your garage information and WhatsApp integration</p>
-      </div>
-
       <div className="grid gap-6 max-w-3xl">
         <Card className="card-modern">
           <CardHeader>
@@ -206,32 +192,6 @@ export default function Settings() {
                 </div>
               </div>
             </div>
-          </CardContent>
-        </Card>
-
-        <Card className="card-modern">
-          <CardHeader>
-            <CardTitle className="text-foreground font-medium flex items-center gap-2">
-              <MessageCircle className="w-5 h-5 text-primary" />
-              Customer Status Message Templates
-            </CardTitle>
-            <CardDescription>
-              These messages are sent automatically when you update a customer's service status.
-              Use <code className="bg-muted px-1 rounded">{'{{service}}'}</code> to include the service name.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {statusTemplates.map((template) => (
-              <div key={template.status} className="p-4 border rounded-lg space-y-2">
-                <div className="flex items-center justify-between">
-                  <Badge variant="outline" className="text-sm">
-                    {template.status}
-                  </Badge>
-                  <CheckCircle2 className="w-4 h-4 text-green-500" />
-                </div>
-                <p className="text-sm text-muted-foreground">{template.message}</p>
-              </div>
-            ))}
           </CardContent>
         </Card>
 
