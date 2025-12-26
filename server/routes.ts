@@ -440,8 +440,9 @@ export async function registerRoutes(
       const item = await storage.deductRoll(req.params.id, req.params.rollId, metersUsed);
       if (!item) return res.status(404).json({ message: "Item or roll not found" });
       res.json(item);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to deduct from roll" });
+    } catch (error: any) {
+      console.error("Deduct roll error:", error?.message || error);
+      res.status(500).json({ message: error?.message || "Failed to deduct from roll" });
     }
   });
 

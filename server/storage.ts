@@ -338,30 +338,28 @@ export class MongoStorage implements IStorage {
     const roll = item.rolls.find(r => r._id?.toString() === rollId);
     if (!roll) return null;
     
-    // Handle deduction based on unit type
-    // Check if roll is in square feet mode (when remaining_sqft is non-zero but remaining_meters is 0 or very small)
-    const isSquareFeetMode = roll.remaining_sqft > 0 && (roll.remaining_meters === 0 || roll.squareFeet > roll.meters);
+    // Handle deduction based on what we have available
+    // If remaining_sqft is set (non-zero), deduct from that, otherwise from meters
+    const hasSquareFeet = roll.remaining_sqft && roll.remaining_sqft > 0;
     
-    if (isSquareFeetMode) {
-      // For square feet rolls, deduct from remaining_sqft directly
+    if (hasSquareFeet) {
+      // Deduct from square feet
       roll.remaining_sqft = Math.max(0, roll.remaining_sqft - metersUsed);
-      // Recalculate remaining_meters based on the ratio
+      // Sync meters proportionally if both exist
       if (roll.squareFeet > 0 && roll.meters > 0) {
-        const metersPerSqft = roll.meters / roll.squareFeet;
-        roll.remaining_meters = roll.remaining_sqft * metersPerSqft;
+        roll.remaining_meters = (roll.remaining_sqft / roll.squareFeet) * roll.meters;
       }
     } else {
-      // For meter-based rolls, deduct from remaining_meters
+      // Deduct from meters (default)
       roll.remaining_meters = Math.max(0, roll.remaining_meters - metersUsed);
-      // Recalculate remaining_sqft based on the ratio
+      // Sync sqft proportionally if both exist
       if (roll.meters > 0) {
-        const sqftPerMeter = roll.squareFeet / roll.meters;
-        roll.remaining_sqft = roll.remaining_meters * sqftPerMeter;
+        roll.remaining_sqft = (roll.remaining_meters / roll.meters) * roll.squareFeet;
       }
     }
     
-    // Mark as Finished if all stock is depleted
-    if (roll.remaining_meters === 0 || roll.remaining_sqft === 0) {
+    // Mark as Finished if depleted
+    if (roll.remaining_meters <= 0 && roll.remaining_sqft <= 0) {
       roll.status = 'Finished';
     }
     
