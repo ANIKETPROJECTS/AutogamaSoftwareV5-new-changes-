@@ -582,49 +582,55 @@ export default function PriceInquiries() {
                   {selectedServiceItems.length > 0 && (
                     <div className="mb-4">
                       <div className="border rounded-lg overflow-x-auto">
-                        <div className="bg-slate-100 p-3 font-semibold text-sm grid grid-cols-5 gap-2 min-w-max">
-                          <div>Service</div>
-                          <div>Car Type</div>
-                          <div>Service Price (₹)</div>
-                          <div>Customer Price (₹)</div>
-                          <div>Action</div>
-                        </div>
-                        {selectedServiceItems.map((item) => (
-                          <div key={item.id} className="border-t p-3 grid grid-cols-5 gap-2 items-center text-sm min-w-max">
-                            <div>{item.name}</div>
-                            <div>{item.carType}</div>
-                            <div className="font-semibold">{item.price}</div>
-                            <div>
-                              <Input
-                                type="number"
-                                value={item.customerPrice ?? ''}
-                                onChange={(e) => {
-                                  const val = e.target.value;
-                                  updateServiceCustomerPrice(item.id, val === '' ? undefined : parseFloat(val));
-                                }}
-                                className="w-32"
-                                min="0"
-                                data-testid={`input-service-customer-price-${item.id}`}
-                              />
-                            </div>
-                            <Button
-                              type="button"
-                              variant="destructive"
-                              size="sm"
-                              onClick={() => removeServiceItem(item.id)}
-                              data-testid={`button-delete-service-${item.id}`}
-                            >
-                              Delete
-                            </Button>
-                          </div>
-                        ))}
-                        <div className="border-t bg-blue-50 p-3 font-bold grid grid-cols-5 gap-2 text-sm min-w-max">
-                          <div>Total:</div>
-                          <div></div>
-                          <div className="text-blue-600">₹{getTotalPrice()}</div>
-                          <div></div>
-                          <div></div>
-                        </div>
+                        <table className="w-full">
+                          <thead>
+                            <tr className="bg-slate-100">
+                              <th className="p-3 text-left font-semibold text-sm w-1/5">Service</th>
+                              <th className="p-3 text-left font-semibold text-sm w-1/5">Car Type</th>
+                              <th className="p-3 text-left font-semibold text-sm w-1/5">Service Price (₹)</th>
+                              <th className="p-3 text-left font-semibold text-sm w-1/5">Customer Price (₹)</th>
+                              <th className="p-3 text-left font-semibold text-sm w-1/5">Action</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {selectedServiceItems.map((item) => (
+                              <tr key={item.id} className="border-t">
+                                <td className="p-3 text-sm w-1/5">{item.name}</td>
+                                <td className="p-3 text-sm w-1/5">{item.carType}</td>
+                                <td className="p-3 text-sm font-semibold w-1/5">{item.price}</td>
+                                <td className="p-3 text-sm w-1/5">
+                                  <Input
+                                    type="number"
+                                    value={item.customerPrice ?? ''}
+                                    onChange={(e) => {
+                                      const val = e.target.value;
+                                      updateServiceCustomerPrice(item.id, val === '' ? undefined : parseFloat(val));
+                                    }}
+                                    className="w-full"
+                                    min="0"
+                                    data-testid={`input-service-customer-price-${item.id}`}
+                                  />
+                                </td>
+                                <td className="p-3 text-sm w-1/5">
+                                  <Button
+                                    type="button"
+                                    variant="destructive"
+                                    size="sm"
+                                    onClick={() => removeServiceItem(item.id)}
+                                    data-testid={`button-delete-service-${item.id}`}
+                                  >
+                                    Delete
+                                  </Button>
+                                </td>
+                              </tr>
+                            ))}
+                            <tr className="border-t bg-blue-50">
+                              <td colSpan={2} className="p-3 text-sm font-bold">Total:</td>
+                              <td className="p-3 text-sm font-bold text-blue-600">₹{getTotalPrice()}</td>
+                              <td colSpan={2}></td>
+                            </tr>
+                          </tbody>
+                        </table>
                       </div>
                     </div>
                   )}
