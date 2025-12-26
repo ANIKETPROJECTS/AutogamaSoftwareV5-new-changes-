@@ -224,21 +224,23 @@ export default function CustomerService() {
             setPpfWarrantyFromPreferences(true);
           }
           
-          // Load other services
+          // Load other services (excluding Labor Charge which has its own field)
           if (Array.isArray(prefs.otherServices) && prefs.otherServices.length > 0) {
-            const servicesWithPrices = prefs.otherServices.map((svc: any) => {
-              const serviceData = OTHER_SERVICES[svc.name];
-              const price = serviceData && serviceData[svc.vehicleType] ? serviceData[svc.vehicleType] : 0;
-              return {
-                name: svc.name,
-                vehicleType: svc.vehicleType || '',
-                price: price,
-                discount: 0
-              };
-            });
+            const servicesWithPrices = prefs.otherServices
+              .filter((svc: any) => svc.name !== 'Labor Charge') // Exclude Labor Charge - it has its own field
+              .map((svc: any) => {
+                const serviceData = OTHER_SERVICES[svc.name];
+                const price = serviceData && serviceData[svc.vehicleType] ? serviceData[svc.vehicleType] : 0;
+                return {
+                  name: svc.name,
+                  vehicleType: svc.vehicleType || '',
+                  price: price,
+                  discount: 0
+                };
+              });
             setSelectedOtherServices(servicesWithPrices);
             
-            // Pre-fill the form fields with all services for user to see and edit
+            // Pre-fill the form fields with the first service for user to see and edit
             if (servicesWithPrices.length > 0) {
               setOtherServiceName(servicesWithPrices[0].name);
               setOtherServiceVehicleType(servicesWithPrices[0].vehicleType);
