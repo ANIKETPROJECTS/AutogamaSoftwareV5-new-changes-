@@ -50,7 +50,7 @@ export default function Invoices() {
 
   const markPaidMutation = useMutation({
     mutationFn: (data: { invoiceId: string; paymentMode: string }) => 
-      api.apiRequest("PATCH", `/api/invoices/${data.invoiceId}/pay`, { paymentMode: data.paymentMode }),
+      api.invoices.markPaid(data.invoiceId, undefined, data.paymentMode),
     onSuccess: (updatedInvoice: any) => {
       queryClient.invalidateQueries({ queryKey: ["invoices"] });
       queryClient.invalidateQueries({ queryKey: ["jobs"] });
@@ -160,9 +160,9 @@ export default function Invoices() {
     const opt = {
       margin: 1,
       filename: `Invoice_${selectedInvoice.invoiceNumber}.pdf`,
-      image: { type: 'jpeg', quality: 0.98 },
+      image: { type: 'jpeg' as const, quality: 0.98 },
       html2canvas: { scale: 2 },
-      jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+      jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' as const }
     };
 
     html2pdf().set(opt).from(element).save();
