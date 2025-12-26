@@ -772,7 +772,7 @@ export default function CustomerRegistration() {
                     <SelectTrigger data-testid="select-state">
                       <SelectValue placeholder="Select state" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="max-h-60 overflow-y-auto">
                       {INDIAN_STATES.map((state) => (
                         <SelectItem key={state} value={state}>{state}</SelectItem>
                       ))}
