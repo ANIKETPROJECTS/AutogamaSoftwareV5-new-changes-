@@ -736,7 +736,7 @@ export default function PriceInquiries() {
                               {inquiry.name}
                             </h3>
                             <span className="text-xs text-muted-foreground font-medium">
-                              {inquiry.createdAt ? format(new Date(inquiry.createdAt), 'Dec 27, 2025') : 'Dec 27, 2025'}
+                              {inquiry.createdAt ? format(new Date(inquiry.createdAt), 'MMM d, yyyy') : 'Dec 27, 2025'}
                             </span>
                           </div>
                           
