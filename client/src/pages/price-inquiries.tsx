@@ -423,7 +423,76 @@ export default function PriceInquiries() {
       </AlertDialog>
 
       <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
-        <DialogContent className="max-w-2xl"><DialogHeader><DialogTitle>Inquiry Details</DialogTitle></DialogHeader>{selectedInquiry && <div className="space-y-4 text-sm"><div className="grid grid-cols-2 gap-4"><div><p className="text-muted-foreground">Name</p><p className="font-bold">{selectedInquiry.name}</p></div><div><p className="text-muted-foreground">Phone</p><p className="font-bold">{selectedInquiry.phone}</p></div></div><div className="border rounded p-3"><p className="text-muted-foreground mb-2">Service</p><p>{selectedInquiry.service}</p></div></div>}</DialogContent>
+        <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <DialogTitle>Inquiry Details</DialogTitle>
+          </DialogHeader>
+          {selectedInquiry && (
+            <div className="space-y-4 text-sm">
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <p className="text-muted-foreground">Name</p>
+                  <p className="font-bold">{selectedInquiry.name}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Phone</p>
+                  <p className="font-bold">{selectedInquiry.phone}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Email</p>
+                  <p className="font-bold">{selectedInquiry.email || 'N/A'}</p>
+                </div>
+              </div>
+              
+              <div className="border rounded-lg overflow-hidden">
+                <table className="w-full text-sm">
+                  <thead className="bg-slate-50 border-b">
+                    <tr>
+                      <th className="p-3 text-left">Service Name</th>
+                      <th className="p-3 text-right">Service Price</th>
+                      <th className="p-3 text-right">Customer Price</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {selectedInquiry.serviceDetailsJson ? (
+                      JSON.parse(selectedInquiry.serviceDetailsJson).map((item: any, index: number) => (
+                        <tr key={index} className="border-b hover:bg-slate-50" data-testid={`row-service-detail-${index}`}>
+                          <td className="p-3">
+                            <div className="font-medium" data-testid={`text-servicename-detail-${index}`}>{item.name}</div>
+                            <div className="text-xs text-slate-500" data-testid={`text-cartype-detail-${index}`}>{item.carType}</div>
+                          </td>
+                          <td className="p-3 text-right font-medium" data-testid={`text-serviceprice-detail-${index}`}>₹{item.servicePrice.toLocaleString()}</td>
+                          <td className="p-3 text-right font-medium" data-testid={`text-customerprice-detail-${index}`}>₹{(item.customerPrice || 0).toLocaleString()}</td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan={3} className="p-3 text-center text-muted-foreground">No service details available</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4 pt-4 border-t">
+                <div>
+                  <p className="text-muted-foreground text-xs uppercase font-bold">Our Price</p>
+                  <p className="text-lg font-bold">₹{selectedInquiry.priceOffered?.toLocaleString()}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground text-xs uppercase font-bold">Customer Price</p>
+                  <p className="text-lg font-bold">₹{selectedInquiry.priceStated?.toLocaleString()}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground text-xs uppercase font-bold">Difference</p>
+                  <p className={cn("text-lg font-bold", ((selectedInquiry.priceStated || 0) - (selectedInquiry.priceOffered || 0)) < 0 ? "text-red-600" : "text-green-600")}>
+                    {((selectedInquiry.priceStated || 0) - (selectedInquiry.priceOffered || 0)) < 0 ? '-' : '+'}₹{Math.abs((selectedInquiry.priceStated || 0) - (selectedInquiry.priceOffered || 0)).toLocaleString()}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
       </Dialog>
     </div>
   );
