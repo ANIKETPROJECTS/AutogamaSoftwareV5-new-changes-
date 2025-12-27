@@ -15,6 +15,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { Trash2, Phone, Mail, Search, X, AlertCircle, LayoutGrid, List } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { format } from 'date-fns';
@@ -350,6 +351,17 @@ export default function PriceInquiries() {
                 </table>
               </div>
             )}
+            <div>
+              <Label htmlFor="notes" className="text-sm font-medium">Notes (Optional)</Label>
+              <Textarea 
+                name="notes" 
+                id="notes"
+                placeholder="Add any additional notes or special requests..." 
+                className="mt-2 resize-none"
+                rows={4}
+                data-testid="textarea-notes"
+              />
+            </div>
             <div className="flex gap-2">
               <Button type="submit">Save Inquiry</Button>
               <Button type="button" variant="outline" onClick={() => setShowForm(false)}>Cancel</Button>
@@ -492,6 +504,13 @@ export default function PriceInquiries() {
                   </p>
                 </div>
               </div>
+
+              {selectedInquiry.notes && (
+                <div className="pt-4 border-t">
+                  <p className="text-muted-foreground text-xs uppercase font-bold mb-2">Notes</p>
+                  <p className="text-sm whitespace-pre-wrap bg-slate-50 p-3 rounded border border-slate-200" data-testid="text-notes-display">{selectedInquiry.notes}</p>
+                </div>
+              )}
             </div>
           )}
         </DialogContent>
