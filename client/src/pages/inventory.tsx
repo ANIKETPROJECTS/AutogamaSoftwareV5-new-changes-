@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { Package, AlertTriangle, Search, Plus, Trash2, ArrowLeft, Grid3X3, List } from 'lucide-react';
+import { Package, AlertTriangle, Search, Plus, Trash2, ArrowLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const PPF_ITEMS = [
@@ -40,7 +40,6 @@ export default function Inventory() {
   const [rollName, setRollName] = useState('');
   const [rollQuantity, setRollQuantity] = useState('');
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
-  const [viewMode, setViewMode] = useState<'card' | 'list'>('card');
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -114,40 +113,16 @@ export default function Inventory() {
   return (
     <div className="space-y-6">
       <div className="space-y-4">
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            {selectedProductId && (
-              <Button variant="ghost" size="icon" onClick={() => setSelectedProductId(null)} className="h-10 w-10">
-                <ArrowLeft className="w-6 h-6" />
-              </Button>
-            )}
-            <div>
-              <h1 className="font-display text-3xl font-bold tracking-tight">PPF Inventory</h1>
-              <p className="text-muted-foreground mt-1">Manage stock for PPF products</p>
-            </div>
-          </div>
-          {!selectedProductId && (
-            <div className="flex gap-2">
-              <Button
-                variant={viewMode === "card" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setViewMode("card")}
-                className="flex items-center gap-2"
-              >
-                <Grid3X3 className="w-4 h-4" />
-                Card
-              </Button>
-              <Button
-                variant={viewMode === "list" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setViewMode("list")}
-                className="flex items-center gap-2"
-              >
-                <List className="w-4 h-4" />
-                List
-              </Button>
-            </div>
+        <div className="flex items-center gap-4">
+          {selectedProductId && (
+            <Button variant="ghost" size="icon" onClick={() => setSelectedProductId(null)} className="h-10 w-10">
+              <ArrowLeft className="w-6 h-6" />
+            </Button>
           )}
+          <div>
+            <h1 className="font-display text-3xl font-bold tracking-tight">PPF Inventory</h1>
+            <p className="text-muted-foreground mt-1">Manage stock for PPF products</p>
+          </div>
         </div>
         
         {!selectedProductId && (
