@@ -221,32 +221,29 @@ export default function CustomerService() {
           
           console.log('Vehicle Preferences Loaded:', { category, vehicleType, warranty, ppfPrice: prefs.ppfPrice });
           
-          // Set all PPF fields at once to avoid race conditions
-          // Order matters here to ensure the Select components' options are available
+          // Set primary fields first
           setPpfCategory(category);
           setPpfVehicleType(vehicleType);
           
-          // Small delay or use setTimeout to ensure React updates the state and re-renders 
-          // before setting the warranty, which depends on category and vehicleType
-          setTimeout(() => {
-            setPpfWarranty(warranty);
-            
-            // Calculate price from catalog if needed
-            let price = prefs.ppfPrice || 0;
-            if (price === 0 && category && vehicleType && warranty) {
-              const categoryData = PPF_CATEGORIES[category as keyof typeof PPF_CATEGORIES];
-              if (categoryData) {
-                const vehicleTypeData = categoryData[vehicleType as keyof typeof categoryData] as Record<string, number>;
-                if (vehicleTypeData && vehicleTypeData[warranty]) {
-                  price = vehicleTypeData[warranty];
-                }
+          // Use a more robust way to ensure warranty is set after list is populated
+          // We'll set it immediately but also calculate price
+          setPpfWarranty(warranty);
+          
+          // Calculate price from catalog if needed
+          let price = prefs.ppfPrice || 0;
+          if (price === 0 && category && vehicleType && warranty) {
+            const categoryData = PPF_CATEGORIES[category as keyof typeof PPF_CATEGORIES];
+            if (categoryData) {
+              const vehicleTypeData = categoryData[vehicleType as keyof typeof categoryData] as Record<string, number>;
+              if (vehicleTypeData && vehicleTypeData[warranty]) {
+                price = vehicleTypeData[warranty];
               }
             }
-            setPpfPrice(price);
-            if (warranty) {
-              setPpfWarrantyFromPreferences(true);
-            }
-          }, 0);
+          }
+          setPpfPrice(price);
+          if (warranty) {
+            setPpfWarrantyFromPreferences(true);
+          }
           
           // Load other services (excluding Labor Charge which has its own field)
           if (Array.isArray(prefs.otherServices) && prefs.otherServices.length > 0) {
@@ -741,7 +738,7 @@ export default function CustomerService() {
 
                       <div className="space-y-2">
                         <Label className="text-sm">Warranty / Variant</Label>
-                        <Select value={ppfWarranty} onValueChange={(val) => {
+                        <Select key={`${ppfCategory}-${ppfVehicleType}`} value={ppfWarranty} onValueChange={(val) => {
                           setPpfWarranty(val);
                           setPpfWarrantyFromPreferences(false);
                         }} disabled={!ppfCategory || !ppfVehicleType}>
