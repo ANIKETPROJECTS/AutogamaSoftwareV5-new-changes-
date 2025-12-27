@@ -82,7 +82,7 @@ const TimePicker = ({ value, onChange, error }: { value: string, onChange: (val:
                 }
               }}
             />
-            <SelectTrigger className="absolute right-0 top-0 h-8 w-6 border-0 bg-transparent hover:bg-slate-100 transition-colors p-0 flex items-center justify-center opacity-100">
+            <SelectTrigger className="absolute right-0 top-0 h-8 w-6 border-0 bg-transparent hover:bg-slate-100 transition-colors p-0 flex items-center justify-center opacity-100 [&>svg]:hidden">
               <ChevronDown className="h-3 w-3 text-slate-400" />
             </SelectTrigger>
           </div>
@@ -115,7 +115,7 @@ const TimePicker = ({ value, onChange, error }: { value: string, onChange: (val:
                 }
               }}
             />
-            <SelectTrigger className="absolute right-0 top-0 h-8 w-6 border-0 bg-transparent hover:bg-slate-100 transition-colors p-0 flex items-center justify-center opacity-100">
+            <SelectTrigger className="absolute right-0 top-0 h-8 w-6 border-0 bg-transparent hover:bg-slate-100 transition-colors p-0 flex items-center justify-center opacity-100 [&>svg]:hidden">
               <ChevronDown className="h-3 w-3 text-slate-400" />
             </SelectTrigger>
           </div>
