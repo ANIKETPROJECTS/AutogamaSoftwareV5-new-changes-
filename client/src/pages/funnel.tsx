@@ -166,7 +166,7 @@ export default function CustomerFunnel() {
               {getJobsByStage(stage.key).length === 0 ? (
                 <p className="text-sm text-slate-500">No services in this phase</p>
               ) : (
-                <div className="flex flex-wrap gap-3">
+                <div className="flex gap-3 overflow-x-auto pb-2">
                   {getJobsByStage(stage.key).map((job: any) => {
                     const customer = customers.find((c: any) => c._id === job.customerId);
                     return (
