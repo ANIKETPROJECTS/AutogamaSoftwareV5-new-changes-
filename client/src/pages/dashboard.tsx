@@ -409,7 +409,7 @@ export default function Dashboard() {
           {activeJobs.length > 0 ? (
             <div className="space-y-4">
               {activeJobs.map((job: any) => (
-                <Link key={job.id} href="/funnel">
+                <Link key={job.id} href="/customer-service">
                   <div
                     className="p-4 rounded-lg bg-gradient-to-r from-slate-50 to-white hover:from-slate-100 hover:to-slate-50 transition-all border border-slate-200 hover:border-slate-300 cursor-pointer mb-4"
                     data-testid={`job-row-${job.id}`}
@@ -445,13 +445,13 @@ export default function Dashboard() {
                         <div>
                           <p className="text-slate-600">Roll No</p>
                           <p className="font-medium text-slate-900">
-                            {job.serviceItems.find((item: any) => item.name?.startsWith('PPF'))?.rollName || 'N/A'}
+                            {job.serviceItems.find((item: any) => item.category && item.warranty)?.rollName || 'N/A'}
                           </p>
                         </div>
                         <div>
                           <p className="text-slate-600">Size Used</p>
                           <p className="font-medium text-slate-900">
-                            {job.serviceItems.find((item: any) => item.name?.startsWith('PPF'))?.sizeUsed || 'N/A'} sqft
+                            {job.serviceItems.find((item: any) => item.category && item.warranty)?.sizeUsed || 'N/A'} sqft
                           </p>
                         </div>
                       </>
