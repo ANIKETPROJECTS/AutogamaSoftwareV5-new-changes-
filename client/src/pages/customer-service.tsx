@@ -418,18 +418,18 @@ export default function CustomerService() {
 
     const serviceItemsList: any[] = [];
     if (ppfPrice > 0) {
-      const ppfAfterDiscount = Math.max(0, ppfPrice - ppfDiscountAmount);
       serviceItemsList.push({
         name: `PPF ${ppfCategory} - ${ppfWarranty}`,
-        price: ppfAfterDiscount,
+        price: ppfPrice,
+        discount: ppfDiscountAmount,
         type: 'part'
       });
     }
     selectedOtherServices.forEach(s => {
-      const serviceAfterDiscount = Math.max(0, s.price - (s.discount || 0));
       serviceItemsList.push({
         name: s.name,
-        price: serviceAfterDiscount,
+        price: s.price,
+        discount: s.discount || 0,
         type: 'part'
       });
     });
