@@ -320,11 +320,11 @@ export default function PriceInquiries() {
                           <div className="text-xs text-slate-500" data-testid={`text-cartype-${item.id}`}>{item.carType}</div>
                         </td>
                         <td className="p-3 text-right font-medium" data-testid={`text-serviceprice-${item.id}`}>₹{item.price.toLocaleString()}</td>
-                        <td className="p-3">
+                        <td className="p-3 text-right">
                           <Input 
                             type="number" 
                             placeholder="Enter price" 
-                            className="w-32" 
+                            className="w-32 ml-auto" 
                             data-testid={`input-customerprice-${item.id}`}
                             onChange={(e) => {
                               const val = parseInt(e.target.value) || 0;
