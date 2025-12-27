@@ -235,7 +235,7 @@ export default function Dashboard() {
           data-testid="card-todays-sales"
         />
 
-        <Link href="/jobs">
+        <Link href="/funnel">
           <MetricCard
             title="Active Service Jobs"
             value={jobs.filter((j: any) => j.stage !== "Completed" && j.stage !== "Cancelled").length}

@@ -8,7 +8,7 @@ import { PageProvider } from "@/contexts/page-context";
 import { Layout } from "@/components/layout";
 import Login from "@/pages/login";
 import Dashboard from "@/pages/dashboard";
-import ServiceFunnel from "@/pages/jobs";
+import ServiceFunnel from "@/pages/funnel";
 import Customers from "@/pages/customers";
 import CustomerRegistration from "@/pages/register";
 import RegisteredCustomers from "@/pages/registered-customers";
@@ -32,7 +32,7 @@ function ProtectedRoutes() {
           <Route path="/register" component={CustomerRegistration} />
           <Route path="/registered-customers" component={RegisteredCustomers} />
           <Route path="/customer-details/:id" component={CustomerDetails} />
-          <Route path="/funnel" component={RegisteredCustomers} />
+          <Route path="/funnel" component={ServiceFunnel} />
           <Route path="/customers" component={Customers} />
           <Route path="/customer-service" component={CustomerService} />
           <Route path="/jobs" component={ServiceFunnel} />
