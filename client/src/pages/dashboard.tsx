@@ -409,7 +409,7 @@ export default function Dashboard() {
           {activeJobs.length > 0 ? (
             <div className="space-y-4">
               {activeJobs.map((job: any) => (
-                <Link key={job.id} href="/customer-service">
+                <Link key={job.id} href="/funnel">
                   <div
                     className="p-4 rounded-lg bg-gradient-to-r from-slate-50 to-white hover:from-slate-100 hover:to-slate-50 transition-all border border-slate-200 hover:border-slate-300 cursor-pointer mb-4"
                     data-testid={`job-row-${job.id}`}
