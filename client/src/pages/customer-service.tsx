@@ -738,7 +738,7 @@ export default function CustomerService() {
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="text-sm">Warranty / Variant</Label>
+                        <Label className="text-sm">Warranty & Price</Label>
                         <Select key={`${ppfCategory}-${ppfVehicleType}`} value={ppfWarranty} onValueChange={(val) => {
                           setPpfWarranty(val);
                           setPpfWarrantyFromPreferences(false);
