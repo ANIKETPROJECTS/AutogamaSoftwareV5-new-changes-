@@ -188,16 +188,16 @@ export default function CustomerFunnel() {
                       return (
                       <Card
                         key={job._id}
-                        className="bg-white border-slate-200 flex-shrink-0 w-64 hover:shadow-md transition-shadow hover-elevate"
+                        className="bg-white border-slate-200 flex-shrink-0 w-80 hover:shadow-md transition-shadow hover-elevate"
                         data-testid={`funnel-job-${job._id}`}
                       >
-                      <CardContent className="p-3 space-y-2">
+                      <CardContent className="p-4 space-y-3">
                         {/* Header */}
-                        <div className="flex items-start justify-between gap-1 pb-2 border-b border-slate-100">
+                        <div className="flex items-start justify-between gap-1 pb-3 border-b border-slate-100">
                           <div className="flex-1 min-w-0">
-                            <h4 className="font-semibold text-xs text-slate-900 truncate">{customer?.name || 'Unknown'}</h4>
-                            <p className="text-[10px] text-slate-600 flex items-center gap-0.5 mt-1">
-                              <Phone className="w-2.5 h-2.5" />
+                            <h4 className="font-semibold text-sm text-slate-900 truncate">{customer?.name || 'Unknown'}</h4>
+                            <p className="text-xs text-slate-600 flex items-center gap-0.5 mt-1">
+                              <Phone className="w-3 h-3" />
                               <span className="truncate">{customer?.phone || 'N/A'}</span>
                             </p>
                           </div>
@@ -205,34 +205,34 @@ export default function CustomerFunnel() {
 
                         {/* Vehicle Info */}
                         {job.vehicleName && (
-                          <div className="bg-slate-50 rounded p-1.5 border border-slate-200">
-                            <p className="text-[10px] font-semibold text-slate-900 truncate">{job.vehicleName}</p>
+                          <div className="bg-slate-50 rounded p-2 border border-slate-200">
+                            <p className="text-xs font-semibold text-slate-900 truncate">{job.vehicleName}</p>
                             {job.plateNumber && (
-                              <p className="text-[9px] text-slate-600 truncate">{job.plateNumber}</p>
+                              <p className="text-[10px] text-slate-600 truncate">{job.plateNumber}</p>
                             )}
                           </div>
                         )}
 
                         {/* Cost */}
                         {job.totalAmount > 0 && (
-                          <div className="flex items-center justify-between py-1 px-2 bg-slate-50 rounded border border-slate-200">
-                            <span className="text-[10px] font-medium text-slate-600">Cost:</span>
-                            <span className="text-xs font-bold text-slate-900">
+                          <div className="flex items-center justify-between py-2 px-3 bg-slate-50 rounded border border-slate-200">
+                            <span className="text-xs font-medium text-slate-600">Cost:</span>
+                            <span className="text-sm font-bold text-slate-900">
                               ₹{job.totalAmount.toLocaleString('en-IN')}
-                              {!job.requiresGST && <span className="text-[8px] ml-1 text-slate-400 font-normal">(No GST)</span>}
+                              {!job.requiresGST && <span className="text-[9px] ml-1 text-slate-400 font-normal">(No GST)</span>}
                             </span>
                           </div>
                         )}
 
                         {/* Payment Status */}
                         {job.paymentStatus && (
-                          <Badge variant="outline" className="text-[9px] px-1.5 py-0 h-5 w-full justify-center mb-2">
+                          <Badge variant="outline" className="text-xs px-2 py-1 h-6 w-full justify-center mb-2">
                             {job.paymentStatus}
                           </Badge>
                         )}
 
                         {/* Status Update Dropdown */}
-                        <div className="pt-1.5 border-t border-slate-100">
+                        <div className="pt-2 border-t border-slate-100">
                           <Select
                             value={job.stage}
                             disabled={job.stage === 'Completed' || job.stage === 'Cancelled'}
@@ -243,7 +243,7 @@ export default function CustomerFunnel() {
                               });
                             }}
                           >
-                            <SelectTrigger className="h-7 text-[10px] bg-slate-50 border-slate-200">
+                            <SelectTrigger className="h-8 text-xs bg-slate-50 border-slate-200">
                               <SelectValue placeholder="Update status" />
                             </SelectTrigger>
                             <SelectContent>
