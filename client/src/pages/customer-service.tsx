@@ -221,31 +221,40 @@ export default function CustomerService() {
           
           console.log('Vehicle Preferences Loaded:', { category, vehicleType, warranty, ppfPrice: prefs.ppfPrice });
           
-          // Calculate price from catalog if needed
-          let price = prefs.ppfPrice || 0;
-          if (price === 0 && category && vehicleType && warranty) {
-            const categoryData = PPF_CATEGORIES[category];
-            if (categoryData && categoryData[vehicleType] && categoryData[vehicleType][warranty]) {
-              price = categoryData[vehicleType][warranty];
-            }
-          }
-          
           // Set all PPF fields at once to avoid race conditions
+          // Order matters here to ensure the Select components' options are available
           setPpfCategory(category);
           setPpfVehicleType(vehicleType);
-          setPpfWarranty(warranty);
-          setPpfPrice(price);
-          if (warranty) {
-            setPpfWarrantyFromPreferences(true);
-          }
+          
+          // Small delay or use setTimeout to ensure React updates the state and re-renders 
+          // before setting the warranty, which depends on category and vehicleType
+          setTimeout(() => {
+            setPpfWarranty(warranty);
+            
+            // Calculate price from catalog if needed
+            let price = prefs.ppfPrice || 0;
+            if (price === 0 && category && vehicleType && warranty) {
+              const categoryData = PPF_CATEGORIES[category as keyof typeof PPF_CATEGORIES];
+              if (categoryData) {
+                const vehicleTypeData = categoryData[vehicleType as keyof typeof categoryData] as Record<string, number>;
+                if (vehicleTypeData && vehicleTypeData[warranty]) {
+                  price = vehicleTypeData[warranty];
+                }
+              }
+            }
+            setPpfPrice(price);
+            if (warranty) {
+              setPpfWarrantyFromPreferences(true);
+            }
+          }, 0);
           
           // Load other services (excluding Labor Charge which has its own field)
           if (Array.isArray(prefs.otherServices) && prefs.otherServices.length > 0) {
             const servicesWithPrices = prefs.otherServices
               .filter((svc: any) => svc.name !== 'Labor Charge') // Exclude Labor Charge - it has its own field
               .map((svc: any) => {
-                const serviceData = OTHER_SERVICES[svc.name];
-                const price = serviceData && serviceData[svc.vehicleType] ? serviceData[svc.vehicleType] : 0;
+                const serviceData = OTHER_SERVICES[svc.name as keyof typeof OTHER_SERVICES];
+                const price = serviceData && (serviceData as any)[svc.vehicleType] ? (serviceData as any)[svc.vehicleType] : 0;
                 return {
                   name: svc.name,
                   vehicleType: svc.vehicleType || '',
@@ -280,14 +289,20 @@ export default function CustomerService() {
     if (isLoadingLastService) return;
 
     if (!ppfCategory || !ppfVehicleType || !ppfWarranty) {
+      // If we have category and vehicle type but no warranty yet, 
+      // we should still try to find a price if only one warranty exists
+      // or just wait for warranty to be set.
       return;
     }
     
-    const categoryData = PPF_CATEGORIES[ppfCategory];
-    if (categoryData && categoryData[ppfVehicleType] && categoryData[ppfVehicleType][ppfWarranty]) {
-      const calculatedPrice = categoryData[ppfVehicleType][ppfWarranty];
-      // Only update if current price is 0 or different (prevents loop)
-      setPpfPrice(prev => (prev === 0 || prev !== calculatedPrice ? calculatedPrice : prev));
+    const categoryData = PPF_CATEGORIES[ppfCategory as keyof typeof PPF_CATEGORIES];
+    if (categoryData && categoryData[ppfVehicleType as keyof typeof categoryData]) {
+      const vehicleTypeData = categoryData[ppfVehicleType as keyof typeof categoryData] as Record<string, number>;
+      if (vehicleTypeData[ppfWarranty]) {
+        const calculatedPrice = vehicleTypeData[ppfWarranty];
+        // Only update if current price is 0 or different (prevents loop)
+        setPpfPrice(prev => (prev === 0 || prev !== calculatedPrice ? calculatedPrice : prev));
+      }
     }
   }, [ppfCategory, ppfVehicleType, ppfWarranty, isLoadingLastService]);
 
