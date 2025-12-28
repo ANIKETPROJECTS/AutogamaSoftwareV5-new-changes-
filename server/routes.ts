@@ -449,6 +449,18 @@ export async function registerRoutes(
     }
   });
 
+  app.patch("/api/inventory/:id/consume-fifo", async (req, res) => {
+    try {
+      const { quantity } = req.body;
+      const result = await storage.consumeRollsWithFIFO(req.params.id, quantity);
+      if (!result.success) return res.status(400).json({ message: "Failed to consume materials" });
+      res.json(result);
+    } catch (error: any) {
+      console.error("Consume FIFO error:", error?.message || error);
+      res.status(500).json({ message: error?.message || "Failed to consume materials using FIFO" });
+    }
+  });
+
   app.get("/api/appointments", async (req, res) => {
     try {
       const { date, page = '1', limit = '10' } = req.query;

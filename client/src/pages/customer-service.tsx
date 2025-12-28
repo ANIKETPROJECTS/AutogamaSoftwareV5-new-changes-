@@ -36,9 +36,8 @@ export default function CustomerService() {
   const [ppfDiscount, setPpfDiscount] = useState<string>('');
   const [laborCost, setLaborCost] = useState<string>('');
   const [includeGst, setIncludeGst] = useState(true);
-  const [selectedItems, setSelectedItems] = useState<{ inventoryId: string; rollId?: string; metersUsed?: number; name: string; unit: string; quantity?: number }[]>([]);
+  const [selectedItems, setSelectedItems] = useState<{ inventoryId: string; metersUsed?: number; name: string; unit: string; quantity?: number }[]>([]);
   const [selectedItemId, setSelectedItemId] = useState<string>('');
-  const [selectedRollId, setSelectedRollId] = useState<string>('');
   const [metersUsed, setMetersUsed] = useState<string>('1');
 
   const [showAddVehicle, setShowAddVehicle] = useState(false);
@@ -132,15 +131,14 @@ export default function CustomerService() {
       const job = await api.jobs.create(data);
       if (selectedItems.length > 0) {
         for (const item of selectedItems) {
-          if (item.rollId) {
-            const amountToDeduct = item.unit === 'Square Feet' ? item.quantity : item.metersUsed;
-            if (amountToDeduct && amountToDeduct > 0) {
-              try {
-                await api.inventory.deductRoll(item.inventoryId, item.rollId, amountToDeduct);
-              } catch (error: any) {
-                console.error(`Failed to deduct from roll ${item.rollId}:`, error);
-                throw new Error(error?.message || `Failed to deduct from roll ${item.name}`);
-              }
+          const amountToDeduct = item.unit === 'Square Feet' ? item.quantity : item.metersUsed;
+          if (amountToDeduct && amountToDeduct > 0) {
+            try {
+              // Use FIFO consumption for automatic roll deduction
+              await api.inventory.consumeRollsWithFIFO(item.inventoryId, amountToDeduct);
+            } catch (error: any) {
+              console.error(`Failed to consume from ${item.name}:`, error);
+              throw new Error(error?.message || `Failed to deduct from ${item.name}`);
             }
           }
         }
@@ -179,7 +177,6 @@ export default function CustomerService() {
     setIncludeGst(true);
     setSelectedItems([]);
     setSelectedItemId('');
-    setSelectedRollId('');
     setMetersUsed('1');
     setPpfCategory('');
     setPpfVehicleType('');
@@ -317,67 +314,37 @@ export default function CustomerService() {
     const item = (Array.isArray(inventory) ? inventory : []).find((inv: any) => inv._id === selectedItemId);
     if (!item) return;
 
-    if (item.rolls && item.rolls.length > 0) {
-      if (!selectedRollId) {
-        toast({ title: 'Please select a roll', variant: 'destructive' });
-        return;
-      }
-      const roll = item.rolls.find((r: any) => r._id === selectedRollId);
-      if (!roll) {
-        toast({ title: 'Roll not found', variant: 'destructive' });
-        return;
-      }
-      if (roll.status === 'Finished' || (roll.remaining_meters <= 0 && roll.remaining_sqft <= 0)) {
-        toast({ title: 'Selected roll is not available', variant: 'destructive' });
-        return;
-      }
-      const val = parseFloat(metersUsed);
-      if (isNaN(val) || val <= 0) {
-        toast({ title: 'Please enter a valid amount', variant: 'destructive' });
-        return;
-      }
-      if (roll.remaining_sqft > 0) {
-        if (val > roll.remaining_sqft) {
-          toast({ title: `Only ${roll.remaining_sqft}sqft available in this roll`, variant: 'destructive' });
-          return;
-        }
-        setSelectedItems([...selectedItems, {
-          inventoryId: selectedItemId,
-          rollId: selectedRollId,
-          metersUsed: 0,
-          quantity: val,
-          name: `${item.name} - ${roll.name}`,
-          unit: 'Square Feet'
-        }]);
-      } else {
-        setSelectedItems([...selectedItems, {
-          inventoryId: selectedItemId,
-          rollId: selectedRollId,
-          metersUsed: val,
-          quantity: val,
-          name: `${item.name} - ${roll.name}`,
-          unit: 'Square Feet'
-        }]);
-      }
-    } else {
-      const qty = parseFloat(metersUsed);
-      if (isNaN(qty) || qty <= 0) {
-        toast({ title: 'Please enter a valid quantity', variant: 'destructive' });
-        return;
-      }
-      if (qty > item.quantity) {
-        toast({ title: `Only ${item.quantity} ${item.unit} available`, variant: 'destructive' });
-        return;
-      }
-      setSelectedItems([...selectedItems, {
-        inventoryId: selectedItemId,
-        quantity: qty,
-        name: item.name,
-        unit: item.unit
-      }]);
+    const val = parseFloat(metersUsed);
+    if (isNaN(val) || val <= 0) {
+      toast({ title: 'Please enter a valid amount', variant: 'destructive' });
+      return;
     }
+
+    // Calculate total available across all rolls
+    let totalAvailable = 0;
+    if (item.rolls && item.rolls.length > 0) {
+      totalAvailable = item.rolls.reduce((sum: number, roll: any) => {
+        if (roll.status !== 'Finished' && roll.remaining_sqft > 0) {
+          return sum + (roll.remaining_sqft || 0);
+        }
+        return sum;
+      }, 0);
+    } else {
+      totalAvailable = item.quantity || 0;
+    }
+
+    if (val > totalAvailable) {
+      toast({ title: `Only ${totalAvailable} available for ${item.category}`, variant: 'destructive' });
+      return;
+    }
+
+    setSelectedItems([...selectedItems, {
+      inventoryId: selectedItemId,
+      quantity: val,
+      name: item.category,
+      unit: 'Square Feet'
+    }]);
     setSelectedItemId('');
-    setSelectedRollId('');
     setMetersUsed('1');
   };
 
@@ -751,23 +718,6 @@ export default function CustomerService() {
                       </Select>
                     </div>
 
-                    {selectedItemId && (Array.isArray(inventory) ? inventory : []).find((item: any) => item._id === selectedItemId)?.rolls && (Array.isArray(inventory) ? inventory : []).find((item: any) => item._id === selectedItemId).rolls.length > 0 && (
-                      <div className="space-y-2">
-                        <Label className="text-sm">Select Roll</Label>
-                        <Select value={selectedRollId} onValueChange={setSelectedRollId}>
-                          <SelectTrigger data-testid="select-roll">
-                            <SelectValue placeholder="Choose a roll" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {(Array.isArray(inventory) ? inventory : []).find((item: any) => item._id === selectedItemId)?.rolls?.map((roll: any) => (
-                              <SelectItem key={roll._id} value={roll._id}>
-                                {roll.name} - {roll.remaining_sqft || roll.remaining_meters}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    )}
 
                     <div className="space-y-2">
                       <Label className="text-sm">Quantity/Amount</Label>
