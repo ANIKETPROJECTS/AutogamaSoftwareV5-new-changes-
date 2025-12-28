@@ -4,11 +4,11 @@ export type JobStage = 'New Lead' | 'Inspection Done' | 'Work In Progress' | 'Co
 export type PaymentStatus = 'Pending' | 'Partially Paid' | 'Paid';
 export type TechnicianStatus = 'Available' | 'Busy' | 'Off';
 export type InventoryCategory = 'Elite' | 'Garware Plus' | 'Garware Premium' | 'Garware Matt';
+export type CustomerStatus = 'Inquired' | 'Working' | 'Waiting' | 'Completed' | 'Cancelled';
 export type PaymentMode = 'Cash' | 'UPI' | 'Credit Card' | 'Debit Card' | 'Bank Transfer' | 'Cheque' | 'Other';
-export type CustomerStatus = 'Inquired' | 'Working' | 'Waiting' | 'Completed';
 
 export const PAYMENT_MODES: PaymentMode[] = ['Cash', 'UPI', 'Credit Card', 'Debit Card', 'Bank Transfer', 'Cheque', 'Other'];
-export const CUSTOMER_STATUSES: CustomerStatus[] = ['Inquired', 'Working', 'Waiting', 'Completed'];
+export const CUSTOMER_STATUSES: CustomerStatus[] = ['Inquired', 'Working', 'Waiting', 'Completed', 'Cancelled'];
 
 export const JOB_STAGES: JobStage[] = [
   'New Lead',
@@ -35,7 +35,7 @@ export const customerSchema = z.object({
   city: z.string().optional(),
   district: z.string().optional(),
   state: z.string().optional(),
-  status: z.enum(['Inquired', 'Working', 'Waiting', 'Completed']).optional(),
+  status: z.enum(['Inquired', 'Working', 'Waiting', 'Completed', 'Cancelled']).optional(),
   createdAt: z.date().optional(),
   vehicles: z.array(vehicleSchema).default([]),
   referrerName: z.string().optional(),
