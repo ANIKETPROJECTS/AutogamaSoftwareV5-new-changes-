@@ -262,9 +262,9 @@ export default function PriceInquiries() {
     const opt = {
       margin: 0,
       filename: `Quotation_${inquiry.name}_${inquiry._id.slice(-6)}.pdf`,
-      image: { type: 'jpeg', quality: 0.98 },
+      image: { type: 'jpeg' as const, quality: 0.98 },
       html2canvas: { scale: 3, useCORS: true },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' as const }
     };
 
     html2pdf().from(receiptHtml).set(opt).save();
