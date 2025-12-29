@@ -337,27 +337,44 @@ export default function PriceInquiries() {
     };
 
     try {
-      toast({ title: 'Preparing WhatsApp sharing...' });
+      toast({ title: 'Generating PDF for WhatsApp...' });
       
-      const file = new File([receiptHtml], `Quotation_${inquiry.name}.html`, { type: 'text/html' });
+      // Use html2pdf to generate the PDF blob
+      const pdfElement = document.getElementById(`receipt-${inquiry._id}`);
+      if (!pdfElement) {
+        toast({ title: 'Error: Quotation element not found', variant: 'destructive' });
+        return;
+      }
       
-      // Attempt to use Web Share API for professional sharing on mobile
-      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+      const opt = {
+        margin: 0,
+        filename: `Quotation_${inquiry.name}.pdf`,
+        image: { type: 'jpeg' as const, quality: 0.98 },
+        html2canvas: { scale: 3, useCORS: true },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' as const }
+      };
+
+      // Generate the PDF and then handle it
+      const pdfBlob = await html2pdf().from(pdfElement).set(opt).output('blob');
+      const pdfFile = new File([pdfBlob], `Quotation_${inquiry.name}.pdf`, { type: 'application/pdf' });
+      
+      // Attempt to use Web Share API for professional sharing on mobile (including PDF)
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
         try {
           await navigator.share({
-            files: [file],
+            files: [pdfFile],
             title: `Quotation - ${inquiry.name}`,
             text: `Professional Quotation from Auto Gamma for ${inquiry.name}`
           });
           toast({ title: 'Shared successfully!' });
           return;
         } catch (shareError) {
-          console.log('Web Share failed or cancelled, falling back to download + message');
+          console.log('Web Share failed or cancelled, falling back to message');
         }
       }
 
       // Fallback: Trigger the PDF download so the user has the professional copy
-      html2pdf().from(receiptHtml).set(opt).save();
+      html2pdf().from(pdfElement).set(opt).save();
 
       // Format a highly detailed text message for WhatsApp
       const details = serviceDetails.map((s: any) => `✅ *${s.name}*\n   (${s.carType})\n   Our Price: ₹${s.servicePrice.toLocaleString()}\n   Customer Price: ₹${(s.customerPrice || 0).toLocaleString()}`).join('\n\n');
