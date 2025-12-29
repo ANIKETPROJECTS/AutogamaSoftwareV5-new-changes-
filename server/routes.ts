@@ -106,6 +106,7 @@ export async function registerRoutes(
   app.post("/api/save-pdf", express.raw({ type: 'application/octet-stream' }), async (req, res) => {
     try {
       const inquiryId = req.query.inquiryId as string;
+      const customerName = (req.query.customerName as string || '').replace(/\s+/g, '_');
       
       if (!inquiryId) {
         return res.status(400).json({ message: "Inquiry ID is required" });
@@ -117,7 +118,8 @@ export async function registerRoutes(
 
       // Check for existing PDF for this inquiry to avoid duplicates
       const files = fs.readdirSync(quotationsDir);
-      const existingFile = files.find(f => f.startsWith(`quote_${inquiryId}_`) && f.endsWith('.pdf'));
+      const searchPattern = customerName ? `quote_${customerName}_${inquiryId}_` : `quote_${inquiryId}_`;
+      const existingFile = files.find(f => f.startsWith(searchPattern) && f.endsWith('.pdf'));
 
       if (existingFile) {
         const protocol = req.headers['x-forwarded-proto'] || 'http';
@@ -130,7 +132,7 @@ export async function registerRoutes(
         return res.status(400).json({ message: "PDF file is required" });
       }
 
-      const filename = `quote_${inquiryId}_${Date.now()}.pdf`;
+      const filename = customerName ? `quote_${customerName}_${inquiryId}_${Date.now()}.pdf` : `quote_${inquiryId}_${Date.now()}.pdf`;
       const filepath = path.join(quotationsDir, filename);
 
       fs.writeFileSync(filepath, pdfBuffer);
@@ -143,6 +145,36 @@ export async function registerRoutes(
     } catch (error) {
       console.error("PDF save error:", error);
       res.status(500).json({ message: "Failed to save PDF" });
+    }
+  });
+
+  // Check if PDF exists for an inquiry
+  app.get("/api/check-pdf/:inquiryId", async (req, res) => {
+    try {
+      const { inquiryId } = req.params;
+
+      if (!inquiryId) {
+        return res.status(400).json({ message: "Inquiry ID is required" });
+      }
+
+      if (!fs.existsSync(quotationsDir)) {
+        return res.json({ exists: false, url: null });
+      }
+
+      const files = fs.readdirSync(quotationsDir);
+      const pdfFile = files.find(f => f.includes(`${inquiryId}_`) && f.endsWith('.pdf'));
+
+      if (pdfFile) {
+        const protocol = req.headers['x-forwarded-proto'] || 'http';
+        const host = req.headers['host'];
+        const url = `${protocol}://${host}/q/${pdfFile}`;
+        return res.json({ exists: true, url });
+      }
+
+      res.json({ exists: false, url: null });
+    } catch (error) {
+      console.error("PDF check error:", error);
+      res.status(500).json({ message: "Failed to check PDF" });
     }
   });
 
@@ -160,7 +192,7 @@ export async function registerRoutes(
       }
 
       const files = fs.readdirSync(quotationsDir);
-      const pdfFile = files.find(f => f.startsWith(`quote_${inquiryId}_`) && f.endsWith('.pdf'));
+      const pdfFile = files.find(f => f.includes(`${inquiryId}_`) && f.endsWith('.pdf'));
 
       if (pdfFile) {
         const filepath = path.join(quotationsDir, pdfFile);
