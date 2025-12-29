@@ -581,15 +581,26 @@ export default function PriceInquiries() {
 
                       <div className="space-y-1">
                         <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Services Requested</Label>
-                        <div className="bg-slate-50 border border-slate-100 p-3 rounded-md space-y-2">
+                        <div className="bg-slate-50 border border-slate-100 p-3 rounded-md space-y-3">
                           {serviceDetails.length > 0 ? (
                             serviceDetails.map((item: any, idx: number) => (
-                              <div key={idx} className="flex justify-between items-center text-sm border-b border-slate-100 last:border-0 pb-2 last:pb-0">
-                                <div>
-                                  <span className="font-semibold text-slate-800">{item.name}</span>
-                                  <span className="text-xs text-slate-500 ml-2">({item.carType})</span>
+                              <div key={idx} className="flex flex-col border-b border-slate-200 last:border-0 pb-2 last:pb-0">
+                                <div className="flex justify-between items-center text-sm">
+                                  <div>
+                                    <span className="font-bold text-slate-900">{item.name}</span>
+                                    <span className="text-xs text-slate-500 ml-2">({item.carType})</span>
+                                  </div>
                                 </div>
-                                <div className="text-slate-600">₹{item.servicePrice.toLocaleString()}</div>
+                                <div className="flex justify-between items-center text-[11px] mt-1">
+                                  <div className="flex items-center gap-1">
+                                    <span className="text-slate-500 uppercase font-black tracking-tighter">Our:</span>
+                                    <span className="font-bold text-slate-700">₹{item.servicePrice.toLocaleString()}</span>
+                                  </div>
+                                  <div className="flex items-center gap-1">
+                                    <span className="text-slate-500 uppercase font-black tracking-tighter">Customer:</span>
+                                    <span className="font-bold text-slate-900">₹{(item.customerPrice || 0).toLocaleString()}</span>
+                                  </div>
+                                </div>
                               </div>
                             ))
                           ) : (
