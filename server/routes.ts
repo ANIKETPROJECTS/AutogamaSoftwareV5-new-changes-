@@ -1,12 +1,13 @@
-import type { Express } from "express";
+import express, { type Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { sendStageUpdateMessage } from "./whatsapp";
 import { Customer, Admin } from "./models";
 import type { JobStage, CustomerStatus } from "./models";
 import mongoose from "mongoose";
+import path from "path";
+import fs from "fs";
 
-// Seed default admin user
 async function seedAdminUser() {
   try {
     const existingAdmin = await Admin.findOne({ email: 'Autogarage@system.com' });
@@ -27,6 +28,37 @@ export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
+  // Serve public quotations directory
+  const quotationsDir = path.join(process.cwd(), "public", "quotations");
+  if (!fs.existsSync(quotationsDir)) {
+    fs.mkdirSync(quotationsDir, { recursive: true });
+  }
+  app.use("/q", express.static(quotationsDir));
+
+  app.post("/api/price-inquiries/:id/generate-pdf", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { html } = req.body;
+      
+      if (!html) {
+        return res.status(400).json({ message: "HTML content is required" });
+      }
+
+      const filename = `quote_${id}_${Date.now()}.html`;
+      const filepath = path.join(quotationsDir, filename);
+
+      fs.writeFileSync(filepath, html);
+      
+      const protocol = req.headers['x-forwarded-proto'] || 'http';
+      const host = req.headers['host'];
+      const publicUrl = `${protocol}://${host}/q/${filename}`;
+
+      res.json({ url: publicUrl });
+    } catch (error) {
+      console.error("Link generation error:", error);
+      res.status(500).json({ message: "Failed to generate quotation link" });
+    }
+  });
 
   // Seed admin user on startup
   try {

@@ -337,44 +337,23 @@ export default function PriceInquiries() {
     };
 
     try {
-      toast({ title: 'Generating PDF for WhatsApp...' });
+      toast({ title: 'Generating professional quotation link...' });
       
-      // Use html2pdf to generate the PDF blob
       const pdfElement = document.getElementById(`receipt-${inquiry._id}`);
       if (!pdfElement) {
         toast({ title: 'Error: Quotation element not found', variant: 'destructive' });
         return;
       }
-      
-      const opt = {
-        margin: 0,
-        filename: `Quotation_${inquiry.name}.pdf`,
-        image: { type: 'jpeg' as const, quality: 0.98 },
-        html2canvas: { scale: 3, useCORS: true },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' as const }
-      };
 
-      // Generate the PDF and then handle it
-      const pdfBlob = await html2pdf().from(pdfElement).set(opt).output('blob');
-      const pdfFile = new File([pdfBlob], `Quotation_${inquiry.name}.pdf`, { type: 'application/pdf' });
-      
-      // Attempt to use Web Share API for professional sharing on mobile (including PDF)
-      if (navigator.share && navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
-        try {
-          await navigator.share({
-            files: [pdfFile],
-            title: `Quotation - ${inquiry.name}`,
-            text: `Professional Quotation from Auto Gamma for ${inquiry.name}`
-          });
-          toast({ title: 'Shared successfully!' });
-          return;
-        } catch (shareError) {
-          console.log('Web Share failed or cancelled, falling back to message');
-        }
-      }
+      // Generate the URL via server storage
+      const response = await fetch(`/api/price-inquiries/${inquiry._id}/generate-pdf`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ html: pdfElement.innerHTML })
+      });
 
-      // Fallback: Trigger the PDF download so the user has the professional copy
-      html2pdf().from(pdfElement).set(opt).save();
+      if (!response.ok) throw new Error('Failed to generate link');
+      const { url } = await response.json();
 
       // Format a highly detailed text message for WhatsApp
       const details = serviceDetails.map((s: any) => `✅ *${s.name}*\n   (${s.carType})\n   Our Price: ₹${s.servicePrice.toLocaleString()}\n   Customer Price: ₹${(s.customerPrice || 0).toLocaleString()}`).join('\n\n');
@@ -389,7 +368,7 @@ export default function PriceInquiries() {
         `💰 *OUR TOTAL: ₹${inquiry.priceOffered.toLocaleString()}*\n` +
         `💰 *CUSTOMER TOTAL: ₹${inquiry.priceStated.toLocaleString()}*\n` +
         `----------------------------------\n\n` +
-        `The official PDF Quotation has been downloaded. Please attach it to this chat.\n\n` +
+        `📄 *View Official Quotation:* ${url}\n\n` +
         `Thank you for choosing Auto Gamma!\n\n` +
         `📍 *Location:* Auto Gamma Car Care Studio`;
 
