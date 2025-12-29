@@ -92,6 +92,9 @@ export default function CustomerFunnel() {
       api.jobs.updateStage(id, status),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["jobs"] });
+      if (data.stage === 'Completed') {
+        queryClient.invalidateQueries({ queryKey: ["invoices"] });
+      }
       const message = data.stage === 'Completed' ? "Service completed & invoice created!" : "Status updated";
       toast({ title: message });
     },
