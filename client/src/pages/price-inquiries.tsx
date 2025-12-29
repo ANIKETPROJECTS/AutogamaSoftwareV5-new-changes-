@@ -259,10 +259,6 @@ export default function PriceInquiries() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Inquiry</h1>
-        <div className="flex gap-2">
-          <Button variant={viewMode === "card" ? "default" : "outline"} size="sm" onClick={() => setViewMode("card")}><LayoutGrid className="w-4 h-4" /> Card</Button>
-          <Button variant={viewMode === "list" ? "default" : "outline"} size="sm" onClick={() => setViewMode("list")}><List className="w-4 h-4" /> List</Button>
-        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -370,64 +366,142 @@ export default function PriceInquiries() {
         </CardContent></Card>
       )}
 
-      {viewMode === "card" ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredInquiries.map((inquiry: any) => {
-            const diff = (inquiry.priceStated || 0) - (inquiry.priceOffered || 0);
-            const isNegative = diff < 0;
-            return (
-              <Card key={inquiry._id} className="border border-orange-200 hover:shadow-lg transition-all group">
-                <CardContent className="p-4 flex flex-col gap-3">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="font-semibold text-lg text-slate-900 truncate">{inquiry.name}</h3>
-                      <p className="text-sm text-slate-700 font-medium">{inquiry.phone}</p>
+      <div className="grid grid-cols-1 gap-6">
+        {filteredInquiries.map((inquiry: any) => {
+          const diff = (inquiry.priceStated || 0) - (inquiry.priceOffered || 0);
+          const isNegative = diff < 0;
+          const serviceDetails = inquiry.serviceDetailsJson ? JSON.parse(inquiry.serviceDetailsJson) : [];
+
+          return (
+            <Card key={inquiry._id} className="border border-orange-200 hover:shadow-lg transition-all overflow-hidden">
+              <CardContent className="p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  {/* Left Column: Customer & Service Info */}
+                  <div className="space-y-4">
+                    <div className="space-y-1">
+                      <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Customer Name</Label>
+                      <p className="text-lg font-semibold text-slate-900">{inquiry.name}</p>
                     </div>
-                    <div className="flex gap-1">
-                      <Button variant="ghost" size="sm" className="bg-red-50 text-red-600 text-xs h-8" onClick={() => { setSelectedInquiry(inquiry); setViewDialogOpen(true); }}>Details</Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-red-600" onClick={() => { setInquiryToDelete(inquiry); setDeleteDialogOpen(true); }}><Trash2 className="w-4 h-4" /></Button>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                        <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Phone Number</Label>
+                        <div className="flex items-center gap-2 text-slate-700 font-medium">
+                          <Phone className="w-4 h-4 text-blue-500" />
+                          {inquiry.phone}
+                        </div>
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Email Address</Label>
+                        <div className="flex items-center gap-2 text-slate-700 font-medium">
+                          <Mail className="w-4 h-4 text-blue-500" />
+                          <span className="truncate">{inquiry.email || 'N/A'}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Services Requested</Label>
+                      <div className="bg-slate-50 border border-slate-100 p-3 rounded-md space-y-2">
+                        {serviceDetails.length > 0 ? (
+                          serviceDetails.map((item: any, idx: number) => (
+                            <div key={idx} className="flex justify-between items-center text-sm border-b border-slate-100 last:border-0 pb-2 last:pb-0">
+                              <div>
+                                <span className="font-semibold text-slate-800">{item.name}</span>
+                                <span className="text-xs text-slate-500 ml-2">({item.carType})</span>
+                              </div>
+                              <div className="text-slate-600">₹{item.servicePrice.toLocaleString()}</div>
+                            </div>
+                          ))
+                        ) : (
+                          <p className="text-sm text-slate-800 font-medium">{inquiry.service}</p>
+                        )}
+                      </div>
+                    </div>
+
+                    {inquiry.notes && (
+                      <div className="space-y-1">
+                        <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Special Notes</Label>
+                        <p className="text-sm text-slate-600 bg-orange-50/50 p-2 rounded italic">"{inquiry.notes}"</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Right Column: Pricing & Meta Info */}
+                  <div className="flex flex-col justify-between space-y-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
+                      <div className="space-y-1 text-center sm:text-left">
+                        <Label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Our Price</Label>
+                        <p className="text-xl font-bold text-slate-900">₹{inquiry.priceOffered?.toLocaleString()}</p>
+                      </div>
+                      <div className="space-y-1 text-center sm:text-left border-y sm:border-y-0 sm:border-x border-slate-200 py-2 sm:py-0 px-0 sm:px-4">
+                        <Label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Customer Price</Label>
+                        <p className="text-xl font-bold text-slate-900">₹{inquiry.priceStated?.toLocaleString()}</p>
+                      </div>
+                      <div className="space-y-1 text-center sm:text-left">
+                        <Label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Difference</Label>
+                        <div className="flex flex-col">
+                          <p className={cn("text-xl font-bold", isNegative ? "text-red-600" : "text-emerald-600")}>
+                            {isNegative ? '-' : '+'}₹{Math.abs(diff).toLocaleString()}
+                          </p>
+                          <span className={cn("text-[10px] font-bold", isNegative ? "text-red-500" : "text-emerald-500")}>
+                            {isNegative ? '' : '+'}{(inquiry.priceOffered > 0 ? (diff / inquiry.priceOffered) * 100 : 0).toFixed(1)}%
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col gap-4">
+                      <div className="flex items-center justify-between text-xs text-muted-foreground border-b pb-2">
+                        <span className="font-medium">Inquiry ID: <span className="text-slate-900">#{inquiry._id.slice(-6).toUpperCase()}</span></span>
+                        <span className="font-medium">Date: <span className="text-slate-900">{inquiry.createdAt ? format(new Date(inquiry.createdAt), 'MMMM d, yyyy') : 'N/A'}</span></span>
+                      </div>
+
+                      <div className="flex flex-wrap items-center justify-end gap-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="hover-elevate bg-white border-slate-200 text-slate-700"
+                          onClick={() => { setSelectedInquiry(inquiry); setViewDialogOpen(true); }}
+                        >
+                          View
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="hover-elevate bg-white border-slate-200 text-slate-700"
+                        >
+                          Print
+                        </Button>
+                          <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="hover-elevate bg-blue-50 border-blue-100 text-blue-700 hover:bg-blue-100"
+                          onClick={() => {
+                            const details = serviceDetails.map((s: any) => `${s.name}: ₹${s.servicePrice}`).join('\n');
+                            const text = `Inquiry Details:\nName: ${inquiry.name}\nPhone: ${inquiry.phone}\nServices:\n${details}\nTotal: ₹${inquiry.priceOffered}`;
+                            window.open(`https://wa.me/${inquiry.phone.replace(/\D/g, '')}?text=${encodeURIComponent(text)}`, '_blank');
+                          }}
+                        >
+                          Send
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="hover-elevate bg-red-50 border-red-100 text-red-600 hover:bg-red-100"
+                          onClick={() => { setInquiryToDelete(inquiry); setDeleteDialogOpen(true); }}
+                        >
+                          Delete
+                        </Button>
+                      </div>
                     </div>
                   </div>
-                  <div className="space-y-1 text-xs text-slate-600">
-                    <div className="flex items-center gap-2"><Mail className="w-3 h-3" /><span className="truncate uppercase">{inquiry.email || 'N/A'}</span></div>
-                    <div className="bg-slate-100 p-1 rounded font-medium text-slate-900">{inquiry.service}</div>
-                  </div>
-                  <div className="grid grid-cols-3 gap-2 pt-2 border-t text-center">
-                    <div><p className="text-[10px] font-bold text-slate-500 uppercase">Our Price</p><p className="text-sm font-bold">₹{inquiry.priceOffered?.toLocaleString()}</p></div>
-                    <div className="border-x"><p className="text-[10px] font-bold text-slate-500 uppercase">Customer</p><p className="text-sm font-bold">₹{inquiry.priceStated?.toLocaleString()}</p></div>
-                    <div><p className="text-[10px] font-bold text-slate-500 uppercase">Diff</p><p className={cn("text-sm font-bold", isNegative ? "text-red-600" : "text-green-600")}>{isNegative ? '-' : '+'}₹{Math.abs(diff).toLocaleString()}</p></div>
-                  </div>
-                  <div className="flex justify-between items-center text-[10px] text-slate-400 font-medium">
-                    <span>{inquiry.createdAt ? format(new Date(inquiry.createdAt), 'MMM d, yyyy') : 'N/A'}</span>
-                    <span className={cn("font-bold", isNegative ? "text-red-600" : "text-green-600")}>{isNegative ? '' : '+'}{(inquiry.priceOffered > 0 ? (diff / inquiry.priceOffered) * 100 : 0).toFixed(1)}%</span>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-      ) : (
-        <div className="border rounded-lg overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="bg-slate-50 border-b">
-              <tr><th className="p-3 text-left">Customer</th><th className="p-3 text-left">Date</th><th className="p-3 text-right">Our Price</th><th className="p-3 text-right">Customer</th><th className="p-3 text-center">Actions</th></tr>
-            </thead>
-            <tbody>
-              {filteredInquiries.map((inquiry: any) => (
-                <tr key={inquiry._id} className="border-b hover:bg-slate-50">
-                  <td className="p-3"><div>{inquiry.name}</div><div className="text-xs text-slate-500">{inquiry.phone}</div></td>
-                  <td className="p-3">{inquiry.createdAt ? format(new Date(inquiry.createdAt), 'MMM d, yyyy') : 'N/A'}</td>
-                  <td className="p-3 text-right">₹{inquiry.priceOffered?.toLocaleString()}</td>
-                  <td className="p-3 text-right">₹{inquiry.priceStated?.toLocaleString()}</td>
-                  <td className="p-3 text-center">
-                    <Button variant="ghost" size="sm" onClick={() => { setSelectedInquiry(inquiry); setViewDialogOpen(true); }}>View</Button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
