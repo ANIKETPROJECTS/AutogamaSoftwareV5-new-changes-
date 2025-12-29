@@ -276,10 +276,10 @@ export default function PriceInquiries() {
     
     const receiptHtml = `
       <div style="font-family: Arial, sans-serif; padding: 40px; color: #333; max-width: 800px; margin: 0 auto; background: white;">
-        <div style="text-align: center; margin-bottom: 30px;">
-          <img src="${autogammaLogo}" alt="Auto Gamma Logo" style="height: 80px; margin-bottom: 10px;" />
-          <h1 style="font-size: 28px; font-weight: bold; color: #000; margin: 0; letter-spacing: 1px;">AUTO GAMMA</h1>
-          <p style="font-size: 14px; color: #666; margin-top: 5px;">Professional Car Care & Detailing Studio</p>
+        <div style="text-align: center; margin-bottom: 25px;">
+          <img src="${autogammaLogo}" alt="Auto Gamma Logo" style="height: 65px; display: block; margin: 0 auto 8px auto;" />
+          <h1 style="font-size: 22px; font-weight: bold; color: #000; margin: 0; letter-spacing: 1px;">AUTO GAMMA</h1>
+          <p style="font-size: 12px; color: #666; margin-top: 4px;">Professional Car Care & Detailing Studio</p>
         </div>
 
         <div style="border-top: 2px solid #eee; border-bottom: 2px solid #eee; padding: 20px 0; margin-bottom: 30px; display: flex; justify-content: space-between;">
@@ -321,9 +321,9 @@ export default function PriceInquiries() {
           </table>
         </div>
 
-        <div style="background: #000; color: white; padding: 20px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
-          <span style="font-size: 18px; font-weight: bold; text-transform: uppercase;">Total Quotation Amount</span>
-          <span style="font-size: 24px; font-weight: bold;">₹${inquiry.priceOffered.toLocaleString()}</span>
+        <div style="border-top: 2px solid #333; padding-top: 15px; margin-top: 10px; display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-size: 14px; font-weight: bold; text-transform: uppercase; color: #000;">Total Quotation Amount</span>
+          <span style="font-size: 18px; font-weight: bold; color: #000; background: #f3f4f6; padding: 5px 15px; border-radius: 4px;">₹${inquiry.priceOffered.toLocaleString()}</span>
         </div>
       </div>
     `;
