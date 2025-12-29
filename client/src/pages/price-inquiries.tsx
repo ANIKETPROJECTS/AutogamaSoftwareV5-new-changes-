@@ -368,7 +368,7 @@ export default function PriceInquiries() {
         `💰 *OUR TOTAL: ₹${inquiry.priceOffered.toLocaleString()}*\n` +
         `💰 *CUSTOMER TOTAL: ₹${inquiry.priceStated.toLocaleString()}*\n` +
         `----------------------------------\n\n` +
-        `📄 *View Official Quotation:* ${url}\n\n` +
+        `📄 *View Official Quotation (PDF):* ${url}\n\n` +
         `Thank you for choosing Auto Gamma!\n\n` +
         `📍 *Location:* Auto Gamma Car Care Studio`;
 

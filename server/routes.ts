@@ -44,10 +44,30 @@ export async function registerRoutes(
         return res.status(400).json({ message: "HTML content is required" });
       }
 
-      const filename = `quote_${id}_${Date.now()}.html`;
+      const filename = `quote_${id}_${Date.now()}.pdf`;
       const filepath = path.join(quotationsDir, filename);
 
-      fs.writeFileSync(filepath, html);
+      // Save as PDF
+      const puppeteer = require('puppeteer-core');
+      const chromium = require('chrome-aws-lambda');
+
+      const browser = await puppeteer.launch({
+        args: chromium.args,
+        defaultViewport: chromium.defaultViewport,
+        executablePath: await chromium.executablePath,
+        headless: chromium.headless,
+      });
+
+      const page = await browser.newPage();
+      await page.setContent(html, { waitUntil: 'networkidle0' });
+      await page.pdf({
+        path: filepath,
+        format: 'A4',
+        margin: { top: '0px', right: '0px', bottom: '0px', left: '0px' },
+        printBackground: true
+      });
+
+      await browser.close();
       
       const protocol = req.headers['x-forwarded-proto'] || 'http';
       const host = req.headers['host'];
