@@ -553,12 +553,20 @@ export default function CustomerService() {
                           </SelectTrigger>
                           <SelectContent className="max-h-64 overflow-y-auto">
                             {VEHICLE_TYPES.map((type) => {
-                              const categoryData = ppfCategory ? PPF_CATEGORIES[ppfCategory as keyof typeof PPF_CATEGORIES] : null;
-                              const warranties = categoryData ? Object.keys(categoryData[type as keyof typeof categoryData] || {}) : [];
-                              const priceForType = warranties.length > 0 && categoryData ? (categoryData[type as keyof typeof categoryData] as any)[warranties[0]] : null;
+                              let priceDisplay = '';
+                              if (ppfCategory) {
+                                const categoryData = PPF_CATEGORIES[ppfCategory as keyof typeof PPF_CATEGORIES];
+                                if (categoryData && categoryData[type as keyof typeof categoryData]) {
+                                  const warranties = Object.values(categoryData[type as keyof typeof categoryData]);
+                                  if (warranties.length > 0) {
+                                    const minPrice = Math.min(...warranties);
+                                    priceDisplay = ` - ₹${minPrice.toLocaleString('en-IN')}`;
+                                  }
+                                }
+                              }
                               return (
                                 <SelectItem key={type} value={type}>
-                                  {type} {priceForType ? `- ₹${priceForType.toLocaleString('en-IN')}` : ''}
+                                  {type}{priceDisplay}
                                 </SelectItem>
                               );
                             })}
