@@ -147,6 +147,7 @@ export interface IWhatsAppTemplate extends Document {
 }
 
 export interface IPriceInquiry extends Document {
+  inquiryId?: string;
   name: string;
   phone: string;
   email?: string;
@@ -350,6 +351,7 @@ const WhatsAppTemplateSchema = new Schema<IWhatsAppTemplate>({
 });
 
 const PriceInquirySchema = new Schema<IPriceInquiry>({
+  inquiryId: { type: String },
   name: { type: String, required: true },
   phone: { type: String, required: true },
   email: { type: String },

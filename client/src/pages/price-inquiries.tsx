@@ -210,7 +210,7 @@ export default function PriceInquiries() {
           </div>
           <div style="text-align: right;">
             <h2 style="font-size: 11px; font-weight: bold; color: #999; text-transform: uppercase; margin: 0 0 5px 0;">Quotation Info</h2>
-            <p style="font-size: 13px; margin: 0;">ID: INQ${inquiry._id.slice(-6).toUpperCase()}</p>
+            <p style="font-size: 13px; margin: 0;">ID: ${inquiry.inquiryId || `INQ${inquiry._id.slice(-6).toUpperCase()}`}</p>
             <p style="font-size: 13px; margin: 5px 0 0 0;">Date: ${format(new Date(inquiry.createdAt), 'MMMM d, yyyy')}</p>
           </div>
         </div>
@@ -261,7 +261,7 @@ export default function PriceInquiries() {
 
     const opt = {
       margin: 0,
-      filename: `Quotation_${inquiry.name}_${inquiry._id.slice(-6)}.pdf`,
+      filename: `Quotation_${inquiry.name}_${inquiry.inquiryId || inquiry._id.slice(-6)}.pdf`,
       image: { type: 'jpeg' as const, quality: 0.98 },
       html2canvas: { scale: 3, useCORS: true },
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' as const }
@@ -291,7 +291,7 @@ export default function PriceInquiries() {
           </div>
           <div style="text-align: right;">
             <h2 style="font-size: 12px; font-weight: bold; color: #999; text-transform: uppercase; margin: 0 0 5px 0;">Quotation Info</h2>
-            <p style="font-size: 14px; margin: 0;">ID: INQ${inquiry._id.slice(-6).toUpperCase()}</p>
+            <p style="font-size: 14px; margin: 0;">ID: ${inquiry.inquiryId || `INQ${inquiry._id.slice(-6).toUpperCase()}`}</p>
             <p style="font-size: 14px; margin: 5px 0 0 0;">Date: ${format(new Date(inquiry.createdAt), 'MMMM d, yyyy')}</p>
           </div>
         </div>
@@ -365,7 +365,7 @@ export default function PriceInquiries() {
       const whatsappText = `*AUTO GAMMA - OFFICIAL QUOTATION*\n\n` +
         `👤 *Customer:* ${inquiry.name}\n` +
         `📅 *Date:* ${format(new Date(inquiry.createdAt), 'MMMM d, yyyy')}\n` +
-        `🆔 *Quote ID:* INQ${inquiry._id.slice(-6).toUpperCase()}\n\n` +
+        `🆔 *Quote ID:* ${inquiry.inquiryId || `INQ${inquiry._id.slice(-6).toUpperCase()}`}\n\n` +
         `🛠️ *Requested Services:*\n${details}\n\n` +
         (inquiry.notes ? `📝 *Special Notes:* _${inquiry.notes}_\n\n` : '') +
         `----------------------------------\n` +
@@ -664,7 +664,7 @@ export default function PriceInquiries() {
 
                       <div className="flex flex-col gap-4">
                         <div className="flex items-center justify-between text-xs text-muted-foreground border-b pb-2">
-                          <span className="font-medium">Inquiry ID: <span className="text-slate-900">INQ{inquiry._id.slice(-3).toUpperCase().padStart(3, '0')}</span></span>
+                          <span className="font-medium">Inquiry ID: <span className="text-slate-900">{inquiry.inquiryId || `INQ${inquiry._id.slice(-3).toUpperCase().padStart(3, '0')}`}</span></span>
                           <span className="font-medium">Date: <span className="text-slate-900">{inquiry.createdAt ? format(new Date(inquiry.createdAt), 'MMMM d, yyyy') : 'N/A'}</span></span>
                         </div>
 
@@ -725,7 +725,7 @@ export default function PriceInquiries() {
                   </div>
                   <div className="text-right">
                     <h2 className="text-xs font-bold text-slate-500 uppercase mb-2">Quotation Details:</h2>
-                    <p className="text-sm">Quotation #: <span className="font-bold">INQ{inquiry._id.slice(-3).toUpperCase().padStart(3, '0')}</span></p>
+                    <p className="text-sm">Quotation #: <span className="font-bold">{inquiry.inquiryId || `INQ${inquiry._id.slice(-3).toUpperCase().padStart(3, '0')}`}</span></p>
                     <p className="text-sm">Date: <span className="font-bold">{inquiry.createdAt ? format(new Date(inquiry.createdAt), 'MMMM d, yyyy') : format(new Date(), 'MMMM d, yyyy')}</span></p>
                   </div>
                 </div>

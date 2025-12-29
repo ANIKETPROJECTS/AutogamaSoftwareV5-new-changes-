@@ -107,6 +107,7 @@ export const appointmentSchema = z.object({
 });
 
 export const priceInquirySchema = z.object({
+  inquiryId: z.string().optional(), // Format: INQ001, INQ002...
   name: z.string().min(1),
   phone: z.string().min(1),
   email: z.string().email().optional(),

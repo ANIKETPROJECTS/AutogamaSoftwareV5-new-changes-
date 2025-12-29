@@ -548,7 +548,20 @@ export class MongoStorage implements IStorage {
   }
 
   async createPriceInquiry(data: Partial<IPriceInquiry>): Promise<IPriceInquiry> {
-    const inquiry = new PriceInquiry(data);
+    const highestInquiry = await PriceInquiry.findOne({ inquiryId: { $regex: '^INQ' } })
+      .sort({ inquiryId: -1 })
+      .select('inquiryId');
+    
+    let nextNumber = 1;
+    if (highestInquiry && highestInquiry.inquiryId) {
+      const match = highestInquiry.inquiryId.match(/\d+/);
+      if (match) {
+        nextNumber = parseInt(match[0], 10) + 1;
+      }
+    }
+    
+    const inquiryId = `INQ${String(nextNumber).padStart(3, '0')}`;
+    const inquiry = new PriceInquiry({ ...data, inquiryId });
     return inquiry.save();
   }
 
