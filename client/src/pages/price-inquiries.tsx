@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { Card, CardContent } from '@/components/ui/card';
@@ -13,12 +13,14 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { Trash2, Phone, Mail, Search, X, AlertCircle, LayoutGrid, List } from 'lucide-react';
+import { Trash2, Phone, Mail, Search, X, AlertCircle, LayoutGrid, List, Download, Printer, Share2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { format } from 'date-fns';
+import html2pdf from 'html2pdf.js';
+import autogammaLogo from "@assets/logo.png";
 
 const validatePhone = (phone: string): boolean => {
   const digitsOnly = phone.replace(/\D/g, '');
@@ -187,6 +189,29 @@ export default function PriceInquiries() {
   const [selectedInquiry, setSelectedInquiry] = useState<any>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  const handlePrint = (inquiry: any) => {
+    const receiptElement = document.getElementById(`receipt-${inquiry._id}`);
+    if (!receiptElement) return;
+
+    const opt = {
+      margin: 10,
+      filename: `Quotation_${inquiry.name}_${inquiry._id.slice(-6)}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    } as any;
+
+    html2pdf().from(receiptElement).set(opt).save();
+    toast({ title: 'Quotation generating...' });
+  };
+
+  const handleSendWhatsApp = (inquiry: any) => {
+    const serviceDetails = inquiry.serviceDetailsJson ? JSON.parse(inquiry.serviceDetailsJson) : [];
+    const details = serviceDetails.map((s: any) => `• ${s.name}: ₹${s.servicePrice.toLocaleString()}`).join('\n');
+    const text = `*AUTO GAMMA - QUOTATION*\n\n*Customer Details:*\nName: ${inquiry.name}\nPhone: ${inquiry.phone}\n\n*Services Requested:*\n${details}\n\n*Total Quotation Amount: ₹${inquiry.priceOffered.toLocaleString()}*\n\nThank you for choosing Auto Gamma!`;
+    window.open(`https://wa.me/${inquiry.phone.replace(/\D/g, '')}?text=${encodeURIComponent(text)}`, '_blank');
+  };
 
   const { data: inquiriesData, isLoading } = useQuery({
     queryKey: ['/api/price-inquiries', searchQuery, filterService],
@@ -373,132 +398,204 @@ export default function PriceInquiries() {
           const serviceDetails = inquiry.serviceDetailsJson ? JSON.parse(inquiry.serviceDetailsJson) : [];
 
           return (
-            <Card key={inquiry._id} className="border border-orange-200 hover:shadow-lg transition-all overflow-hidden">
-              <CardContent className="p-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  {/* Left Column: Customer & Service Info */}
-                  <div className="space-y-4">
-                    <div className="space-y-1">
-                      <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Customer Name</Label>
-                      <p className="text-lg font-semibold text-slate-900">{inquiry.name}</p>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <React.Fragment key={inquiry._id}>
+              <Card className="border border-orange-200 hover:shadow-lg transition-all overflow-hidden">
+                <CardContent className="p-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    {/* Left Column: Customer & Service Info */}
+                    <div className="space-y-4">
                       <div className="space-y-1">
-                        <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Phone Number</Label>
-                        <div className="flex items-center gap-2 text-slate-700 font-medium">
-                          <Phone className="w-4 h-4 text-blue-500" />
-                          {inquiry.phone}
+                        <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Customer Name</Label>
+                        <p className="text-lg font-semibold text-slate-900">{inquiry.name}</p>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                          <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Phone Number</Label>
+                          <div className="flex items-center gap-2 text-slate-700 font-medium">
+                            <Phone className="w-4 h-4 text-blue-500" />
+                            {inquiry.phone}
+                          </div>
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Email Address</Label>
+                          <div className="flex items-center gap-2 text-slate-700 font-medium">
+                            <Mail className="w-4 h-4 text-blue-500" />
+                            <span className="truncate">{inquiry.email || 'N/A'}</span>
+                          </div>
                         </div>
                       </div>
-                      <div className="space-y-1">
-                        <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Email Address</Label>
-                        <div className="flex items-center gap-2 text-slate-700 font-medium">
-                          <Mail className="w-4 h-4 text-blue-500" />
-                          <span className="truncate">{inquiry.email || 'N/A'}</span>
-                        </div>
-                      </div>
-                    </div>
 
-                    <div className="space-y-1">
-                      <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Services Requested</Label>
-                      <div className="bg-slate-50 border border-slate-100 p-3 rounded-md space-y-2">
-                        {serviceDetails.length > 0 ? (
-                          serviceDetails.map((item: any, idx: number) => (
-                            <div key={idx} className="flex justify-between items-center text-sm border-b border-slate-100 last:border-0 pb-2 last:pb-0">
-                              <div>
-                                <span className="font-semibold text-slate-800">{item.name}</span>
-                                <span className="text-xs text-slate-500 ml-2">({item.carType})</span>
+                      <div className="space-y-1">
+                        <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Services Requested</Label>
+                        <div className="bg-slate-50 border border-slate-100 p-3 rounded-md space-y-2">
+                          {serviceDetails.length > 0 ? (
+                            serviceDetails.map((item: any, idx: number) => (
+                              <div key={idx} className="flex justify-between items-center text-sm border-b border-slate-100 last:border-0 pb-2 last:pb-0">
+                                <div>
+                                  <span className="font-semibold text-slate-800">{item.name}</span>
+                                  <span className="text-xs text-slate-500 ml-2">({item.carType})</span>
+                                </div>
+                                <div className="text-slate-600">₹{item.servicePrice.toLocaleString()}</div>
                               </div>
-                              <div className="text-slate-600">₹{item.servicePrice.toLocaleString()}</div>
-                            </div>
-                          ))
-                        ) : (
-                          <p className="text-sm text-slate-800 font-medium">{inquiry.service}</p>
-                        )}
+                            ))
+                          ) : (
+                            <p className="text-sm text-slate-800 font-medium">{inquiry.service}</p>
+                          )}
+                        </div>
                       </div>
+
+                      {inquiry.notes && (
+                        <div className="space-y-1">
+                          <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Special Notes</Label>
+                          <p className="text-sm text-slate-600 bg-orange-50/50 p-2 rounded italic">"{inquiry.notes}"</p>
+                        </div>
+                      )}
                     </div>
 
-                    {inquiry.notes && (
-                      <div className="space-y-1">
-                        <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Special Notes</Label>
-                        <p className="text-sm text-slate-600 bg-orange-50/50 p-2 rounded italic">"{inquiry.notes}"</p>
+                    {/* Right Column: Pricing & Meta Info */}
+                    <div className="flex flex-col justify-between space-y-6">
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
+                        <div className="space-y-1 text-center sm:text-left">
+                          <Label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Our Price</Label>
+                          <p className="text-xl font-bold text-slate-900">₹{inquiry.priceOffered?.toLocaleString()}</p>
+                        </div>
+                        <div className="space-y-1 text-center sm:text-left border-y sm:border-y-0 sm:border-x border-slate-200 py-2 sm:py-0 px-0 sm:px-4">
+                          <Label className="text-[10px] font-black text-slate-500 uppercase tracking-widest whitespace-nowrap">Customer Price</Label>
+                          <p className="text-xl font-bold text-slate-900">₹{inquiry.priceStated?.toLocaleString()}</p>
+                        </div>
+                        <div className="space-y-1 text-center sm:text-left">
+                          <Label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Difference</Label>
+                          <div className="flex flex-col">
+                            <p className={cn("text-xl font-bold", isNegative ? "text-red-600" : "text-emerald-600")}>
+                              {isNegative ? '-' : '+'}₹{Math.abs(diff).toLocaleString()}
+                            </p>
+                            <span className={cn("text-[10px] font-bold", isNegative ? "text-red-500" : "text-emerald-500")}>
+                              {isNegative ? '' : '+'}{(inquiry.priceOffered > 0 ? (diff / inquiry.priceOffered) * 100 : 0).toFixed(1)}%
+                            </span>
+                          </div>
+                        </div>
                       </div>
-                    )}
-                  </div>
 
-                  {/* Right Column: Pricing & Meta Info */}
-                  <div className="flex flex-col justify-between space-y-6">
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
-                      <div className="space-y-1 text-center sm:text-left">
-                        <Label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Our Price</Label>
-                        <p className="text-xl font-bold text-slate-900">₹{inquiry.priceOffered?.toLocaleString()}</p>
-                      </div>
-                      <div className="space-y-1 text-center sm:text-left border-y sm:border-y-0 sm:border-x border-slate-200 py-2 sm:py-0 px-0 sm:px-4">
-                        <Label className="text-[10px] font-black text-slate-500 uppercase tracking-widest whitespace-nowrap">Customer Price</Label>
-                        <p className="text-xl font-bold text-slate-900">₹{inquiry.priceStated?.toLocaleString()}</p>
-                      </div>
-                      <div className="space-y-1 text-center sm:text-left">
-                        <Label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Difference</Label>
-                        <div className="flex flex-col">
-                          <p className={cn("text-xl font-bold", isNegative ? "text-red-600" : "text-emerald-600")}>
-                            {isNegative ? '-' : '+'}₹{Math.abs(diff).toLocaleString()}
-                          </p>
-                          <span className={cn("text-[10px] font-bold", isNegative ? "text-red-500" : "text-emerald-500")}>
-                            {isNegative ? '' : '+'}{(inquiry.priceOffered > 0 ? (diff / inquiry.priceOffered) * 100 : 0).toFixed(1)}%
-                          </span>
+                      <div className="flex flex-col gap-4">
+                        <div className="flex items-center justify-between text-xs text-muted-foreground border-b pb-2">
+                          <span className="font-medium">Inquiry ID: <span className="text-slate-900">INQ{inquiry._id.slice(-3).toUpperCase().padStart(3, '0')}</span></span>
+                          <span className="font-medium">Date: <span className="text-slate-900">{inquiry.createdAt ? format(new Date(inquiry.createdAt), 'MMMM d, yyyy') : 'N/A'}</span></span>
+                        </div>
+
+                        <div className="flex flex-wrap items-center justify-end gap-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="hover-elevate bg-blue-600 border-blue-600 text-white hover:bg-blue-700"
+                            onClick={() => { setSelectedInquiry(inquiry); setViewDialogOpen(true); }}
+                          >
+                            View
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="hover-elevate bg-orange-500 border-orange-500 text-white hover:bg-orange-600"
+                            onClick={() => handlePrint(inquiry)}
+                          >
+                            Print
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="hover-elevate bg-emerald-600 border-emerald-600 text-white hover:bg-emerald-700"
+                            onClick={() => handleSendWhatsApp(inquiry)}
+                          >
+                            Send
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="hover-elevate bg-red-600 border-red-600 text-white hover:bg-red-700"
+                            onClick={() => { setInquiryToDelete(inquiry); setDeleteDialogOpen(true); }}
+                          >
+                            Delete
+                          </Button>
                         </div>
                       </div>
                     </div>
+                  </div>
+                </CardContent>
+              </Card>
 
-                    <div className="flex flex-col gap-4">
-                      <div className="flex items-center justify-between text-xs text-muted-foreground border-b pb-2">
-                        <span className="font-medium">Inquiry ID: <span className="text-slate-900">INQ{inquiry._id.slice(-3).toUpperCase().padStart(3, '0')}</span></span>
-                        <span className="font-medium">Date: <span className="text-slate-900">{inquiry.createdAt ? format(new Date(inquiry.createdAt), 'MMMM d, yyyy') : 'N/A'}</span></span>
-                      </div>
+              {/* Hidden Receipt for PDF Generation */}
+              <div id={`receipt-${inquiry._id}`} className="hidden print:block p-8 bg-white text-slate-900 min-h-[297mm] w-[210mm] mx-auto">
+                <div className="flex flex-col items-center mb-8">
+                  <img src={autogammaLogo} alt="Auto Gamma" className="h-16 mb-2" />
+                  <h1 className="text-2xl font-bold uppercase tracking-widest">Quotation</h1>
+                  <div className="h-1 w-24 bg-orange-500 mt-1"></div>
+                </div>
 
-                      <div className="flex flex-wrap items-center justify-end gap-2">
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="hover-elevate bg-white border-slate-200 text-slate-700"
-                          onClick={() => { setSelectedInquiry(inquiry); setViewDialogOpen(true); }}
-                        >
-                          View
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="hover-elevate bg-white border-slate-200 text-slate-700"
-                        >
-                          Print
-                        </Button>
-                          <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="hover-elevate bg-blue-50 border-blue-100 text-blue-700 hover:bg-blue-100"
-                          onClick={() => {
-                            const details = serviceDetails.map((s: any) => `${s.name}: ₹${s.servicePrice}`).join('\n');
-                            const text = `Inquiry Details:\nName: ${inquiry.name}\nPhone: ${inquiry.phone}\nServices:\n${details}\nTotal: ₹${inquiry.priceOffered}`;
-                            window.open(`https://wa.me/${inquiry.phone.replace(/\D/g, '')}?text=${encodeURIComponent(text)}`, '_blank');
-                          }}
-                        >
-                          Send
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="hover-elevate bg-red-50 border-red-100 text-red-600 hover:bg-red-100"
-                          onClick={() => { setInquiryToDelete(inquiry); setDeleteDialogOpen(true); }}
-                        >
-                          Delete
-                        </Button>
-                      </div>
-                    </div>
+                <div className="grid grid-cols-2 gap-8 mb-8 border-b pb-6">
+                  <div>
+                    <h2 className="text-xs font-bold text-slate-500 uppercase mb-2">Quotation For:</h2>
+                    <p className="text-lg font-bold">{inquiry.name}</p>
+                    <p className="text-sm text-slate-600">{inquiry.phone}</p>
+                    <p className="text-sm text-slate-600">{inquiry.email || ''}</p>
+                  </div>
+                  <div className="text-right">
+                    <h2 className="text-xs font-bold text-slate-500 uppercase mb-2">Quotation Details:</h2>
+                    <p className="text-sm">Quotation #: <span className="font-bold">INQ{inquiry._id.slice(-3).toUpperCase().padStart(3, '0')}</span></p>
+                    <p className="text-sm">Date: <span className="font-bold">{inquiry.createdAt ? format(new Date(inquiry.createdAt), 'MMMM d, yyyy') : format(new Date(), 'MMMM d, yyyy')}</span></p>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+
+                <div className="mb-8">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="bg-slate-100">
+                        <th className="p-3 text-left text-xs font-bold uppercase text-slate-600">Service Description</th>
+                        <th className="p-3 text-right text-xs font-bold uppercase text-slate-600">Vehicle Type</th>
+                        <th className="p-3 text-right text-xs font-bold uppercase text-slate-600">Amount</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {serviceDetails.map((item: any, idx: number) => (
+                        <tr key={idx} className="border-b">
+                          <td className="p-3">
+                            <p className="font-bold">{item.name}</p>
+                          </td>
+                          <td className="p-3 text-right text-slate-600">{item.carType}</td>
+                          <td className="p-3 text-right font-bold">₹{item.servicePrice.toLocaleString()}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                    <tfoot>
+                      <tr className="bg-slate-50">
+                        <td colSpan={2} className="p-4 text-right font-bold uppercase text-slate-600">Total Amount</td>
+                        <td className="p-4 text-right text-xl font-bold text-orange-600">₹{inquiry.priceOffered.toLocaleString()}</td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+
+                {inquiry.notes && (
+                  <div className="mb-8">
+                    <h2 className="text-xs font-bold text-slate-500 uppercase mb-2">Important Notes:</h2>
+                    <div className="p-4 bg-orange-50 border border-orange-100 rounded text-sm text-slate-700 italic">
+                      {inquiry.notes}
+                    </div>
+                  </div>
+                )}
+
+                <div className="mt-auto pt-12 border-t text-center space-y-2">
+                  <p className="text-sm font-bold">Auto Gamma - Premium Auto Garage</p>
+                  <p className="text-xs text-slate-500">This is a system-generated quotation. Valid for 7 days from the date of issue.</p>
+                  <div className="flex justify-center gap-4 text-[10px] text-slate-400 uppercase tracking-widest pt-4">
+                    <span>Quality</span>
+                    <span>•</span>
+                    <span>Reliability</span>
+                    <span>•</span>
+                    <span>Trust</span>
+                  </div>
+                </div>
+              </div>
+            </React.Fragment>
           );
         })}
       </div>
