@@ -120,6 +120,34 @@ export default function ServiceFunnel() {
     }
   });
 
+  const [assignBusinessOpen, setAssignBusinessOpen] = useState(false);
+  const [selectedJobForAssign, setSelectedJobForAssign] = useState<any>(null);
+  const [serviceAssignments, setServiceAssignments] = useState<any[]>([]);
+
+  const handleStageChange = (job: any, newStage: string) => {
+    if (newStage === 'Completed') {
+      setSelectedJobForAssign(job);
+      setServiceAssignments(job.serviceItems.map((item: any) => ({
+        ...item,
+        assignedBusiness: item.assignedBusiness || 'Auto Gamma'
+      })));
+      setAssignBusinessOpen(true);
+    } else {
+      updateStageMutation.mutate({ id: job._id, stage: newStage });
+    }
+  };
+
+  const confirmCompleteService = () => {
+    if (selectedJobForAssign) {
+      updateStageMutation.mutate({ 
+        id: selectedJobForAssign._id, 
+        stage: 'Completed',
+        serviceItems: serviceAssignments
+      });
+      setAssignBusinessOpen(false);
+    }
+  };
+
   const groupedJobs = JOB_STAGES.reduce((acc, stage) => {
     acc[stage] = jobs.filter((job: any) => job.stage === stage);
     return acc;
@@ -272,7 +300,7 @@ export default function ServiceFunnel() {
                   ) : (
                     <Select
                       value={job.stage}
-                      onValueChange={(stage) => updateStageMutation.mutate({ id: job._id, stage })}
+                      onValueChange={(stage) => handleStageChange(job, stage)}
                     >
                       <SelectTrigger className={cn("w-full border text-xs h-8", STAGE_COLORS[job.stage])} data-testid={`stage-select-${job._id}`}>
                         <SelectValue />
@@ -317,6 +345,50 @@ export default function ServiceFunnel() {
           );
         })
       )}
+      {/* Assign Business Dialog */}
+      <Dialog open={assignBusinessOpen} onOpenChange={setAssignBusinessOpen}>
+        <DialogContent className="max-w-4xl w-[95vw] max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Complete Service - Assign Business</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            <p className="text-sm text-slate-500">
+              Select which business each service item belongs to. Separate invoices will be generated for each business.
+            </p>
+            
+            <div className="space-y-4">
+              {serviceAssignments.map((item, index) => (
+                <div key={index} className="flex items-center justify-between p-4 border border-slate-200 rounded-lg bg-slate-50">
+                  <div>
+                    <p className="font-semibold text-slate-900">{item.name}</p>
+                    <p className="text-sm text-slate-500">₹{item.price.toLocaleString('en-IN')}</p>
+                  </div>
+                  <Select 
+                    value={item.assignedBusiness} 
+                    onValueChange={(value) => {
+                      const newAssignments = [...serviceAssignments];
+                      newAssignments[index].assignedBusiness = value;
+                      setServiceAssignments(newAssignments);
+                    }}
+                  >
+                    <SelectTrigger className="w-48">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Auto Gamma">Auto Gamma</SelectItem>
+                      <SelectItem value="Business 2">Business 2</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="flex justify-end gap-3 mt-6">
+            <Button variant="outline" onClick={() => setAssignBusinessOpen(false)}>Cancel</Button>
+            <Button onClick={confirmCompleteService}>Complete & Generate Invoice</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
