@@ -839,29 +839,33 @@ export class MongoStorage implements IStorage {
     const invoiceNumber = `INV${String(nextNumber).padStart(4, '0')}`;
 
     // Build invoice items from service items and materials
-    const invoiceItems: any[] = [
-      ...filteredServiceItems.map(s => ({
-        description: s.name,
-        quantity: 1,
-        unitPrice: s.price,
-        total: s.price - (s.discount || 0),
-        type: 'service' as const,
-        discount: s.discount || 0,
-        assignedBusiness: s.assignedBusiness || 'Auto Gamma'
-      }))
-    ];
+    const invoiceItems: any[] = filteredServiceItems.map(s => ({
+      description: s.name,
+      quantity: 1,
+      unitPrice: s.price,
+      total: s.price - (s.discount || 0),
+      type: 'service',
+      discount: s.discount || 0,
+      assignedBusiness: s.assignedBusiness || 'Auto Gamma'
+    }));
 
-    // Add labor charges as an item
-    if (totalLabor > 0) {
-      invoiceItems.push({
-        description: "Labor Charges",
-        quantity: 1,
-        unitPrice: totalLabor,
-        total: totalLabor,
-        type: 'service' as const,
-        discount: 0,
-        assignedBusiness: business || 'Auto Gamma'
-      });
+    // Add labor charges if they exist for this job and aren't already in the list
+    if (job.laborCost && job.laborCost > 0) {
+      const laborAlreadyAdded = invoiceItems.some(item => 
+        item.description.toLowerCase().includes("labor")
+      );
+      
+      if (!laborAlreadyAdded) {
+        invoiceItems.push({
+          description: "Labor Charge",
+          quantity: 1,
+          unitPrice: job.laborCost,
+          total: job.laborCost,
+          type: 'service',
+          discount: 0,
+          assignedBusiness: business || 'Auto Gamma'
+        });
+      }
     }
 
     // Ensure Business 2 invoices don't include materials by default unless assigned

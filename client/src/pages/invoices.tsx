@@ -136,34 +136,24 @@ export default function Invoices() {
       return "";
     };
 
-    const normalizedBusiness = String(invoice.business || "").trim().toLowerCase();
-    const isBusiness2 = normalizedBusiness === "business 2" || normalizedBusiness === "business2" || normalizedBusiness.includes("business 2");
+    const rawBiz = String(invoice.business || "");
+    const isBusiness2 = /business\s*2/i.test(rawBiz);
     
-    const businessName = isBusiness2 ? "BUSINESS 2" : "AUTOGAMMA";
-    const footerText = isBusiness2 ? "BUSINESS 2" : "AUTOGAMMA - Premium Auto Detailing Studio";
-    const logoSrc = isBusiness2 ? "/logo2.png" : "/logo.png";
+    const currentBusinessName = isBusiness2 ? "BUSINESS 2" : "AUTOGAMMA";
+    const currentFooterText = isBusiness2 ? "BUSINESS 2" : "AUTOGAMMA - Premium Auto Detailing Studio";
+    const currentLogo = isBusiness2 ? "/logo2.png" : "/logo.png";
 
-    // Adding more aggressive debugging to identify data issues
-    console.log("INVOICE_DEBUG:", {
-      id: invoice.invoiceNumber,
-      businessRaw: invoice.business,
-      normalized: normalizedBusiness,
-      isB2: isBusiness2,
-      logo: logoSrc
-    });
-
-    // FORCE RELOAD LOGIC: If we are in Business 2 mode, ensure we use the correct logo
-    // This is a safety check for the browser cache
-    const finalLogo = isBusiness2 ? `/logo2.png?v=${Date.now()}` : `/logo.png?v=${Date.now()}`;
+    // Adding this directly to the returned HTML to ensure it's evaluated at render time
+    const logoHtml = `<img src="${currentLogo}" alt="${currentBusinessName} Logo" style="height: 60px; object-fit: contain; margin-bottom: 10px;" />`;
 
     return `
       <div style="font-family: Arial, sans-serif; max-width: 900px; margin: 0 auto; padding: 0;">
         <div style="text-align: center; margin-bottom: 30px;">
-          <img src="${finalLogo}" alt="${businessName} Logo" style="height: 60px; object-fit: contain; margin-bottom: 10px;" />
-          <h1 style="margin: 0; color: #111827;">${businessName}</h1>
+          ${logoHtml}
+          <h1 style="margin: 0; color: #111827;">${currentBusinessName}</h1>
           <p style="color: #9ca3af; font-size: 12px; margin: 0;">Tax Invoice</p>
         </div>
-
+        
         <div style="display: flex; justify-content: space-between; gap: 20px; margin-bottom: 30px; flex-wrap: wrap;">
           <div>
             <p style="color: #9ca3af; font-size: 12px; margin: 0;">Invoice Number</p>
@@ -267,7 +257,7 @@ export default function Invoices() {
 
         <div style="border-top: 1px solid #e5e7eb; text-align: center; padding-top: 20px; margin-top: 30px;">
           <p style="color: #9ca3af; font-size: 11px; margin: 0;">This is a computer-generated invoice. No signature is required.</p>
-          <p style="color: #111827; font-size: 12px; font-weight: 600; margin: 4px 0 0 0;">${footerText}</p>
+          <p style="color: #111827; font-size: 12px; font-weight: 600; margin: 4px 0 0 0;">${currentFooterText}</p>
         </div>
       </div>
     `;
