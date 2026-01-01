@@ -88,19 +88,24 @@ export default function CustomerFunnel() {
   });
 
   const [assignmentOpen, setAssignmentOpen] = useState(false);
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const [cancellationReason, setCancellationReason] = useState("");
   const [pendingJob, setPendingJob] = useState<any>(null);
 
   const updateStatusMutation = useMutation({
-    mutationFn: ({ id, status, serviceItems }: { id: string; status: string; serviceItems?: any[] }) =>
-      api.jobs.updateStage(id, status, serviceItems),
+    mutationFn: ({ id, status, serviceItems, cancellationReason }: { id: string; status: string; serviceItems?: any[]; cancellationReason?: string }) =>
+      api.jobs.updateStage(id, status, serviceItems, cancellationReason),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["jobs"] });
       if (data.stage === 'Completed') {
         queryClient.invalidateQueries({ queryKey: ["invoices"] });
       }
-      const message = data.stage === 'Completed' ? "Service completed & invoice created!" : "Status updated";
+      const message = data.stage === 'Completed' ? "Service completed & invoice created!" : 
+                     data.stage === 'Cancelled' ? "Service cancelled" : "Status updated";
       toast({ title: message });
       setAssignmentOpen(false);
+      setCancelDialogOpen(false);
+      setCancellationReason("");
     },
     onError: (error: any) => {
       const errorMsg = error?.message || "Failed to update status";
@@ -112,9 +117,21 @@ export default function CustomerFunnel() {
     if (newStage === 'Completed') {
       setPendingJob(job);
       setAssignmentOpen(true);
+    } else if (newStage === 'Cancelled') {
+      setPendingJob(job);
+      setCancelDialogOpen(true);
     } else {
       updateStatusMutation.mutate({ id: job._id, status: newStage });
     }
+  };
+
+  const handleCancelConfirm = () => {
+    if (!pendingJob) return;
+    updateStatusMutation.mutate({ 
+      id: pendingJob._id, 
+      status: 'Cancelled',
+      cancellationReason 
+    });
   };
 
   const getJobsByStage = (stage: string) => {
@@ -247,6 +264,14 @@ export default function CustomerFunnel() {
                           <Badge variant="outline" className="text-xs px-2 py-1 h-6 w-full justify-center mb-2">
                             {job.paymentStatus}
                           </Badge>
+                        )}
+
+                        {/* Cancellation Reason */}
+                        {job.stage === 'Cancelled' && job.cancellationReason && (
+                          <div className="bg-red-50 p-2 rounded border border-red-100 mt-2">
+                            <p className="text-[10px] font-bold text-red-600 uppercase tracking-wider mb-1">Cancellation Reason</p>
+                            <p className="text-xs text-red-700 italic">"{job.cancellationReason}"</p>
+                          </div>
                         )}
 
                         {/* Status Update Dropdown */}
@@ -457,10 +482,15 @@ export default function CustomerFunnel() {
                 <Select
                   value={selectedCustomer.status || 'Inquired'}
                   onValueChange={(value) => {
-                    updateStatusMutation.mutate({
-                      id: selectedCustomer._id,
-                      status: value,
-                    });
+                    if (value === 'Cancelled') {
+                      setPendingJob({ _id: selectedCustomer._id, customerId: selectedCustomer._id });
+                      setCancelDialogOpen(true);
+                    } else {
+                      updateStatusMutation.mutate({
+                        id: selectedCustomer._id,
+                        status: value,
+                      });
+                    }
                     setSelectedCustomer({ ...selectedCustomer, status: value });
                   }}
                 >
@@ -478,6 +508,30 @@ export default function CustomerFunnel() {
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Cancel Reason Dialog */}
+      <Dialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Reason for Cancellation</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <p className="text-sm text-slate-500">Please provide a reason for cancelling this service.</p>
+            <textarea
+              className="flex min-h-[80px] w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-800 dark:bg-slate-950 dark:ring-offset-slate-950 dark:placeholder:text-slate-400 dark:focus-visible:ring-slate-300"
+              placeholder="Enter reason here..."
+              value={cancellationReason}
+              onChange={(e) => setCancellationReason(e.target.value)}
+            />
+          </div>
+          <div className="flex justify-end gap-3">
+            <Button variant="outline" size="sm" onClick={() => setCancelDialogOpen(false)}>Back</Button>
+            <Button variant="destructive" size="sm" onClick={handleCancelConfirm} disabled={!cancellationReason.trim() || updateStatusMutation.isPending}>
+              {updateStatusMutation.isPending ? "Cancelling..." : "Confirm Cancellation"}
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
 

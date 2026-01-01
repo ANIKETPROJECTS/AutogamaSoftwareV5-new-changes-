@@ -469,7 +469,7 @@ export async function registerRoutes(
 
   app.patch("/api/jobs/:id/stage", async (req, res) => {
     try {
-      const { stage, discount = 0 } = req.body;
+      const { stage, discount = 0, cancellationReason } = req.body;
       
       const currentJob = await storage.getJob(req.params.id);
       if (!currentJob) return res.status(404).json({ message: "Job not found" });
@@ -489,7 +489,11 @@ export async function registerRoutes(
         return res.status(409).json({ message: "Cannot change stage after invoice has been created" });
       }
       
-      const job = await storage.updateJob(req.params.id, { stage, serviceItems: req.body.serviceItems });
+      const job = await storage.updateJob(req.params.id, { 
+        stage, 
+        serviceItems: req.body.serviceItems,
+        cancellationReason 
+      });
       if (!job) return res.status(404).json({ message: "Job not found" });
       
       const customer = await Customer.findById(job.customerId);
