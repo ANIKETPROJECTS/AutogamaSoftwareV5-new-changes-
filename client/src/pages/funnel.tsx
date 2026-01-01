@@ -287,20 +287,20 @@ export default function CustomerFunnel() {
 
       {/* Business Assignment Dialog */}
       <Dialog open={assignmentOpen} onOpenChange={setAssignmentOpen}>
-        <DialogContent className="sm:max-w-[600px] w-[95vw] max-h-[90vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-[900px] w-[95vw] max-h-[90vh] overflow-y-auto">
           <DialogHeader className="pb-4 border-b">
-            <DialogTitle className="text-2xl font-bold">Complete Service - Assign Business</DialogTitle>
+            <DialogTitle className="text-xl font-bold">Complete Service - Assign Business</DialogTitle>
           </DialogHeader>
           <div className="space-y-6 py-6">
-            <p className="text-base text-slate-600 font-medium">Select which business each service item belongs to. Separate invoices will be generated for each business.</p>
+            <p className="text-sm text-slate-500">Select which business each service item belongs to. Separate invoices will be generated for each business.</p>
             <div className="space-y-4">
               {pendingJob?.serviceItems?.map((item: any, index: number) => (
-                <div key={index} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border-2 rounded-xl bg-slate-50 gap-4 hover:border-primary/20 transition-colors">
+                <div key={index} className="flex items-center justify-between p-4 border rounded-lg bg-slate-50 gap-4">
                   <div className="flex-1 min-w-0">
-                    <p className="text-lg font-bold text-slate-900 truncate">{item.name}</p>
-                    <p className="text-base font-semibold text-primary">₹{item.price?.toLocaleString('en-IN')}</p>
+                    <p className="text-sm font-semibold text-slate-900 truncate">{item.name}</p>
+                    <p className="text-xs text-slate-500">₹{item.price?.toLocaleString('en-IN')}</p>
                   </div>
-                  <div className="w-full sm:w-[200px] space-y-1.5">
+                  <div className="w-[200px] space-y-1">
                     <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-1">Assign To</p>
                     <Select 
                       value={item.assignedBusiness || 'Auto Gamma'} 
@@ -310,28 +310,28 @@ export default function CustomerFunnel() {
                         setPendingJob({ ...pendingJob, serviceItems: newItems });
                       }}
                     >
-                      <SelectTrigger className="w-full h-11 text-sm font-semibold bg-white border-slate-200">
+                      <SelectTrigger className="w-full h-9 text-xs bg-white border-slate-200">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Auto Gamma" className="font-medium">Auto Gamma</SelectItem>
-                        <SelectItem value="Business 2" className="font-medium">Business 2</SelectItem>
+                        <SelectItem value="Auto Gamma">Auto Gamma</SelectItem>
+                        <SelectItem value="Business 2">Business 2</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                 </div>
               ))}
             </div>
-            <div className="flex flex-col sm:flex-row justify-end gap-3 pt-6 border-t">
+            <div className="flex justify-end gap-3 pt-4 border-t">
               <Button 
                 variant="outline" 
-                className="h-11 px-8 font-bold text-slate-600" 
+                size="sm"
                 onClick={() => setAssignmentOpen(false)}
               >
                 Cancel
               </Button>
               <Button 
-                className="h-11 px-8 font-bold shadow-lg shadow-primary/20" 
+                size="sm"
                 onClick={() => updateStatusMutation.mutate({ 
                   id: pendingJob._id, 
                   status: 'Completed',

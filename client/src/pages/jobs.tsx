@@ -348,37 +348,29 @@ export default function ServiceFunnel() {
       )}
       {/* Assign Business Dialog */}
       <Dialog open={assignBusinessOpen} onOpenChange={setAssignBusinessOpen}>
-        <DialogContent className="sm:max-w-[700px] w-[95vw] max-h-[90vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-[900px] w-[95vw] max-h-[90vh] overflow-y-auto">
           <DialogHeader className="pb-4 border-b">
-            <DialogTitle className="text-2xl font-bold">Complete Service - Assign Business</DialogTitle>
+            <DialogTitle className="text-xl font-bold">Complete Service - Assign Business</DialogTitle>
           </DialogHeader>
           
           <div className="space-y-6 py-6">
-            <div className="bg-primary/5 border-2 border-primary/10 p-4 rounded-xl flex items-center gap-4">
-              <div className="p-2 bg-primary/10 rounded-lg">
-                <FileText className="w-6 h-6 text-primary" />
-              </div>
-              <div className="space-y-1">
-                <h4 className="text-sm font-bold text-slate-900 uppercase">Business Selection Required</h4>
-                <p className="text-sm text-slate-600">
-                  Select which business each service item belongs to. Separate invoices will be generated for each business.
-                </p>
-              </div>
+            <div className="bg-slate-50 border p-4 rounded-lg flex items-center gap-4">
+              <FileText className="w-5 h-5 text-slate-500" />
+              <p className="text-sm text-slate-600">
+                Select which business each service item belongs to. Separate invoices will be generated for each business.
+              </p>
             </div>
             
             <div className="space-y-4">
               {serviceAssignments.map((item, index) => (
-                <div key={index} className="flex flex-col sm:flex-row sm:items-center justify-between p-5 border-2 border-slate-100 rounded-2xl bg-white shadow-sm hover:border-primary/20 transition-all gap-4">
-                  <div className="space-y-1.5 flex-1 min-w-0">
-                    <p className="font-bold text-lg text-slate-900 truncate leading-tight uppercase">{item.name}</p>
-                    <div className="flex items-center gap-2 text-primary text-lg font-black">
-                      <IndianRupee className="w-4 h-4" strokeWidth={3} />
-                      <span className="tabular-nums">{(item.price || 0).toLocaleString('en-IN')}</span>
-                    </div>
+                <div key={index} className="flex items-center justify-between p-4 border rounded-lg bg-white shadow-sm gap-4">
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-sm text-slate-900 truncate">{item.name}</p>
+                    <p className="text-xs font-bold text-slate-600">₹{(item.price || 0).toLocaleString('en-IN')}</p>
                   </div>
                   
-                  <div className="w-full sm:w-[220px] space-y-1.5">
-                    <Label className="text-[10px] font-black uppercase tracking-wider text-slate-400 px-1">Invoicing Entity</Label>
+                  <div className="w-[200px] space-y-1">
+                    <Label className="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-1">Assign To</Label>
                     <Select 
                       value={item.assignedBusiness} 
                       onValueChange={(value) => {
@@ -387,16 +379,12 @@ export default function ServiceFunnel() {
                         setServiceAssignments(newAssignments);
                       }}
                     >
-                      <SelectTrigger className="w-full h-12 bg-white border-2 border-slate-200 text-sm font-bold rounded-xl hover:border-primary transition-all">
+                      <SelectTrigger className="w-full h-9 bg-white border-slate-200 text-xs">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Auto Gamma" className="font-bold uppercase text-xs">
-                          Auto Gamma
-                        </SelectItem>
-                        <SelectItem value="Business 2" className="font-bold uppercase text-xs">
-                          Business 2
-                        </SelectItem>
+                        <SelectItem value="Auto Gamma">Auto Gamma</SelectItem>
+                        <SelectItem value="Business 2">Business 2</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -405,16 +393,16 @@ export default function ServiceFunnel() {
             </div>
           </div>
           
-          <div className="p-4 border-t bg-slate-50/50 flex flex-col sm:flex-row justify-end items-center gap-3">
+          <div className="p-4 border-t flex justify-end items-center gap-3">
             <Button 
               variant="outline" 
-              className="w-full sm:w-auto px-8 h-12 font-bold text-slate-600" 
+              size="sm"
               onClick={() => setAssignBusinessOpen(false)}
             >
               Cancel
             </Button>
             <Button 
-              className="w-full sm:w-auto px-10 h-12 font-bold shadow-lg shadow-primary/20" 
+              size="sm"
               onClick={confirmCompleteService}
               disabled={updateStageMutation.isPending}
             >
