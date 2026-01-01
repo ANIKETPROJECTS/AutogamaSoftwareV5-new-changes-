@@ -136,14 +136,30 @@ export default function Invoices() {
       return "";
     };
 
-    const businessName = invoice.business === "Business 2" ? "BUSINESS 2" : "AUTOGAMMA";
-    const footerText = invoice.business === "Business 2" ? "BUSINESS 2" : "AUTOGAMMA - Premium Auto Detailing Studio";
-    const logoSrc = invoice.business === "Business 2" ? "/logo2.png" : "/logo.png";
+    const normalizedBusiness = String(invoice.business || "").trim().toLowerCase();
+    const isBusiness2 = normalizedBusiness === "business 2" || normalizedBusiness === "business2" || normalizedBusiness.includes("business 2");
+    
+    const businessName = isBusiness2 ? "BUSINESS 2" : "AUTOGAMMA";
+    const footerText = isBusiness2 ? "BUSINESS 2" : "AUTOGAMMA - Premium Auto Detailing Studio";
+    const logoSrc = isBusiness2 ? "/logo2.png" : "/logo.png";
+
+    // Adding more aggressive debugging to identify data issues
+    console.log("INVOICE_DEBUG:", {
+      id: invoice.invoiceNumber,
+      businessRaw: invoice.business,
+      normalized: normalizedBusiness,
+      isB2: isBusiness2,
+      logo: logoSrc
+    });
+
+    // FORCE RELOAD LOGIC: If we are in Business 2 mode, ensure we use the correct logo
+    // This is a safety check for the browser cache
+    const finalLogo = isBusiness2 ? `/logo2.png?v=${Date.now()}` : `/logo.png?v=${Date.now()}`;
 
     return `
       <div style="font-family: Arial, sans-serif; max-width: 900px; margin: 0 auto; padding: 0;">
         <div style="text-align: center; margin-bottom: 30px;">
-          <img src="${logoSrc}" alt="${businessName} Logo" style="height: 60px; object-fit: contain; margin-bottom: 10px;" />
+          <img src="${finalLogo}" alt="${businessName} Logo" style="height: 60px; object-fit: contain; margin-bottom: 10px;" />
           <h1 style="margin: 0; color: #111827;">${businessName}</h1>
           <p style="color: #9ca3af; font-size: 12px; margin: 0;">Tax Invoice</p>
         </div>

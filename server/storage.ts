@@ -796,9 +796,15 @@ export class MongoStorage implements IStorage {
     const job = await Job.findById(jobId);
     if (!job) return null;
 
+    console.log(`Generating invoice for Job: ${jobId}, Business: ${business}`);
     // Filter service items by business if specified
     const filteredServiceItems = business 
-      ? job.serviceItems.filter((item: any) => (item.assignedBusiness || 'Auto Gamma') === business)
+      ? job.serviceItems.filter((item: any) => {
+          const itemBiz = item.assignedBusiness || 'Auto Gamma';
+          const matches = itemBiz === business;
+          console.log(`  Item: ${item.name}, Assigned to: ${itemBiz}, Matches ${business}: ${matches}`);
+          return matches;
+        })
       : job.serviceItems;
 
     // IMPORTANT: Check if we have items for this business
@@ -840,7 +846,8 @@ export class MongoStorage implements IStorage {
         unitPrice: s.price,
         total: s.price - (s.discount || 0),
         type: 'service' as const,
-        discount: s.discount || 0
+        discount: s.discount || 0,
+        assignedBusiness: s.assignedBusiness || 'Auto Gamma'
       }))
     ];
 
@@ -852,10 +859,12 @@ export class MongoStorage implements IStorage {
         unitPrice: totalLabor,
         total: totalLabor,
         type: 'service' as const,
-        discount: 0
+        discount: 0,
+        assignedBusiness: business || 'Auto Gamma'
       });
     }
 
+    // Ensure Business 2 invoices don't include materials by default unless assigned
     if (!business || business === 'Auto Gamma') {
       job.materials.forEach(m => {
         invoiceItems.push({
