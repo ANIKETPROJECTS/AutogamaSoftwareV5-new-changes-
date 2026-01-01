@@ -143,9 +143,26 @@ export default function Invoices() {
                        invoice.businessId === "business_2" ||
                        (invoice.items && invoice.items.some((item: any) => 
                          item.assignedBusiness === 'Business 2' || 
-                         (item.description && item.description.toLowerCase().includes('business 2'))
+                         (item.description && item.description.toLowerCase().includes('business 2')) ||
+                         (item.assignedBusiness && item.assignedBusiness.toLowerCase().includes('business 2'))
+                       )) ||
+                       (invoice.serviceItems && invoice.serviceItems.some((item: any) => 
+                         item.assignedBusiness === 'Business 2' || 
+                         (item.description && item.description.toLowerCase().includes('business 2')) ||
+                         (item.assignedBusiness && item.assignedBusiness.toLowerCase().includes('business 2'))
                        ));
     
+    console.log("Invoice Branding Check:", {
+      invoiceNumber: invoice.invoiceNumber,
+      rawBiz,
+      isBusiness2,
+      businessId: invoice.businessId,
+      itemCount: invoice.items?.length,
+      serviceItemCount: invoice.serviceItems?.length,
+      hasBusiness2Item: invoice.items?.some((i: any) => i.assignedBusiness === 'Business 2' || i.assignedBusiness?.toLowerCase().includes('business 2')),
+      hasBusiness2ServiceItem: invoice.serviceItems?.some((i: any) => i.assignedBusiness === 'Business 2' || i.assignedBusiness?.toLowerCase().includes('business 2'))
+    });
+
     const currentBusinessName = isBusiness2 ? "BUSINESS 2" : "AUTOGAMMA";
     const currentFooterText = isBusiness2 ? "BUSINESS 2" : "AUTOGAMMA - Premium Auto Detailing Studio";
     const currentLogo = isBusiness2 ? "logo2.png" : "logo.png";
