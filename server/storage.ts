@@ -115,6 +115,11 @@ export class MongoStorage implements IStorage {
     try {
       if (!data.name) throw new Error("Name is required");
       if (!data.phone) throw new Error("Phone number is required");
+
+      const existingCustomer = await Customer.findOne({ phone: data.phone });
+      if (existingCustomer) {
+        throw new Error(`Customer with mobile number ${data.phone} already exists`);
+      }
       
       const highestCustomer = await Customer.findOne({ customerId: { $regex: '^cus' } })
         .sort({ customerId: -1 })
