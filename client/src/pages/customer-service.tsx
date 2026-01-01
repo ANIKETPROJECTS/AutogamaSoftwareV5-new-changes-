@@ -76,17 +76,15 @@ export default function CustomerService() {
     const urlParams = new URLSearchParams(window.location.search);
     const preSelectedCustomerId = urlParams.get('customerId');
     if (preSelectedCustomerId && customers.length > 0) {
-      const exists = customers.some((c: any) => c._id === preSelectedCustomerId);
-      if (exists) {
+      const customer = customers.find((c: any) => c._id === preSelectedCustomerId);
+      if (customer) {
         setSelectedCustomerId(preSelectedCustomerId);
-        // Force the vehicle auto-selection if customer is found
-        const customer = customers.find((c: any) => c._id === preSelectedCustomerId);
-        if (customer && customer.vehicles && customer.vehicles.length > 0) {
+        if (customer.vehicles && customer.vehicles.length > 0) {
           setSelectedVehicleIndex('0');
         }
       }
     }
-  }, [customersData, location]);
+  }, [customers, location]);
 
   const filteredCustomers = customers.filter((customer: any) => 
     customer.name.toLowerCase().includes(customerSearch.toLowerCase()) || 
