@@ -402,11 +402,22 @@ export default function CustomerRegistration() {
     });
   };
 
-  const validateStep1 = () => {
+  const validateStep1 = async () => {
     const newErrors: { phone?: string; email?: string; referrerName?: string; referrerPhone?: string } = {};
     
     if (!validatePhone(customerData.phone)) {
       newErrors.phone = "Please enter a valid 10-digit mobile number";
+    } else {
+      // Check if phone number already exists
+      try {
+        const response = await fetch(`/api/customers/check-phone/${customerData.phone}`);
+        const data = await response.json();
+        if (data.exists) {
+          newErrors.phone = "This mobile number is already registered";
+        }
+      } catch (error) {
+        console.error("Error checking phone number:", error);
+      }
     }
     
     if (!validateEmail(customerData.email)) {
@@ -426,8 +437,8 @@ export default function CustomerRegistration() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleNextStep = () => {
-    if (validateStep1()) {
+  const handleNextStep = async () => {
+    if (await validateStep1()) {
       // Pre-fill vehicle type from PPF selection in step 2
       if (customerData.ppfVehicleType) {
         setVehicleData({ ...vehicleData, vehicleType: customerData.ppfVehicleType });

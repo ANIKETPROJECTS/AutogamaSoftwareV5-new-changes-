@@ -255,6 +255,16 @@ export async function registerRoutes(
     res.json({ authenticated: false });
   });
 
+  app.get("/api/customers/check-phone/:phone", async (req, res) => {
+    try {
+      const { phone } = req.params;
+      const customer = await Customer.findOne({ phone });
+      res.json({ exists: !!customer });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to check phone number" });
+    }
+  });
+
   app.get("/api/customers", async (req, res) => {
     try {
       const { search, page = '1', limit = '10' } = req.query;
