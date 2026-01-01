@@ -63,7 +63,7 @@ export interface IServiceItem {
   rollId?: mongoose.Types.ObjectId;
   rollName?: string;
   sizeUsed?: string;
-  assignedBusiness: { type: String, enum: ['Auto Gamma', 'Business 2'], default: 'Auto Gamma' }
+  assignedBusiness?: 'Auto Gamma' | 'Business 2';
 }
 
 export interface IPayment {

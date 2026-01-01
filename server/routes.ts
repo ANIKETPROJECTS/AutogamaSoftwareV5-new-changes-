@@ -489,11 +489,9 @@ export async function registerRoutes(
       
       if (stage === 'Completed') {
         try {
-          // Generate or retrieve existing invoice for this specific job
-          const taxRate = 18; // Default rate, storage handles requiresGST
+          const taxRate = 18;
           const discount = req.body.discount || 0;
 
-          // Group service items by business
           const itemsByBusiness: Record<string, any[]> = {};
           job.serviceItems.forEach((item: any) => {
             const biz = item.assignedBusiness || 'Auto Gamma';
@@ -522,7 +520,7 @@ export async function registerRoutes(
             error: invoiceError instanceof Error ? invoiceError.message : "Unknown error"
           });
         }
-        return; // Prevent double response
+        return;
       }
       
       res.json({ ...job.toObject(), message: "Status updated" });

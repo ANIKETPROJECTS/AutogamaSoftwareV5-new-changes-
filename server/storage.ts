@@ -791,25 +791,29 @@ export class MongoStorage implements IStorage {
     return updatedJob;
   }
 
-  async generateInvoiceForJob(jobId: string, taxRate: number = 18, discount: number = 0): Promise<IInvoice | null> {
+  async generateInvoiceForJob(jobId: string, taxRate: number = 18, discount: number = 0, business?: string): Promise<IInvoice | null> {
     if (!mongoose.Types.ObjectId.isValid(jobId)) return null;
     const job = await Job.findById(jobId);
     if (!job) return null;
 
-    const invoiceExists = await Invoice.findOne({ jobId });
-    if (invoiceExists) return invoiceExists;
+    // Filter service items by business if specified
+    const filteredServiceItems = business 
+      ? job.serviceItems.filter((item: any) => (item.assignedBusiness || 'Auto Gamma') === business)
+      : job.serviceItems;
+
+    if (filteredServiceItems.length === 0) return null;
 
     // Fetch customer to get phone number
     const customer = await Customer.findById(job.customerId);
     if (!customer) return null;
 
-    const materialsTotal = job.materials.reduce((sum, m) => sum + m.cost, 0);
-    const servicesTotal = job.serviceItems.reduce((sum, s) => sum + (s.price - (s.discount || 0)), 0);
+    const materialsTotal = (!business || business === 'Auto Gamma') ? job.materials.reduce((sum, m) => sum + m.cost, 0) : 0;
+    const servicesTotal = filteredServiceItems.reduce((sum, s) => sum + (s.price - (s.discount || 0)), 0);
     const subtotal = materialsTotal + servicesTotal;
     
     const appliedTaxRate = job.requiresGST ? taxRate : 0;
     const taxAmount = (subtotal * appliedTaxRate) / 100;
-    const totalAmount = subtotal + taxAmount - discount;
+    const totalAmount = subtotal + taxAmount - (business === 'Auto Gamma' || !business ? discount : 0);
 
     const highestInvoice = await Invoice.findOne().sort({ invoiceNumber: -1 });
     let nextNumber = 1;
@@ -823,22 +827,27 @@ export class MongoStorage implements IStorage {
 
     // Build invoice items from service items and materials
     const invoiceItems: any[] = [
-      ...job.serviceItems.map(s => ({
+      ...filteredServiceItems.map(s => ({
         description: s.name,
         quantity: 1,
         unitPrice: s.price,
         total: s.price - (s.discount || 0),
         type: 'service' as const,
         discount: s.discount || 0
-      })),
-      ...job.materials.map(m => ({
-        description: m.name,
-        quantity: m.quantity,
-        unitPrice: m.cost / m.quantity,
-        total: m.cost,
-        type: 'material' as const
       }))
     ];
+
+    if (!business || business === 'Auto Gamma') {
+      job.materials.forEach(m => {
+        invoiceItems.push({
+          description: m.name,
+          quantity: m.quantity,
+          unitPrice: m.cost / m.quantity,
+          total: m.cost,
+          type: 'material' as const
+        });
+      });
+    }
 
     const invoice = new Invoice({
       jobId: job._id,
@@ -854,15 +863,18 @@ export class MongoStorage implements IStorage {
       subtotal,
       tax: taxAmount,
       taxRate: appliedTaxRate,
-      discount,
+      discount: (!business || business === 'Auto Gamma') ? discount : 0,
       totalAmount,
-      paidAmount: job.paidAmount,
-      paymentStatus: job.paymentStatus
+      paidAmount: (!business || business === 'Auto Gamma') ? job.paidAmount : 0,
+      paymentStatus: (!business || business === 'Auto Gamma') ? job.paymentStatus : 'Pending',
+      business: business || 'Auto Gamma'
     });
 
     await invoice.save();
     
-    if (job.totalAmount !== totalAmount) {
+    // Only update job total if we are looking at the primary business or no business specified
+    // In multi-business, the job total might be a combination, but the storage currently syncs it
+    if ((!business || business === 'Auto Gamma') && job.totalAmount !== totalAmount) {
       await Job.findByIdAndUpdate(jobId, { totalAmount });
     }
     

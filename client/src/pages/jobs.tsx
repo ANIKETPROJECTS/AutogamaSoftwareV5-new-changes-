@@ -100,15 +100,20 @@ export default function ServiceFunnel() {
       const errorMsg = (err as any)?.message || 'Failed to update status';
       toast({ title: errorMsg, variant: 'destructive' });
     },
-    onSuccess: (_, variables) => {
+    onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       if (variables.stage === 'Completed') {
         queryClient.invalidateQueries({ queryKey: ['invoices'] });
+        toast({ 
+          title: 'Status updated',
+          description: 'WhatsApp notification sent & invoices created successfully'
+        });
+      } else {
+        toast({ 
+          title: 'Status updated',
+          description: 'WhatsApp notification sent'
+        });
       }
-      toast({ 
-        title: 'Status updated',
-        description: 'WhatsApp notification sent & invoice created if needed'
-      });
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['jobs'] });
