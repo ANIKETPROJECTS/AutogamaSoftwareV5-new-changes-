@@ -5,9 +5,8 @@ module.exports = {
     env: {
       NODE_ENV: "production",
       PORT: "3002",
-      // IMPORTANT: Replace these with your actual credentials on the server
-      MONGODB_URI: "mongodb://your_mongodb_connection_string",
-      SESSION_SECRET: "your_random_session_secret_here"
+      MONGODB_URI: "mongodb+srv://abhijeet18012001_db_user:SNXS0nh4tm8l2IYv@autogarage.pxrxaer.mongodb.net/?appName=Autogarage",
+      SESSION_SECRET: "QmpMz4VloWsF7jLF58Q1La/Q937EqwHUCqZiLGk54XHF+6eRjSLzDGFAKFoMbfGtsZ2uzIwQiB4HCYQsC2fc3A=="
     }
   }]
 };
