@@ -504,9 +504,14 @@ export default function Invoices() {
                       <p className="text-sm text-slate-600">
                         {invoice.customerName} - {invoice.plateNumber}
                       </p>
-                      <p className="text-xs text-slate-500">
-                        {new Date(invoice.createdAt).toLocaleDateString("en-IN")}
-                      </p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Badge variant="outline" className="text-[10px] uppercase font-bold px-1.5 h-4 border-slate-300 text-slate-500">
+                          {invoice.business || "Auto Gamma"}
+                        </Badge>
+                        <p className="text-xs text-slate-500">
+                          {new Date(invoice.createdAt).toLocaleDateString("en-IN")}
+                        </p>
+                      </div>
                     </div>
                   </div>
 
