@@ -881,6 +881,11 @@ export class MongoStorage implements IStorage {
       });
     }
 
+    // Standardize business name for consistent matching
+    const finalBusiness = (business && (business === "Business 2" || business.trim().toLowerCase() === "business 2" || business.toLowerCase().includes("business 2"))) 
+      ? "Business 2" 
+      : "Auto Gamma";
+
     const invoice = new Invoice({
       jobId: job._id,
       customerId: job.customerId,
@@ -895,14 +900,14 @@ export class MongoStorage implements IStorage {
       subtotal,
       tax: taxAmount,
       taxRate: appliedTaxRate,
-      discount: (!business || business === 'Auto Gamma') ? discount : 0,
+      discount: (finalBusiness === 'Auto Gamma') ? discount : 0,
       totalAmount,
-      paidAmount: (!business || business === 'Auto Gamma') ? job.paidAmount : 0,
-      paymentStatus: (!business || business === 'Auto Gamma') ? job.paymentStatus : 'Pending',
-      business: business || 'Auto Gamma'
+      paidAmount: (finalBusiness === 'Auto Gamma') ? job.paidAmount : 0,
+      paymentStatus: (finalBusiness === 'Auto Gamma') ? job.paymentStatus : 'Pending',
+      business: finalBusiness
     });
 
-    console.log(`[Invoice Storage] Saving invoice ${invoiceNumber} with business: "${invoice.business}"`);
+    console.log(`[Invoice Storage] SAVING INVOICE: ${invoiceNumber} | FINAL BUSINESS: "${invoice.business}" | ITEMS: ${invoiceItems.length}`);
     await invoice.save();
     
     // Only update job total if we are looking at the primary business or no business specified

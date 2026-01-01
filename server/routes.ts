@@ -500,16 +500,17 @@ export async function registerRoutes(
           });
 
           const businesses = Object.keys(itemsByBusiness);
+          console.log(`[Invoice] Found items for businesses: ${JSON.stringify(businesses)}`);
           const invoices = [];
 
           for (const business of businesses) {
-            console.log(`[Invoice] Starting generation for Job: ${req.params.id}, Business: "${business}"`);
+            console.log(`[Invoice] STARTING GENERATION for Job: ${req.params.id}, Business: "${business}"`);
             const invoice = await storage.generateInvoiceForJob(req.params.id, taxRate, discount, business);
             if (invoice) {
-              console.log(`[Invoice] Successfully created: ${invoice.invoiceNumber} for business: "${invoice.business}"`);
+              console.log(`[Invoice] CREATED: ${invoice.invoiceNumber}, Business: "${invoice.business}", Total: ${invoice.totalAmount}`);
               invoices.push(invoice);
               // Wait a small amount to ensure distinct timestamps or sequence handling if needed
-              await new Promise(resolve => setTimeout(resolve, 100));
+              await new Promise(resolve => setTimeout(resolve, 200));
             }
           }
 

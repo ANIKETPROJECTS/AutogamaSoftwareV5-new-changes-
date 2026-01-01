@@ -137,14 +137,21 @@ export default function Invoices() {
     };
 
     const rawBiz = String(invoice.business || "");
-    const isBusiness2 = rawBiz.toLowerCase().includes("business 2") || rawBiz.toLowerCase().includes("business2");
+    const isBusiness2 = rawBiz === "Business 2" || rawBiz.toLowerCase().includes("business 2") || rawBiz.toLowerCase().includes("business2");
     
     const currentBusinessName = isBusiness2 ? "BUSINESS 2" : "AUTOGAMMA";
     const currentFooterText = isBusiness2 ? "BUSINESS 2" : "AUTOGAMMA - Premium Auto Detailing Studio";
     const currentLogo = isBusiness2 ? "logo2.png" : "logo.png";
 
     // Use absolute paths for the images to ensure they load correctly in all contexts
-    const logoHtml = `<div style="text-align: center; width: 100%;"><img src="/${currentLogo}" alt="${currentBusinessName} Logo" style="height: 80px; width: auto; max-width: 250px; object-fit: contain; margin: 0 auto 10px auto; display: block;" /></div>`;
+    const logoUrl = `/${currentLogo}`;
+    const logoHtml = `<div style="text-align: center; width: 100%; min-height: 80px; margin-bottom: 10px;">
+      <img src="${logoUrl}" 
+           alt="${currentBusinessName} Logo" 
+           onload="console.log('Logo loaded successfully: ${logoUrl}')"
+           onerror="this.onerror=null; this.src='/${isBusiness2 ? 'logo2.png' : 'logo.png'}'; console.log('Logo failed, retrying: ${logoUrl}')"
+           style="height: 80px; width: auto; max-width: 250px; object-fit: contain; margin: 0 auto; display: block;" />
+    </div>`;
 
     return `
       <div style="font-family: Arial, sans-serif; max-width: 900px; margin: 0 auto; padding: 0;">
