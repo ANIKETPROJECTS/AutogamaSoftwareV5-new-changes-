@@ -148,8 +148,6 @@ export default function Invoices() {
     const logoHtml = `<div style="text-align: center; width: 100%; min-height: 80px; margin-bottom: 10px;">
       <img src="${logoUrl}" 
            alt="${currentBusinessName} Logo" 
-           onload="console.log('Logo loaded successfully: ${logoUrl}')"
-           onerror="this.onerror=null; this.src='/${isBusiness2 ? 'logo2.png' : 'logo.png'}'; console.log('Logo failed, retrying: ${logoUrl}')"
            style="height: 80px; width: auto; max-width: 250px; object-fit: contain; margin: 0 auto; display: block;" />
     </div>`;
 
@@ -157,7 +155,6 @@ export default function Invoices() {
       <div style="font-family: Arial, sans-serif; max-width: 900px; margin: 0 auto; padding: 0;">
         <div style="text-align: center; margin-bottom: 30px;">
           ${logoHtml}
-          <h1 style="margin: 0; color: #111827;">${currentBusinessName}</h1>
           <p style="color: #9ca3af; font-size: 12px; margin: 0;">Tax Invoice</p>
         </div>
         
