@@ -9,7 +9,7 @@ import path from "path";
 import fs from "fs";
 import { createRequire } from "module";
 
-const require = createRequire(import.meta.url);
+const require = createRequire(typeof import.meta !== 'undefined' && import.meta.url ? import.meta.url : `file://${process.cwd()}/server/routes.ts`);
 
 async function seedAdminUser() {
   try {
