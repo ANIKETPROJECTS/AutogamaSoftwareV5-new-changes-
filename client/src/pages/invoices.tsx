@@ -119,7 +119,7 @@ export default function Invoices() {
     }
   };
 
-  const getInvoiceHTML = (invoice: any): string => {
+    const getInvoiceHTML = (invoice: any): string => {
     if (!invoice) return "";
     
     const getPaymentModeHTML = () => {
@@ -136,10 +136,13 @@ export default function Invoices() {
       return "";
     };
 
+    const businessName = invoice.business === "Business 2" ? "BUSINESS 2" : "AUTOGAMMA";
+    const footerText = invoice.business === "Business 2" ? "BUSINESS 2 - Premium Services" : "AUTOGAMMA - Premium Auto Detailing Studio";
+
     return `
       <div style="font-family: Arial, sans-serif; max-width: 900px; margin: 0 auto; padding: 0;">
         <div style="text-align: center; margin-bottom: 30px;">
-          <img src="/logo.png" alt="Auto Gamma Logo" style="height: 40px; display: block; margin: 0 auto 10px; object-fit: contain;" />
+          <h1 style="margin: 0; color: #111827;">${businessName}</h1>
           <p style="color: #9ca3af; font-size: 12px; margin: 0;">Tax Invoice</p>
         </div>
 
@@ -246,7 +249,7 @@ export default function Invoices() {
 
         <div style="border-top: 1px solid #e5e7eb; text-align: center; padding-top: 20px; margin-top: 30px;">
           <p style="color: #9ca3af; font-size: 11px; margin: 0;">This is a computer-generated invoice. No signature is required.</p>
-          <p style="color: #111827; font-size: 12px; font-weight: 600; margin: 4px 0 0 0;">AUTOGAMMA - Premium Auto Detailing Studio</p>
+          <p style="color: #111827; font-size: 12px; font-weight: 600; margin: 4px 0 0 0;">${footerText}</p>
         </div>
       </div>
     `;

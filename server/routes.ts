@@ -479,7 +479,7 @@ export async function registerRoutes(
         return res.status(409).json({ message: "Cannot change stage after invoice has been created" });
       }
       
-      const job = await storage.updateJob(req.params.id, { stage });
+      const job = await storage.updateJob(req.params.id, { stage, serviceItems: req.body.serviceItems });
       if (!job) return res.status(404).json({ message: "Job not found" });
       
       const customer = await Customer.findById(job.customerId);
@@ -491,12 +491,30 @@ export async function registerRoutes(
         try {
           // Generate or retrieve existing invoice for this specific job
           const taxRate = 18; // Default rate, storage handles requiresGST
-          const invoice = await storage.generateInvoiceForJob(req.params.id, taxRate, discount);
-          if (!invoice) {
+          const discount = req.body.discount || 0;
+
+          // Group service items by business
+          const itemsByBusiness: Record<string, any[]> = {};
+          job.serviceItems.forEach((item: any) => {
+            const biz = item.assignedBusiness || 'Auto Gamma';
+            if (!itemsByBusiness[biz]) itemsByBusiness[biz] = [];
+            itemsByBusiness[biz].push(item);
+          });
+
+          const businesses = Object.keys(itemsByBusiness);
+          const invoices = [];
+
+          for (const business of businesses) {
+            const invoice = await storage.generateInvoiceForJob(req.params.id, taxRate, discount, business);
+            if (invoice) invoices.push(invoice);
+          }
+
+          if (invoices.length === 0) {
             return res.status(500).json({ 
               message: "Failed to generate invoice for completed job"
             });
           }
+          res.json({ ...job.toObject(), message: "Service completed & invoices created!", invoices });
         } catch (invoiceError) {
           console.error("Invoice generation error for job:", req.params.id, invoiceError);
           return res.status(500).json({ 
@@ -504,9 +522,10 @@ export async function registerRoutes(
             error: invoiceError instanceof Error ? invoiceError.message : "Unknown error"
           });
         }
+        return; // Prevent double response
       }
       
-      res.json({ ...job.toObject(), message: stage === 'Completed' ? "Service completed & invoice created!" : "Status updated" });
+      res.json({ ...job.toObject(), message: "Status updated" });
     } catch (error) {
       console.error("Job stage update error:", error);
       res.status(500).json({ 

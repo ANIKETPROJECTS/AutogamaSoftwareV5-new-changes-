@@ -58,7 +58,7 @@ export interface IStorage {
   getInvoice(id: string): Promise<IInvoice | null>;
   getInvoiceByJob(jobId: string): Promise<IInvoice | null>;
   createInvoice(data: Partial<IInvoice>): Promise<IInvoice>;
-  generateInvoiceForJob(jobId: string, taxRate?: number, discount?: number): Promise<IInvoice | null>;
+  generateInvoiceForJob(jobId: string, taxRate?: number, discount?: number, business?: string): Promise<IInvoice | null>;
   
   getDashboardStats(): Promise<{
     totalJobs: number;

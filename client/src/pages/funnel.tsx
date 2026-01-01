@@ -87,9 +87,12 @@ export default function CustomerFunnel() {
     return nameMatch || phoneMatch || vehicleMatch;
   });
 
+  const [assignmentOpen, setAssignmentOpen] = useState(false);
+  const [pendingJob, setPendingJob] = useState<any>(null);
+
   const updateStatusMutation = useMutation({
-    mutationFn: ({ id, status }: { id: string; status: string }) =>
-      api.jobs.updateStage(id, status),
+    mutationFn: ({ id, status, serviceItems }: { id: string; status: string; serviceItems?: any[] }) =>
+      api.jobs.updateStage(id, status, serviceItems),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["jobs"] });
       if (data.stage === 'Completed') {
@@ -97,12 +100,22 @@ export default function CustomerFunnel() {
       }
       const message = data.stage === 'Completed' ? "Service completed & invoice created!" : "Status updated";
       toast({ title: message });
+      setAssignmentOpen(false);
     },
     onError: (error: any) => {
       const errorMsg = error?.message || "Failed to update status";
       toast({ title: errorMsg, variant: "destructive" });
     },
   });
+
+  const handleStageChange = (job: any, newStage: string) => {
+    if (newStage === 'Completed') {
+      setPendingJob(job);
+      setAssignmentOpen(true);
+    } else {
+      updateStatusMutation.mutate({ id: job._id, status: newStage });
+    }
+  };
 
   const getJobsByStage = (stage: string) => {
     return jobs.filter((job: any) => {
@@ -241,12 +254,7 @@ export default function CustomerFunnel() {
                           <Select
                             value={job.stage}
                             disabled={job.stage === 'Completed' || job.stage === 'Cancelled'}
-                            onValueChange={(value) => {
-                              updateStatusMutation.mutate({
-                                id: job._id,
-                                status: value,
-                              });
-                            }}
+                            onValueChange={(value) => handleStageChange(job, value)}
                           >
                             <SelectTrigger className="h-8 text-xs bg-slate-50 border-slate-200">
                               <SelectValue placeholder="Update status" />
@@ -276,6 +284,58 @@ export default function CustomerFunnel() {
           ))}
         </div>
       )}
+
+      {/* Business Assignment Dialog */}
+      <Dialog open={assignmentOpen} onOpenChange={setAssignmentOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Complete Service - Assign Business</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <p className="text-sm text-slate-500">Select which business each service item belongs to. Separate invoices will be generated for each business.</p>
+            <div className="space-y-3">
+              {pendingJob?.serviceItems?.map((item: any, index: number) => (
+                <div key={index} className="flex items-center justify-between p-2 border rounded bg-slate-50">
+                  <div className="flex-1 min-w-0 mr-2">
+                    <p className="text-sm font-medium truncate">{item.name}</p>
+                    <p className="text-xs text-slate-500">₹{item.price?.toLocaleString('en-IN')}</p>
+                  </div>
+                  <Select 
+                    value={item.assignedBusiness || 'Auto Gamma'} 
+                    onValueChange={(val) => {
+                      const newItems = [...pendingJob.serviceItems];
+                      newItems[index] = { ...newItems[index], assignedBusiness: val };
+                      setPendingJob({ ...pendingJob, serviceItems: newItems });
+                    }}
+                  >
+                    <SelectTrigger className="w-[140px] h-8 text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Auto Gamma">Auto Gamma</SelectItem>
+                      <SelectItem value="Business 2">Business 2</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-end gap-2 pt-4">
+              <Button variant="outline" size="sm" onClick={() => setAssignmentOpen(false)}>Cancel</Button>
+              <Button 
+                size="sm" 
+                onClick={() => updateStatusMutation.mutate({ 
+                  id: pendingJob._id, 
+                  status: 'Completed',
+                  serviceItems: pendingJob.serviceItems
+                })}
+                disabled={updateStatusMutation.isPending}
+              >
+                {updateStatusMutation.isPending ? "Completing..." : "Complete & Generate Invoice"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Details Dialog */}
       <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>

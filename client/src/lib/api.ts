@@ -49,7 +49,11 @@ export const api = {
     get: (id: string) => request<any>(`/jobs/${id}`),
     create: (data: any) => request<any>('/jobs', { method: 'POST', body: JSON.stringify(data) }),
     update: (id: string, data: any) => request<any>(`/jobs/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
-    updateStage: (id: string, stage: string) => request<any>(`/jobs/${id}/stage`, { method: 'PATCH', body: JSON.stringify({ stage }) }),
+    updateStage: (id: string, stage: string, serviceItems?: any[]) => 
+      request<any>(`/jobs/${id}/stage`, { 
+        method: 'PATCH', 
+        body: JSON.stringify({ stage, serviceItems }) 
+      }),
     addPayment: (id: string, payment: any) => request<any>(`/jobs/${id}/payment`, { method: 'POST', body: JSON.stringify(payment) }),
     addMaterials: (id: string, materials: { inventoryId: string; quantity: number }[]) => 
       request<any>(`/jobs/${id}/materials`, { method: 'POST', body: JSON.stringify({ materials }) }),

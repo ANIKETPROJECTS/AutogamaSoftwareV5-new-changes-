@@ -63,6 +63,7 @@ export interface IServiceItem {
   rollId?: mongoose.Types.ObjectId;
   rollName?: string;
   sizeUsed?: string;
+  assignedBusiness: { type: String, enum: ['Auto Gamma', 'Business 2'], default: 'Auto Gamma' }
 }
 
 export interface IPayment {
@@ -192,6 +193,7 @@ export interface IInvoice extends Document {
   paymentMode?: string;
   otherPaymentDetails?: string;
   notes?: string;
+  business: string;
   createdAt: Date;
 }
 
@@ -249,7 +251,8 @@ const ServiceItemSchema = new Schema<IServiceItem>({
   discountPercentage: { type: Number, default: 0 },
   rollId: { type: Schema.Types.ObjectId, ref: 'Inventory.rolls' },
   rollName: { type: String },
-  sizeUsed: { type: String }
+  sizeUsed: { type: String },
+  assignedBusiness: { type: String, enum: ['Auto Gamma', 'Business 2'], default: 'Auto Gamma' }
 });
 
 const PaymentSchema = new Schema<IPayment>({
@@ -396,6 +399,7 @@ const InvoiceSchema = new Schema<IInvoice>({
   paymentMode: { type: String },
   otherPaymentDetails: { type: String },
   notes: { type: String },
+  business: { type: String, default: 'Auto Gamma' },
   createdAt: { type: Date, default: Date.now }
 });
 
