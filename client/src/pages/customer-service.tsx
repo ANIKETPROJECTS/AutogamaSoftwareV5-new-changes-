@@ -67,10 +67,13 @@ export default function CustomerService() {
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const preSelectedCustomerId = urlParams.get('customerId');
-    if (preSelectedCustomerId) {
-      setSelectedCustomerId(preSelectedCustomerId);
+    if (preSelectedCustomerId && customers.length > 0) {
+      const exists = customers.some((c: any) => c._id === preSelectedCustomerId);
+      if (exists) {
+        setSelectedCustomerId(preSelectedCustomerId);
+      }
     }
-  }, [location]);
+  }, [customers]);
 
   const { data: customersData = [] } = useQuery<any>({
     queryKey: ['customers'],
