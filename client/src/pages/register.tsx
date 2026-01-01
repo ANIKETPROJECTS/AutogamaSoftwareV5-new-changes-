@@ -390,6 +390,15 @@ export default function CustomerRegistration() {
           otherServices: customerData.selectedOtherServices,
         },
       ],
+    }, {
+      onError: (error: any) => {
+        const message = error?.message || "Failed to register customer";
+        toast({ 
+          title: "Registration Failed", 
+          description: message,
+          variant: "destructive" 
+        });
+      }
     });
   };
 
