@@ -134,10 +134,25 @@ export default function CustomerFunnel() {
     });
   };
 
+  const { data: invoicesData = [] } = useQuery({
+    queryKey: ["invoices"],
+    queryFn: () => api.invoices.list(),
+  });
+
+  const invoices = Array.isArray(invoicesData) ? invoicesData : [];
+
   const getJobsByStage = (stage: string) => {
     return jobs.filter((job: any) => {
       const isStage = job.stage === stage;
       if (!isStage) return false;
+      
+      // Filter out paid completed jobs
+      if (stage === 'Completed') {
+        const jobInvoices = invoices.filter((inv: any) => inv.jobId === job._id);
+        if (jobInvoices.length > 0 && jobInvoices.every((inv: any) => inv.status === 'Paid')) {
+          return false;
+        }
+      }
       
       if (!searchQuery.trim()) return true;
       
