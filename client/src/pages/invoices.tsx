@@ -137,7 +137,14 @@ export default function Invoices() {
     };
 
     const rawBiz = String(invoice.business || "");
-    const isBusiness2 = rawBiz === "Business 2" || rawBiz.toLowerCase().includes("business 2") || rawBiz.toLowerCase().includes("business2") || invoice.businessId === "business_2";
+    const isBusiness2 = rawBiz === "Business 2" || 
+                       rawBiz.toLowerCase().includes("business 2") || 
+                       rawBiz.toLowerCase().includes("business2") || 
+                       invoice.businessId === "business_2" ||
+                       (invoice.items && invoice.items.some((item: any) => 
+                         item.assignedBusiness === 'Business 2' || 
+                         (item.description && item.description.toLowerCase().includes('business 2'))
+                       ));
     
     const currentBusinessName = isBusiness2 ? "BUSINESS 2" : "AUTOGAMMA";
     const currentFooterText = isBusiness2 ? "BUSINESS 2" : "AUTOGAMMA - Premium Auto Detailing Studio";
