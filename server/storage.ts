@@ -146,6 +146,14 @@ export class MongoStorage implements IStorage {
 
   async deleteCustomer(id: string): Promise<void> {
     if (!mongoose.Types.ObjectId.isValid(id)) return;
+    
+    // Delete all associated jobs first
+    await Job.deleteMany({ customerId: id });
+    
+    // Delete all associated price inquiries
+    await PriceInquiry.deleteMany({ customerId: id });
+    
+    // Delete the customer
     await Customer.findByIdAndDelete(id);
   }
 
