@@ -36,7 +36,7 @@ export default function CustomerService() {
   const [ppfDiscount, setPpfDiscount] = useState<string>('');
   const [laborCost, setLaborCost] = useState<string>('');
   const [includeGst, setIncludeGst] = useState(true);
-  const [selectedItems, setSelectedItems] = useState<{ inventoryId: string; metersUsed?: number; name: string; unit: string; quantity?: number }[]>([]);
+  const [selectedItems, setSelectedItems] = useState<{ inventoryId: string; metersUsed?: number; name: string; unit: string; quantity?: number; rollId?: string }[]>([]);
   const [selectedItemId, setSelectedItemId] = useState<string>('');
   const [metersUsed, setMetersUsed] = useState<string>('1');
   const [expandedInventoryId, setExpandedInventoryId] = useState<string | null>(null);
