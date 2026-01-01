@@ -902,6 +902,7 @@ export class MongoStorage implements IStorage {
       business: business || 'Auto Gamma'
     });
 
+    console.log(`[Invoice Storage] Saving invoice ${invoiceNumber} with business: "${invoice.business}"`);
     await invoice.save();
     
     // Only update job total if we are looking at the primary business or no business specified
