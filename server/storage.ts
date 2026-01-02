@@ -419,6 +419,7 @@ export class MongoStorage implements IStorage {
         console.log(`[Storage] Archiving roll in FIFO: ${roll.name}`);
         // Move to finishedRolls
         if (!item.finishedRolls) item.finishedRolls = [];
+        
         // Use toObject() to get a clean data object if it's a mongoose document
         const rollObj = (roll as any).toObject ? (roll as any).toObject() : { ...roll };
         const finishedRoll = {
@@ -426,9 +427,14 @@ export class MongoStorage implements IStorage {
           status: 'Finished' as const,
           finishedAt: new Date()
         };
-        item.finishedRolls.push(finishedRoll);
-        item.rolls = item.rolls.filter(r => r._id?.toString() !== roll._id?.toString());
-        console.log(`[Storage] Roll archived. finishedRolls count: ${item.finishedRolls.length}`);
+        
+        // Use $push to ensure atomic update and persistence
+        await Inventory.findByIdAndUpdate(item._id, {
+          $push: { finishedRolls: finishedRoll },
+          $pull: { rolls: { _id: roll._id } }
+        });
+        
+        console.log(`[Storage] Roll archived via atomic update for: ${roll.name}`);
       }
     }
 
@@ -472,7 +478,7 @@ export class MongoStorage implements IStorage {
     // Mark as Finished if depleted
     if (roll.remaining_meters <= 0 && (roll.remaining_sqft || 0) <= 0) {
       console.log(`[Storage] Archiving roll in deductRoll: ${roll.name}`);
-      if (!item.finishedRolls) item.finishedRolls = [];
+      
       // Use toObject() to get a clean data object if it's a mongoose document
       const rollObj = (roll as any).toObject ? (roll as any).toObject() : { ...roll };
       const finishedRoll = {
@@ -480,9 +486,15 @@ export class MongoStorage implements IStorage {
         status: 'Finished' as const,
         finishedAt: new Date()
       };
-      item.finishedRolls.push(finishedRoll);
-      item.rolls.splice(rollIndex, 1);
-      console.log(`[Storage] Roll archived. finishedRolls count: ${item.finishedRolls.length}`);
+      
+      // Use atomic update to ensure persistence
+      await Inventory.findByIdAndUpdate(item._id, {
+        $push: { finishedRolls: finishedRoll },
+        $pull: { rolls: { _id: roll._id } }
+      });
+      
+      console.log(`[Storage] Roll archived via atomic update in deductRoll for: ${roll.name}`);
+      return Inventory.findById(item._id);
     }
     
     await item.save();
