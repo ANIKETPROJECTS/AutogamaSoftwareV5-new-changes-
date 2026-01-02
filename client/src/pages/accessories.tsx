@@ -254,7 +254,7 @@ export default function Accessories() {
         </Button>
       </div>
 
-      <Card className="border-red-200 shadow-sm">
+      <Card className="border-2 border-red-200 shadow-sm">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <ShoppingBag className="w-5 h-5 text-primary" />
