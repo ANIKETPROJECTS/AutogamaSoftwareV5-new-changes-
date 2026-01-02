@@ -668,46 +668,50 @@ export default function CustomerRegistration() {
                                 </SelectContent>
                               </Select>
                             </div>
-                            <div className="space-y-2">
-                              <Label>Accessory Name</Label>
-                              <Select
-                                value={customerData.tempAccessoryName}
-                                onValueChange={(value) => {
-                                  const item = accessoryInventory.find(i => i.name === value);
-                                  setCustomerData({
-                                    ...customerData,
-                                    tempAccessoryName: value,
-                                    tempAccessoryCategory: item?.unit || customerData.tempAccessoryCategory
-                                  });
-                                }}
-                              >
-                                <SelectTrigger className="border-slate-300">
-                                  <SelectValue placeholder="Select accessory" />
-                                </SelectTrigger>
-                                <SelectContent position="popper" className="max-h-60 w-[var(--radix-select-trigger-width)]">
-                                  {filteredAccessories.map(item => (
-                                    <SelectItem key={item._id} value={item.name}>
-                                      {item.name} ({item.quantity} in stock)
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </div>
-                            <div className="space-y-2">
-                              <Label>Quantity</Label>
-                              <Input
-                                type="number"
-                                min="1"
-                                value={customerData.accessoryQuantity || 1}
-                                onChange={(e) =>
-                                  setCustomerData({
-                                    ...customerData,
-                                    accessoryQuantity: parseInt(e.target.value) || 1,
-                                  })
-                                }
-                                className="border-slate-300"
-                              />
-                            </div>
+                            {customerData.tempAccessoryCategory && (
+                              <>
+                                <div className="space-y-2">
+                                  <Label>Accessory Name</Label>
+                                  <Select
+                                    value={customerData.tempAccessoryName}
+                                    onValueChange={(value) => {
+                                      const item = accessoryInventory.find(i => i.name === value);
+                                      setCustomerData({
+                                        ...customerData,
+                                        tempAccessoryName: value,
+                                        tempAccessoryCategory: item?.unit || customerData.tempAccessoryCategory
+                                      });
+                                    }}
+                                  >
+                                    <SelectTrigger className="border-slate-300">
+                                      <SelectValue placeholder="Select accessory" />
+                                    </SelectTrigger>
+                                    <SelectContent position="popper" className="max-h-60 w-[var(--radix-select-trigger-width)]">
+                                      {filteredAccessories.map(item => (
+                                        <SelectItem key={item._id} value={item.name}>
+                                          {item.name} ({item.quantity} in stock)
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                                <div className="space-y-2">
+                                  <Label>Quantity</Label>
+                                  <Input
+                                    type="number"
+                                    min="1"
+                                    value={customerData.accessoryQuantity || 1}
+                                    onChange={(e) =>
+                                      setCustomerData({
+                                        ...customerData,
+                                        accessoryQuantity: parseInt(e.target.value) || 1,
+                                      })
+                                    }
+                                    className="border-slate-300"
+                                  />
+                                </div>
+                              </>
+                            )}
                           </div>
                         </div>
 
