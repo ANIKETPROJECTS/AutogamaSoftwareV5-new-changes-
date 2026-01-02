@@ -616,7 +616,7 @@ export default function CustomerRegistration() {
       }
     }
 
-    if (!validateEmail(customerData.email)) {
+    if (customerData.email && !validateEmail(customerData.email)) {
       newErrors.email = "Please enter a valid email address";
     }
 
@@ -686,12 +686,15 @@ export default function CustomerRegistration() {
                   <Input
                     value={customerData.phone}
                     onChange={(e) => {
-                      setCustomerData({
-                        ...customerData,
-                        phone: e.target.value,
-                      });
-                      if (errors.phone)
-                        setErrors({ ...errors, phone: undefined });
+                      const value = e.target.value.replace(/\D/g, "");
+                      if (value.length <= 10) {
+                        setCustomerData({
+                          ...customerData,
+                          phone: value,
+                        });
+                        if (errors.phone)
+                          setErrors({ ...errors, phone: undefined });
+                      }
                     }}
                     placeholder="10-digit mobile number"
                     maxLength={10}
@@ -811,12 +814,15 @@ export default function CustomerRegistration() {
                       <Input
                         value={customerData.referrerPhone}
                         onChange={(e) => {
-                          setCustomerData({
-                            ...customerData,
-                            referrerPhone: e.target.value,
-                          });
-                          if (errors.referrerPhone)
-                            setErrors({ ...errors, referrerPhone: undefined });
+                          const value = e.target.value.replace(/\D/g, "");
+                          if (value.length <= 10) {
+                            setCustomerData({
+                              ...customerData,
+                              referrerPhone: value,
+                            });
+                            if (errors.referrerPhone)
+                              setErrors({ ...errors, referrerPhone: undefined });
+                          }
                         }}
                         placeholder="10-digit mobile number"
                         maxLength={10}
