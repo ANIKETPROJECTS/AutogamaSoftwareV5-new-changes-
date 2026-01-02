@@ -41,6 +41,7 @@ export default function Inventory() {
   const [rollName, setRollName] = useState('');
   const [rollQuantity, setRollQuantity] = useState('');
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'ppf' | 'accessories'>('ppf');
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -125,9 +126,32 @@ export default function Inventory() {
             </Button>
           )}
           <div>
-            <h1 className="font-display text-3xl font-bold tracking-tight">PPF Inventory</h1>
-            <p className="text-muted-foreground mt-1">Manage stock for PPF products</p>
+            <h1 className="font-display text-3xl font-bold tracking-tight">Inventory</h1>
+            <p className="text-muted-foreground mt-1">Manage stock for PPF and accessories</p>
           </div>
+        </div>
+
+        <div className="flex gap-2">
+          <Button 
+            variant={activeTab === 'ppf' ? 'default' : 'outline'}
+            onClick={() => {
+              setActiveTab('ppf');
+              setSelectedProductId(null);
+            }}
+            className="flex-1 sm:flex-none"
+          >
+            PPF Inventory
+          </Button>
+          <Button 
+            variant={activeTab === 'accessories' ? 'default' : 'outline'}
+            onClick={() => {
+              setActiveTab('accessories');
+              setSelectedProductId(null);
+            }}
+            className="flex-1 sm:flex-none"
+          >
+            Accessories
+          </Button>
         </div>
         
         {!selectedProductId && (
@@ -179,104 +203,100 @@ export default function Inventory() {
           "space-y-4 transition-all duration-300",
           selectedProductId ? "lg:col-span-4" : "lg:col-span-12"
         )}>
-          <div className={cn(
-            "grid gap-4",
-            selectedProductId ? "grid-cols-1" : "md:grid-cols-2 lg:grid-cols-4"
-          )}>
-            {isLoading ? (
-              <div className="col-span-full text-center py-8 text-muted-foreground">Loading inventory...</div>
-            ) : filteredAndSortedItems.length === 0 ? (
-              <div className="col-span-full text-center py-8 text-muted-foreground">No products match your search or filters</div>
-            ) : (
-              filteredAndSortedItems
-                .filter(item => !selectedProductId || item._id === selectedProductId)
-                .map((displayItem) => {
-                  const isSelected = selectedProductId === displayItem._id;
-                  
-                  return (
-                    <Card 
-                      key={displayItem.category}
-                      className={cn(
-                        "card-modern border cursor-pointer transition-all hover:ring-2 hover:ring-primary/20",
-                        isLowStock(displayItem) ? "border-red-200" : "border-border",
-                        isSelected && "ring-2 ring-primary border-primary bg-primary/5 shadow-md scale-[1.02]"
-                      )}
-                      onClick={() => setSelectedProductId(isSelected ? null : displayItem._id)}
-                    >
-                      <CardHeader className="pb-2">
-                        <div className="flex items-start justify-between">
-                          <div>
-                            <CardTitle className="text-base">{displayItem.category}</CardTitle>
-                            <Badge className={cn("mt-1", CATEGORY_COLORS[displayItem.category])}>
-                              {displayItem.category}
-                            </Badge>
-                          </div>
-                          {isSelected && <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />}
-                        </div>
-                      </CardHeader>
-                      <CardContent className="space-y-3">
-                        <div className="flex items-baseline justify-between">
-                          <span className="text-3xl font-display font-bold">
-                            {displayItem.rolls?.length || 0}
-                          </span>
-                          <span className="text-sm text-muted-foreground">rolls</span>
-                        </div>
-                        
-                        {!isSelected && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="w-full"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedItem(displayItem);
-                              setRollDialogOpen(true);
-                            }}
-                          >
-                            <Plus className="w-4 h-4 mr-1" />
-                            Add Roll
-                          </Button>
+          {activeTab === 'ppf' ? (
+            <div className={cn(
+              "grid gap-4",
+              selectedProductId ? "grid-cols-1" : "md:grid-cols-2 lg:grid-cols-4"
+            )}>
+              {isLoading ? (
+                <div className="col-span-full text-center py-8 text-muted-foreground">Loading inventory...</div>
+              ) : filteredAndSortedItems.length === 0 ? (
+                <div className="col-span-full text-center py-8 text-muted-foreground">No products match your search or filters</div>
+              ) : (
+                filteredAndSortedItems
+                  .filter(item => !selectedProductId || item._id === selectedProductId)
+                  .map((displayItem) => {
+                    const isSelected = selectedProductId === displayItem._id;
+                    
+                    return (
+                      <Card 
+                        key={displayItem.category}
+                        className={cn(
+                          "card-modern border cursor-pointer transition-all hover:ring-2 hover:ring-primary/20",
+                          isLowStock(displayItem) ? "border-red-200" : "border-border",
+                          isSelected && "ring-2 ring-primary border-primary bg-primary/5 shadow-md scale-[1.02]"
                         )}
-                      </CardContent>
-                    </Card>
-                  );
-                })
-            )}
-          </div>
-
-          {!selectedProductId && (
-            <div className="pt-8 space-y-4">
-              <div>
-                <h2 className="font-display text-2xl font-bold tracking-tight">Accessories Inventory</h2>
-                <p className="text-muted-foreground mt-1">Manage stock for accessory products</p>
-              </div>
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                {accessoryItems.length === 0 ? (
-                  <div className="col-span-full text-center py-8 text-muted-foreground border rounded-lg bg-muted/20">
-                    No accessories in inventory.
-                  </div>
-                ) : (
-                  accessoryItems.map((item: any) => (
-                    <Card 
-                      key={item._id}
-                      className="card-modern border transition-all hover:ring-2 hover:ring-primary/20"
-                    >
-                      <CardHeader className="pb-2">
-                        <CardTitle className="text-base">{item.name}</CardTitle>
-                        <Badge className="mt-1 bg-slate-500/20 text-slate-400">
-                          Accessories
-                        </Badge>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="flex items-baseline justify-between">
-                          <span className="text-3xl font-display font-bold">{item.quantity}</span>
-                          <span className="text-sm text-muted-foreground">{item.unit}</span>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))
-                )}
-              </div>
+                        onClick={() => setSelectedProductId(isSelected ? null : displayItem._id)}
+                      >
+                        <CardHeader className="pb-2">
+                          <div className="flex items-start justify-between">
+                            <div>
+                              <CardTitle className="text-base">{displayItem.category}</CardTitle>
+                              <Badge className={cn("mt-1", CATEGORY_COLORS[displayItem.category])}>
+                                {displayItem.category}
+                              </Badge>
+                            </div>
+                            {isSelected && <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />}
+                          </div>
+                        </CardHeader>
+                        <CardContent className="space-y-3">
+                          <div className="flex items-baseline justify-between">
+                            <span className="text-3xl font-display font-bold">
+                              {displayItem.rolls?.length || 0}
+                            </span>
+                            <span className="text-sm text-muted-foreground">rolls</span>
+                          </div>
+                          
+                          {!isSelected && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="w-full"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedItem(displayItem);
+                                setRollDialogOpen(true);
+                              }}
+                            >
+                              <Plus className="w-4 h-4 mr-1" />
+                              Add Roll
+                            </Button>
+                          )}
+                        </CardContent>
+                      </Card>
+                    );
+                  })
+              )}
+            </div>
+          ) : (
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+              {isLoading ? (
+                <div className="col-span-full text-center py-8 text-muted-foreground">Loading inventory...</div>
+              ) : accessoryItems.length === 0 ? (
+                <div className="col-span-full text-center py-8 text-muted-foreground border rounded-lg bg-muted/20">
+                  No accessories in inventory.
+                </div>
+              ) : (
+                accessoryItems.map((item: any) => (
+                  <Card 
+                    key={item._id}
+                    className="card-modern border transition-all hover:ring-2 hover:ring-primary/20"
+                  >
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-base">{item.name}</CardTitle>
+                      <Badge className="mt-1 bg-slate-500/20 text-slate-400">
+                        {item.unit}
+                      </Badge>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex items-baseline justify-between">
+                        <span className="text-3xl font-display font-bold">{item.quantity}</span>
+                        <span className="text-sm text-muted-foreground">qty</span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
+              )}
             </div>
           )}
         </div>
