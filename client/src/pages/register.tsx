@@ -1169,19 +1169,49 @@ export default function CustomerRegistration() {
                                 </div>
                                 <div className="space-y-2">
                                   <Label>Quantity</Label>
-                                  <Input
-                                    type="number"
-                                    min="1"
-                                    value={customerData.accessoryQuantity || 1}
-                                    onChange={(e) =>
-                                      setCustomerData({
-                                        ...customerData,
-                                        accessoryQuantity:
-                                          parseInt(e.target.value) || 1,
-                                      })
-                                    }
-                                    className="border-slate-300"
-                                  />
+                                  <div className="flex gap-2">
+                                    <Input
+                                      type="number"
+                                      min="1"
+                                      value={customerData.accessoryQuantity || 1}
+                                      onChange={(e) =>
+                                        setCustomerData({
+                                          ...customerData,
+                                          accessoryQuantity:
+                                            parseInt(e.target.value) || 1,
+                                        })
+                                      }
+                                      className="border-slate-300"
+                                    />
+                                    <Button
+                                      type="button"
+                                      onClick={() => {
+                                        if (customerData.tempAccessoryName) {
+                                          const item = accessoryInventory.find(
+                                            (i) => i.name === customerData.tempAccessoryName,
+                                          );
+                                          if (item) {
+                                            setCustomerData({
+                                              ...customerData,
+                                              selectedOtherServices: [
+                                                ...customerData.selectedOtherServices,
+                                                {
+                                                  name: `${item.name} (x${customerData.accessoryQuantity})`,
+                                                  vehicleType: "Accessory",
+                                                  price: (item.price || 0) * customerData.accessoryQuantity,
+                                                },
+                                              ],
+                                              tempAccessoryCategory: "",
+                                              tempAccessoryName: "",
+                                              accessoryQuantity: 1,
+                                            });
+                                          }
+                                        }
+                                      }}
+                                    >
+                                      Add
+                                    </Button>
+                                  </div>
                                 </div>
                               </>
                             )}
