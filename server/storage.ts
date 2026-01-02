@@ -419,7 +419,13 @@ export class MongoStorage implements IStorage {
         roll.status = 'Finished';
         // Move to finishedRolls
         if (!item.finishedRolls) item.finishedRolls = [];
-        item.finishedRolls.push(roll);
+        // Ensure we store a clean object and include finish date
+        const finishedRoll = {
+          ...roll,
+          status: 'Finished' as const,
+          finishedAt: new Date()
+        };
+        item.finishedRolls.push(finishedRoll);
         item.rolls = item.rolls.filter(r => r._id?.toString() !== roll._id?.toString());
       }
     }
@@ -465,7 +471,13 @@ export class MongoStorage implements IStorage {
     if (roll.remaining_meters <= 0 && (roll.remaining_sqft || 0) <= 0) {
       roll.status = 'Finished';
       if (!item.finishedRolls) item.finishedRolls = [];
-      item.finishedRolls.push(roll);
+      // Ensure we store a clean object and include finish date
+      const finishedRoll = {
+        ...(roll instanceof mongoose.Document ? roll.toObject() : roll),
+        status: 'Finished' as const,
+        finishedAt: new Date()
+      };
+      item.finishedRolls.push(finishedRoll);
       item.rolls.splice(rollIndex, 1);
     }
     
