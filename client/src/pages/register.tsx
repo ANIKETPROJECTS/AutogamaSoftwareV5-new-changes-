@@ -1726,7 +1726,7 @@ export default function CustomerRegistration() {
                           (() => {
                             const standardModels = VEHICLE_MODELS[vehicleData.make as keyof typeof VEHICLE_MODELS] || [];
                             const custom = customModels[vehicleData.make] || [];
-                            const models = Array.from(new Set([...custom, ...standardModels])).sort((a, b) => {
+                            const models = Array.from(new Set(["Other", ...custom, ...standardModels])).sort((a, b) => {
                               if (a === "Other") return -1;
                               if (b === "Other") return 1;
                               return a.localeCompare(b);
