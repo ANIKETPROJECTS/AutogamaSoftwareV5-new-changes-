@@ -164,11 +164,13 @@ export default function CustomerDetails() {
                             </div>
                             {vehicle.otherServices && vehicle.otherServices.length > 0 && (
                               <div className="mt-2 flex flex-wrap gap-1">
-                                {vehicle.otherServices.map((service: any, idx: number) => (
-                                  <Badge key={idx} variant="outline" className="text-[9px] bg-blue-50 text-blue-700 border-blue-100 py-0 h-4">
-                                    {service.name}
-                                  </Badge>
-                                ))}
+                                {vehicle.otherServices
+                                  .filter((s: any) => s.vehicleType !== "Accessory")
+                                  .map((service: any, idx: number) => (
+                                    <Badge key={idx} variant="outline" className="text-[9px] bg-blue-50 text-blue-700 border-blue-100 py-0 h-4">
+                                      {service.name}
+                                    </Badge>
+                                  ))}
                               </div>
                             )}
                           </div>
