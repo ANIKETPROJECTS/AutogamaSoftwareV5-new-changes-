@@ -434,6 +434,38 @@ export default function CustomerRegistration() {
   const [customMakes, setCustomMakes] = useState<string[]>([]);
   const [customModels, setCustomModels] = useState<Record<string, string[]>>({});
 
+  const { data: customersData } = useQuery({
+    queryKey: ["customers"],
+    queryFn: () => api.customers.list({ page: 1, limit: 1000 }),
+  });
+
+  const existingCustomers = customersData?.customers || [];
+
+  // Extract unique makes and models from existing customers
+  useEffect(() => {
+    const makes = new Set<string>(VEHICLE_MAKES);
+    const models = { ...VEHICLE_MODELS };
+
+    existingCustomers.forEach((c: any) => {
+      if (c.vehicles && c.vehicles.length > 0) {
+        c.vehicles.forEach((v: any) => {
+          if (v.make) {
+            makes.add(v.make);
+            if (!models[v.make]) {
+              models[v.make] = [];
+            }
+            if (v.model && !models[v.make].includes(v.model)) {
+              models[v.make].push(v.model);
+            }
+          }
+        });
+      }
+    });
+
+    setCustomMakes(Array.from(makes).sort());
+    setCustomModels(models);
+  }, [existingCustomers]);
+
   const [vehicleImagePreview, setVehicleImagePreview] = useState<string>("");
 
   const { data: inventory = [] } = useQuery<any[]>({
@@ -1608,12 +1640,8 @@ export default function CustomerRegistration() {
                           />
                         </div>
                         {(() => {
-                          const allMakes = [...VEHICLE_MAKES, ...customMakes];
-                          const uniqueMakes = [] as string[];
-                          allMakes.forEach(m => {
-                            if (!uniqueMakes.includes(m)) uniqueMakes.push(m);
-                          });
-                          return uniqueMakes.map((make) => (
+                          const makes = Array.from(new Set([...VEHICLE_MAKES, ...customMakes])).sort();
+                          return makes.map((make) => (
                             <SelectItem key={make} value={make}>
                               {make}
                             </SelectItem>
@@ -1694,12 +1722,8 @@ export default function CustomerRegistration() {
                           (() => {
                             const standardModels = VEHICLE_MODELS[vehicleData.make as keyof typeof VEHICLE_MODELS] || [];
                             const custom = customModels[vehicleData.make] || [];
-                            const allModels = [...standardModels, ...custom];
-                            const uniqueModels = [] as string[];
-                            allModels.forEach(m => {
-                              if (!uniqueModels.includes(m)) uniqueModels.push(m);
-                            });
-                            return uniqueModels.map((model) => (
+                            const models = Array.from(new Set([...standardModels, ...custom])).sort();
+                            return models.map((model) => (
                               <SelectItem key={model} value={model}>
                                 {model}
                               </SelectItem>
