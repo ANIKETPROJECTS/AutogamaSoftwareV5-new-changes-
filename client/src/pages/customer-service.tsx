@@ -555,18 +555,24 @@ export default function CustomerService() {
                     <SelectTrigger data-testid="select-customer">
                       <SelectValue placeholder="Choose a customer" />
                     </SelectTrigger>
-                    <SelectContent position="popper" className="max-h-[300px] w-[var(--radix-select-trigger-width)]">
+                    <SelectContent position="popper" className="max-h-60 w-[var(--radix-select-trigger-width)]">
                       <div className="p-2 sticky top-0 bg-white z-10 border-b">
                         <Input
                           placeholder="Search customer..."
-                          value={customerSearch}
-                          onChange={(e) => setCustomerSearch(e.target.value)}
                           className="h-8 text-sm"
+                          onChange={(e) => {
+                            const search = e.target.value.toLowerCase();
+                            const items = e.target.closest('[role="listbox"]')?.querySelectorAll('[role="option"]');
+                            items?.forEach((item) => {
+                              const text = item.textContent?.toLowerCase() || "";
+                              (item as HTMLElement).style.display = text.includes(search) ? "flex" : "none";
+                            });
+                          }}
                           onKeyDown={(e) => e.stopPropagation()}
                         />
                       </div>
                       <div className="overflow-y-auto max-h-[220px]">
-                        {displayedCustomers.map((customer: any) => (
+                        {customers.map((customer: any) => (
                           <SelectItem key={customer._id} value={customer._id}>
                             <div className="flex items-center gap-2">
                               <User className="w-4 h-4" />
@@ -585,7 +591,22 @@ export default function CustomerService() {
                     <SelectTrigger data-testid="select-vehicle">
                       <SelectValue placeholder="Choose a vehicle" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent position="popper" className="max-h-60 w-[var(--radix-select-trigger-width)]">
+                      <div className="p-2 sticky top-0 bg-white z-10 border-b">
+                        <Input
+                          placeholder="Search vehicle..."
+                          className="h-8 text-sm"
+                          onChange={(e) => {
+                            const search = e.target.value.toLowerCase();
+                            const items = e.target.closest('[role="listbox"]')?.querySelectorAll('[role="option"]');
+                            items?.forEach((item) => {
+                              const text = item.textContent?.toLowerCase() || "";
+                              (item as HTMLElement).style.display = text.includes(search) ? "flex" : "none";
+                            });
+                          }}
+                          onKeyDown={(e) => e.stopPropagation()}
+                        />
+                      </div>
                       {selectedCustomer?.vehicles?.map((v: any, idx: number) => (
                         <SelectItem key={idx} value={idx.toString()}>
                           {v.make} {v.model} - {v.plateNumber}
@@ -597,20 +618,35 @@ export default function CustomerService() {
 
                 <div className="space-y-2">
                   <Label>Assign Technician</Label>
-                  <Select value={selectedTechnicianId} onValueChange={setSelectedTechnicianId}>
-                    <SelectTrigger data-testid="select-technician">
-                      <SelectValue placeholder="Choose a technician" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {technicians.map((t: any) => (
-                        t.status !== 'Off' && (
-                          <SelectItem key={t._id} value={t._id} disabled={t.status !== 'Available'}>
-                            {t.name} - {t.specialty} ({t.status})
-                          </SelectItem>
-                        )
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    <Select value={selectedTechnicianId} onValueChange={setSelectedTechnicianId}>
+                      <SelectTrigger data-testid="select-technician">
+                        <SelectValue placeholder="Assign technician" />
+                      </SelectTrigger>
+                      <SelectContent position="popper" className="max-h-60 w-[var(--radix-select-trigger-width)]">
+                        <div className="p-2 sticky top-0 bg-white z-10 border-b">
+                          <Input
+                            placeholder="Search technician..."
+                            className="h-8 text-sm"
+                            onChange={(e) => {
+                              const search = e.target.value.toLowerCase();
+                              const items = e.target.closest('[role="listbox"]')?.querySelectorAll('[role="option"]');
+                              items?.forEach((item) => {
+                                const text = item.textContent?.toLowerCase() || "";
+                                (item as HTMLElement).style.display = text.includes(search) ? "flex" : "none";
+                              });
+                            }}
+                            onKeyDown={(e) => e.stopPropagation()}
+                          />
+                        </div>
+                        {technicians.map((t: any) => (
+                          t.status !== 'Off' && (
+                            <SelectItem key={t._id} value={t._id} disabled={t.status !== 'Available'}>
+                              {t.name} - {t.specialty} ({t.status})
+                            </SelectItem>
+                          )
+                        ))}
+                      </SelectContent>
+                    </Select>
                 </div>
 
                 <Card className="border border-red-200">
@@ -631,7 +667,22 @@ export default function CustomerService() {
                         <SelectTrigger data-testid="select-ppf-category">
                           <SelectValue placeholder="Select category" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent position="popper" className="max-h-60 w-[var(--radix-select-trigger-width)]">
+                          <div className="p-2 sticky top-0 bg-white z-10 border-b">
+                            <Input
+                              placeholder="Search category..."
+                              className="h-8 text-sm"
+                              onChange={(e) => {
+                                const search = e.target.value.toLowerCase();
+                                const items = e.target.closest('[role="listbox"]')?.querySelectorAll('[role="option"]');
+                                items?.forEach((item) => {
+                                  const text = item.textContent?.toLowerCase() || "";
+                                  (item as HTMLElement).style.display = text.includes(search) ? "flex" : "none";
+                                });
+                              }}
+                              onKeyDown={(e) => e.stopPropagation()}
+                            />
+                          </div>
                           {Object.keys(PPF_CATEGORIES).map((cat) => (
                             <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                           ))}
@@ -650,7 +701,22 @@ export default function CustomerService() {
                             <SelectTrigger data-testid="select-ppf-vehicle-type">
                               <SelectValue placeholder="Select vehicle type" />
                             </SelectTrigger>
-                            <SelectContent className="max-h-64 overflow-y-auto">
+                            <SelectContent position="popper" className="max-h-60 w-[var(--radix-select-trigger-width)]">
+                              <div className="p-2 sticky top-0 bg-white z-10 border-b">
+                                <Input
+                                  placeholder="Search vehicle type..."
+                                  className="h-8 text-sm"
+                                  onChange={(e) => {
+                                    const search = e.target.value.toLowerCase();
+                                    const items = e.target.closest('[role="listbox"]')?.querySelectorAll('[role="option"]');
+                                    items?.forEach((item) => {
+                                      const text = item.textContent?.toLowerCase() || "";
+                                      (item as HTMLElement).style.display = text.includes(search) ? "flex" : "none";
+                                    });
+                                  }}
+                                  onKeyDown={(e) => e.stopPropagation()}
+                                />
+                              </div>
                               {VEHICLE_TYPES.map((type) => (
                                 <SelectItem key={type} value={type}>{type}</SelectItem>
                               ))}
@@ -716,7 +782,22 @@ export default function CustomerService() {
                         <SelectTrigger data-testid="select-accessory-category">
                           <SelectValue placeholder="Select category" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent position="popper" className="max-h-60 w-[var(--radix-select-trigger-width)]">
+                          <div className="p-2 sticky top-0 bg-white z-10 border-b">
+                            <Input
+                              placeholder="Search category..."
+                              className="h-8 text-sm"
+                              onChange={(e) => {
+                                const search = e.target.value.toLowerCase();
+                                const items = e.target.closest('[role="listbox"]')?.querySelectorAll('[role="option"]');
+                                items?.forEach((item) => {
+                                  const text = item.textContent?.toLowerCase() || "";
+                                  (item as HTMLElement).style.display = text.includes(search) ? "flex" : "none";
+                                });
+                              }}
+                              onKeyDown={(e) => e.stopPropagation()}
+                            />
+                          </div>
                           {Array.from(new Set(inventory.filter((i: any) => i.category === 'Accessories').map((i: any) => i.name))).map((name: any) => (
                             <SelectItem key={name} value={name}>{name}</SelectItem>
                           ))}
@@ -732,7 +813,22 @@ export default function CustomerService() {
                             <SelectTrigger data-testid="select-accessory-name">
                               <SelectValue placeholder="Select accessory" />
                             </SelectTrigger>
-                            <SelectContent>
+                            <SelectContent position="popper" className="max-h-60 w-[var(--radix-select-trigger-width)]">
+                              <div className="p-2 sticky top-0 bg-white z-10 border-b">
+                                <Input
+                                  placeholder="Search accessory..."
+                                  className="h-8 text-sm"
+                                  onChange={(e) => {
+                                    const search = e.target.value.toLowerCase();
+                                    const items = e.target.closest('[role="listbox"]')?.querySelectorAll('[role="option"]');
+                                    items?.forEach((item) => {
+                                      const text = item.textContent?.toLowerCase() || "";
+                                      (item as HTMLElement).style.display = text.includes(search) ? "flex" : "none";
+                                    });
+                                  }}
+                                  onKeyDown={(e) => e.stopPropagation()}
+                                />
+                              </div>
                               {inventory
                                 .filter((i: any) => i.category === 'Accessories' && i.name === selectedAccessoryCategory)
                                 .map((item: any) => (
@@ -792,7 +888,22 @@ export default function CustomerService() {
                         <SelectTrigger data-testid="select-other-service">
                           <SelectValue placeholder="Choose a service" />
                         </SelectTrigger>
-                        <SelectContent className="max-h-64 overflow-y-auto">
+                        <SelectContent position="popper" className="max-h-60 w-[var(--radix-select-trigger-width)]">
+                          <div className="p-2 sticky top-0 bg-white z-10 border-b">
+                            <Input
+                              placeholder="Search service..."
+                              className="h-8 text-sm"
+                              onChange={(e) => {
+                                const search = e.target.value.toLowerCase();
+                                const items = e.target.closest('[role="listbox"]')?.querySelectorAll('[role="option"]');
+                                items?.forEach((item) => {
+                                  const text = item.textContent?.toLowerCase() || "";
+                                  (item as HTMLElement).style.display = text.includes(search) ? "flex" : "none";
+                                });
+                              }}
+                              onKeyDown={(e) => e.stopPropagation()}
+                            />
+                          </div>
                           {Object.keys(OTHER_SERVICES).map((service) => (
                             <SelectItem key={service} value={service}>{service}</SelectItem>
                           ))}
@@ -891,7 +1002,22 @@ export default function CustomerService() {
                         <SelectTrigger data-testid="select-inventory-item">
                           <SelectValue placeholder="Choose a product" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent position="popper" className="max-h-60 w-[var(--radix-select-trigger-width)]">
+                          <div className="p-2 sticky top-0 bg-white z-10 border-b">
+                            <Input
+                              placeholder="Search product..."
+                              className="h-8 text-sm"
+                              onChange={(e) => {
+                                const search = e.target.value.toLowerCase();
+                                const items = e.target.closest('[role="listbox"]')?.querySelectorAll('[role="option"]');
+                                items?.forEach((item) => {
+                                  const text = item.textContent?.toLowerCase() || "";
+                                  (item as HTMLElement).style.display = text.includes(search) ? "flex" : "none";
+                                });
+                              }}
+                              onKeyDown={(e) => e.stopPropagation()}
+                            />
+                          </div>
                           {(Array.isArray(inventory) ? inventory : [])
                             .filter((item: any) => item.category !== 'Accessories')
                             .map((item: any) => (

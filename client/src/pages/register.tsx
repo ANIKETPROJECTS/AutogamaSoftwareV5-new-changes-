@@ -243,7 +243,7 @@ const validateEmail = (email: string): boolean => {
 };
 
 const VEHICLE_MAKES = [
-  "Toyota", "Honda", "Maruti Suzuki", "Hyundai", "Tata", "Mahindra", "Kia", "MG", "Volkswagen", "Skoda", "BMW", "Mercedes-Benz", "Audi", "Land Rover", "Jaguar", "Volvo", "Porsche", "Lexus", "Jeep", "Other"
+  "Other", "Toyota", "Honda", "Maruti Suzuki", "Hyundai", "Tata", "Mahindra", "Kia", "MG", "Volkswagen", "Skoda", "BMW", "Mercedes-Benz", "Audi", "Land Rover", "Jaguar", "Volvo", "Porsche", "Lexus", "Jeep"
 ];
 
 const VEHICLE_MODELS: Record<string, string[]> = {
@@ -552,6 +552,21 @@ export default function CustomerRegistration() {
                       <SelectValue placeholder="Select referral source" />
                     </SelectTrigger>
                     <SelectContent position="popper" className="max-h-60 w-[var(--radix-select-trigger-width)]">
+                      <div className="p-2 sticky top-0 bg-white z-10 border-b">
+                        <Input
+                          placeholder="Search..."
+                          className="h-8 text-sm"
+                          onChange={(e) => {
+                            const search = e.target.value.toLowerCase();
+                            const items = e.target.closest('[role="listbox"]')?.querySelectorAll('[role="option"]');
+                            items?.forEach((item) => {
+                              const text = item.textContent?.toLowerCase() || "";
+                              (item as HTMLElement).style.display = text.includes(search) ? "flex" : "none";
+                            });
+                          }}
+                          onKeyDown={(e) => e.stopPropagation()}
+                        />
+                      </div>
                       {REFERRAL_SOURCES.map((source) => (
                         <SelectItem key={source} value={source}>
                           {source}
@@ -631,6 +646,21 @@ export default function CustomerRegistration() {
                               <SelectValue placeholder="Select category" />
                             </SelectTrigger>
                             <SelectContent position="popper" className="max-h-60 w-[var(--radix-select-trigger-width)]">
+                              <div className="p-2 sticky top-0 bg-white z-10 border-b">
+                                <Input
+                                  placeholder="Search category..."
+                                  className="h-8 text-sm"
+                                  onChange={(e) => {
+                                    const search = e.target.value.toLowerCase();
+                                    const items = e.target.closest('[role="listbox"]')?.querySelectorAll('[role="option"]');
+                                    items?.forEach((item) => {
+                                      const text = item.textContent?.toLowerCase() || "";
+                                      (item as HTMLElement).style.display = text.includes(search) ? "flex" : "none";
+                                    });
+                                  }}
+                                  onKeyDown={(e) => e.stopPropagation()}
+                                />
+                              </div>
                               {Object.keys(PPF_CATEGORIES).map((category) => (
                                 <SelectItem key={category} value={category}>
                                   {category}
@@ -658,6 +688,21 @@ export default function CustomerRegistration() {
                                 <SelectValue placeholder="Select vehicle type" />
                               </SelectTrigger>
                               <SelectContent position="popper" className="max-h-60 w-[var(--radix-select-trigger-width)]">
+                                <div className="p-2 sticky top-0 bg-white z-10 border-b">
+                                  <Input
+                                    placeholder="Search..."
+                                    className="h-8 text-sm"
+                                    onChange={(e) => {
+                                      const search = e.target.value.toLowerCase();
+                                      const items = e.target.closest('[role="listbox"]')?.querySelectorAll('[role="option"]');
+                                      items?.forEach((item) => {
+                                        const text = item.textContent?.toLowerCase() || "";
+                                        (item as HTMLElement).style.display = text.includes(search) ? "flex" : "none";
+                                      });
+                                    }}
+                                    onKeyDown={(e) => e.stopPropagation()}
+                                  />
+                                </div>
                                 {Object.keys(PPF_CATEGORIES[customerData.ppfCategory as keyof typeof PPF_CATEGORIES]).map((type) => (
                                   <SelectItem key={type} value={type}>
                                     {type}
@@ -687,6 +732,21 @@ export default function CustomerRegistration() {
                                 <SelectValue placeholder="Select warranty" />
                               </SelectTrigger>
                               <SelectContent position="popper" className="max-h-60 w-[var(--radix-select-trigger-width)]">
+                                <div className="p-2 sticky top-0 bg-white z-10 border-b">
+                                  <Input
+                                    placeholder="Search..."
+                                    className="h-8 text-sm"
+                                    onChange={(e) => {
+                                      const search = e.target.value.toLowerCase();
+                                      const items = e.target.closest('[role="listbox"]')?.querySelectorAll('[role="option"]');
+                                      items?.forEach((item) => {
+                                        const text = item.textContent?.toLowerCase() || "";
+                                        (item as HTMLElement).style.display = text.includes(search) ? "flex" : "none";
+                                      });
+                                    }}
+                                    onKeyDown={(e) => e.stopPropagation()}
+                                  />
+                                </div>
                                 {Object.entries((PPF_CATEGORIES[customerData.ppfCategory as keyof typeof PPF_CATEGORIES] as Record<string, Record<string, number>>)[customerData.ppfVehicleType]).map(([warranty, price]) => (
                                   <SelectItem key={warranty} value={warranty}>
                                     {warranty} - ₹{(price as number).toLocaleString('en-IN')}
@@ -719,6 +779,21 @@ export default function CustomerRegistration() {
                                   <SelectValue placeholder="Select category" />
                                 </SelectTrigger>
                                 <SelectContent position="popper" className="max-h-60 w-[var(--radix-select-trigger-width)]">
+                                  <div className="p-2 sticky top-0 bg-white z-10 border-b">
+                                    <Input
+                                      placeholder="Search..."
+                                      className="h-8 text-sm"
+                                      onChange={(e) => {
+                                        const search = e.target.value.toLowerCase();
+                                        const items = e.target.closest('[role="listbox"]')?.querySelectorAll('[role="option"]');
+                                        items?.forEach((item) => {
+                                          const text = item.textContent?.toLowerCase() || "";
+                                          (item as HTMLElement).style.display = text.includes(search) ? "flex" : "none";
+                                        });
+                                      }}
+                                      onKeyDown={(e) => e.stopPropagation()}
+                                    />
+                                  </div>
                                   {accessoryCategories.map(cat => (
                                     <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                                   ))}
@@ -744,6 +819,21 @@ export default function CustomerRegistration() {
                                       <SelectValue placeholder="Select accessory" />
                                     </SelectTrigger>
                                     <SelectContent position="popper" className="max-h-60 w-[var(--radix-select-trigger-width)]">
+                                      <div className="p-2 sticky top-0 bg-white z-10 border-b">
+                                        <Input
+                                          placeholder="Search..."
+                                          className="h-8 text-sm"
+                                          onChange={(e) => {
+                                            const search = e.target.value.toLowerCase();
+                                            const items = e.target.closest('[role="listbox"]')?.querySelectorAll('[role="option"]');
+                                            items?.forEach((item) => {
+                                              const text = item.textContent?.toLowerCase() || "";
+                                              (item as HTMLElement).style.display = text.includes(search) ? "flex" : "none";
+                                            });
+                                          }}
+                                          onKeyDown={(e) => e.stopPropagation()}
+                                        />
+                                      </div>
                                       {filteredAccessories.map(item => (
                                         <SelectItem key={item._id} value={item.name}>
                                           {item.name} ({item.quantity} in stock)
@@ -785,6 +875,21 @@ export default function CustomerRegistration() {
                           <SelectValue placeholder="Select service" />
                         </SelectTrigger>
                         <SelectContent position="popper" className="max-h-60 w-[var(--radix-select-trigger-width)]">
+                          <div className="p-2 sticky top-0 bg-white z-10 border-b">
+                            <Input
+                              placeholder="Search..."
+                              className="h-8 text-sm"
+                              onChange={(e) => {
+                                const search = e.target.value.toLowerCase();
+                                const items = e.target.closest('[role="listbox"]')?.querySelectorAll('[role="option"]');
+                                items?.forEach((item) => {
+                                  const text = item.textContent?.toLowerCase() || "";
+                                  (item as HTMLElement).style.display = text.includes(search) ? "flex" : "none";
+                                });
+                              }}
+                              onKeyDown={(e) => e.stopPropagation()}
+                            />
+                          </div>
                           {Object.keys(OTHER_SERVICES).map((service) => (
                             <SelectItem key={service} value={service}>
                               {service}
@@ -802,6 +907,21 @@ export default function CustomerRegistration() {
                             <SelectValue placeholder="Select vehicle type" />
                           </SelectTrigger>
                           <SelectContent position="popper" className="max-h-60 w-[var(--radix-select-trigger-width)]">
+                            <div className="p-2 sticky top-0 bg-white z-10 border-b">
+                              <Input
+                                placeholder="Search..."
+                                className="h-8 text-sm"
+                                onChange={(e) => {
+                                  const search = e.target.value.toLowerCase();
+                                  const items = e.target.closest('[role="listbox"]')?.querySelectorAll('[role="option"]');
+                                  items?.forEach((item) => {
+                                    const text = item.textContent?.toLowerCase() || "";
+                                    (item as HTMLElement).style.display = text.includes(search) ? "flex" : "none";
+                                  });
+                                }}
+                                onKeyDown={(e) => e.stopPropagation()}
+                              />
+                            </div>
                             {Object.entries(OTHER_SERVICES[customerData.tempServiceName as keyof typeof OTHER_SERVICES]).map(([type, price]) => (
                               <SelectItem key={type} value={type}>
                                 {type} - ₹{(price as number).toLocaleString('en-IN')}
@@ -891,7 +1011,22 @@ export default function CustomerRegistration() {
                     <SelectTrigger data-testid="select-state">
                       <SelectValue placeholder="Select state" />
                     </SelectTrigger>
-                    <SelectContent className="max-h-60 overflow-y-auto">
+                    <SelectContent position="popper" className="max-h-60 w-[var(--radix-select-trigger-width)]">
+                      <div className="p-2 sticky top-0 bg-white z-10 border-b">
+                        <Input
+                          placeholder="Search state..."
+                          className="h-8 text-sm"
+                          onChange={(e) => {
+                            const search = e.target.value.toLowerCase();
+                            const items = document.querySelectorAll('[role="option"]');
+                            items.forEach((item) => {
+                              const text = item.textContent?.toLowerCase() || "";
+                              (item as HTMLElement).style.display = text.includes(search) ? "flex" : "none";
+                            });
+                          }}
+                          onKeyDown={(e) => e.stopPropagation()}
+                        />
+                      </div>
                       {INDIAN_STATES.map((state) => (
                         <SelectItem key={state} value={state}>{state}</SelectItem>
                       ))}
@@ -945,6 +1080,21 @@ export default function CustomerRegistration() {
                         <SelectValue placeholder="Select vehicle make" />
                       </SelectTrigger>
                       <SelectContent position="popper" className="max-h-60 w-[var(--radix-select-trigger-width)]">
+                        <div className="p-2 sticky top-0 bg-white z-10 border-b">
+                          <Input
+                            placeholder="Search make..."
+                            className="h-8 text-sm"
+                            onChange={(e) => {
+                              const search = e.target.value.toLowerCase();
+                              const items = e.target.closest('[role="listbox"]')?.querySelectorAll('[role="option"]');
+                              items?.forEach((item) => {
+                                const text = item.textContent?.toLowerCase() || "";
+                                (item as HTMLElement).style.display = text.includes(search) ? "flex" : "none";
+                              });
+                            }}
+                            onKeyDown={(e) => e.stopPropagation()}
+                          />
+                        </div>
                         {VEHICLE_MAKES.map((make) => (
                           <SelectItem key={make} value={make}>
                             {make}
@@ -981,6 +1131,21 @@ export default function CustomerRegistration() {
                         <SelectValue placeholder={vehicleData.make ? "Select model" : "Select vehicle name first"} />
                       </SelectTrigger>
                       <SelectContent position="popper" className="max-h-60 w-[var(--radix-select-trigger-width)]">
+                        <div className="p-2 sticky top-0 bg-white z-10 border-b">
+                          <Input
+                            placeholder="Search model..."
+                            className="h-8 text-sm"
+                            onChange={(e) => {
+                              const search = e.target.value.toLowerCase();
+                              const items = e.target.closest('[role="listbox"]')?.querySelectorAll('[role="option"]');
+                              items?.forEach((item) => {
+                                const text = item.textContent?.toLowerCase() || "";
+                                (item as HTMLElement).style.display = text.includes(search) ? "flex" : "none";
+                              });
+                            }}
+                            onKeyDown={(e) => e.stopPropagation()}
+                          />
+                        </div>
                         {vehicleData.make && VEHICLE_MODELS[vehicleData.make as keyof typeof VEHICLE_MODELS]?.map((model) => (
                           <SelectItem key={model} value={model}>
                             {model}
@@ -1049,6 +1214,21 @@ export default function CustomerRegistration() {
                       <SelectValue placeholder="Select color" />
                     </SelectTrigger>
                     <SelectContent position="popper" className="max-h-60 w-[var(--radix-select-trigger-width)]">
+                      <div className="p-2 sticky top-0 bg-white z-10 border-b">
+                        <Input
+                          placeholder="Search color..."
+                          className="h-8 text-sm"
+                          onChange={(e) => {
+                            const search = e.target.value.toLowerCase();
+                            const items = e.target.closest('[role="listbox"]')?.querySelectorAll('[role="option"]');
+                            items?.forEach((item) => {
+                              const text = item.textContent?.toLowerCase() || "";
+                              (item as HTMLElement).style.display = text.includes(search) ? "flex" : "none";
+                            });
+                          }}
+                          onKeyDown={(e) => e.stopPropagation()}
+                        />
+                      </div>
                       {VEHICLE_COLORS.map((color) => (
                         <SelectItem key={color} value={color}>
                           {color}
