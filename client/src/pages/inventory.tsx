@@ -42,6 +42,12 @@ export default function Inventory() {
   const [rollQuantity, setRollQuantity] = useState('');
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'ppf' | 'accessories'>('ppf');
+  const [accessoryDialogOpen, setAccessoryDialogOpen] = useState(false);
+  const [editingAccessory, setEditingAccessory] = useState<any>(null);
+  const [accName, setAccName] = useState('');
+  const [accQuantity, setAccQuantity] = useState('');
+  const [accUnit, setAccUnit] = useState('');
+  const [accPrice, setAccPrice] = useState('');
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -116,6 +122,33 @@ export default function Inventory() {
     }
   });
 
+  const upsertAccessoryMutation = useMutation({
+    mutationFn: (data: any) => {
+      if (data._id) {
+        return api.inventory.update(data._id, data);
+      }
+      return api.inventory.create({ ...data, category: 'Accessories' });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['inventory'] });
+      setAccessoryDialogOpen(false);
+      setEditingAccessory(null);
+      setAccName('');
+      setAccQuantity('');
+      setAccUnit('');
+      setAccPrice('');
+      toast({ title: editingAccessory ? 'Accessory updated' : 'Accessory added' });
+    }
+  });
+
+  const deleteAccessoryMutation = useMutation({
+    mutationFn: (id: string) => api.inventory.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['inventory'] });
+      toast({ title: 'Accessory deleted' });
+    }
+  });
+
   return (
     <div className="space-y-6">
       <div className="space-y-4">
@@ -152,6 +185,22 @@ export default function Inventory() {
           >
             Accessories
           </Button>
+          {activeTab === 'accessories' && (
+            <Button 
+              onClick={() => {
+                setEditingAccessory(null);
+                setAccName('');
+                setAccQuantity('');
+                setAccUnit('');
+                setAccPrice('');
+                setAccessoryDialogOpen(true);
+              }}
+              className="ml-auto"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Add Accessory
+            </Button>
+          )}
         </div>
         
         {!selectedProductId && (
@@ -280,18 +329,56 @@ export default function Inventory() {
                 accessoryItems.map((item: any) => (
                   <Card 
                     key={item._id}
-                    className="card-modern border transition-all hover:ring-2 hover:ring-primary/20"
+                    className="card-modern border transition-all hover:ring-2 hover:ring-primary/20 group"
                   >
                     <CardHeader className="pb-2">
-                      <CardTitle className="text-base">{item.name}</CardTitle>
-                      <Badge className="mt-1 bg-slate-500/20 text-slate-400">
-                        {item.unit}
-                      </Badge>
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <CardTitle className="text-base">{item.name}</CardTitle>
+                          <Badge className="mt-1 bg-slate-500/20 text-slate-400">
+                            {item.unit}
+                          </Badge>
+                        </div>
+                        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-8 w-8"
+                            onClick={() => {
+                              setEditingAccessory(item);
+                              setAccName(item.name);
+                              setAccQuantity(item.quantity.toString());
+                              setAccUnit(item.unit);
+                              setAccPrice(item.price?.toString() || '');
+                              setAccessoryDialogOpen(true);
+                            }}
+                          >
+                            <Package className="w-4 h-4" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-8 w-8 text-destructive"
+                            onClick={() => {
+                              if (confirm('Delete this accessory?')) {
+                                deleteAccessoryMutation.mutate(item._id);
+                              }
+                            }}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
                     </CardHeader>
                     <CardContent>
                       <div className="flex items-baseline justify-between">
                         <span className="text-3xl font-display font-bold">{item.quantity}</span>
-                        <span className="text-sm text-muted-foreground">qty</span>
+                        <div className="text-right">
+                          <span className="text-sm text-muted-foreground block">qty</span>
+                          {item.price && (
+                            <span className="text-xs font-medium text-primary">₹{item.price}</span>
+                          )}
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
@@ -407,36 +494,45 @@ export default function Inventory() {
       </div>
 
       <Dialog open={rollDialogOpen} onOpenChange={setRollDialogOpen}>
+        {/* ... existing roll dialog content ... */}
+      </Dialog>
+
+      <Dialog open={accessoryDialogOpen} onOpenChange={setAccessoryDialogOpen}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
-            <DialogTitle>Add Roll to {selectedItem?.category}</DialogTitle>
+            <DialogTitle>{editingAccessory ? 'Edit Accessory' : 'Add Accessory'}</DialogTitle>
           </DialogHeader>
           <form onSubmit={(e) => {
             e.preventDefault();
-            if (!rollName || !rollQuantity) {
-              toast({ title: 'Fill all fields', variant: 'destructive' });
-              return;
-            }
-            addRollMutation.mutate({
-              id: selectedItem._id,
-              roll: {
-                name: rollName,
-                squareFeet: parseFloat(rollQuantity),
-                meters: 0,
-                unit: 'Square Feet'
-              }
+            upsertAccessoryMutation.mutate({
+              _id: editingAccessory?._id,
+              name: accName,
+              quantity: parseFloat(accQuantity),
+              unit: accUnit,
+              price: parseFloat(accPrice) || 0,
+              minStock: 0
             });
           }} className="space-y-4">
             <div className="space-y-2">
-              <Label>Roll Number</Label>
-              <Input placeholder="e.g., ELITE-ROLL-1" value={rollName} onChange={(e) => setRollName(e.target.value)} />
+              <Label>Accessory Name</Label>
+              <Input placeholder="e.g., Helmet" value={accName} onChange={(e) => setAccName(e.target.value)} required />
             </div>
             <div className="space-y-2">
-              <Label>Quantity (Square Feet)</Label>
-              <Input type="number" step="0.1" placeholder="0" value={rollQuantity} onChange={(e) => setRollQuantity(e.target.value)} />
+              <Label>Category / Type</Label>
+              <Input placeholder="e.g., Headgear" value={accUnit} onChange={(e) => setAccUnit(e.target.value)} required />
             </div>
-            <Button type="submit" className="w-full bg-primary" disabled={addRollMutation.isPending}>
-              {addRollMutation.isPending ? 'Adding...' : 'Add Roll'}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Quantity</Label>
+                <Input type="number" placeholder="0" value={accQuantity} onChange={(e) => setAccQuantity(e.target.value)} required />
+              </div>
+              <div className="space-y-2">
+                <Label>Price (₹)</Label>
+                <Input type="number" placeholder="0" value={accPrice} onChange={(e) => setAccPrice(e.target.value)} required />
+              </div>
+            </div>
+            <Button type="submit" className="w-full bg-primary" disabled={upsertAccessoryMutation.isPending}>
+              {upsertAccessoryMutation.isPending ? 'Saving...' : 'Save Accessory'}
             </Button>
           </form>
         </DialogContent>
