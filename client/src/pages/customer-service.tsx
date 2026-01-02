@@ -782,19 +782,13 @@ export default function CustomerService() {
                 </Card>
 
                 <Card className="border border-red-200">
-                  <CardHeader className="py-3 cursor-pointer" onClick={() => setShowOtherServicesSection(!showOtherServicesSection)}>
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="text-base">Other Services</CardTitle>
-                      {showOtherServicesSection ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                    </div>
+                  <CardHeader className="py-3">
+                    <CardTitle className="text-base">Other Services</CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-3 pt-0">
+                  <CardContent className="space-y-3">
                     <div className="space-y-2">
                       <Label className="text-sm">Select Service</Label>
-                      <Select value={otherServiceName} onValueChange={(val) => {
-                        setOtherServiceName(val);
-                        setShowOtherServicesSection(true);
-                      }}>
+                      <Select value={otherServiceName} onValueChange={setOtherServiceName}>
                         <SelectTrigger data-testid="select-other-service">
                           <SelectValue placeholder="Choose a service" />
                         </SelectTrigger>
@@ -806,72 +800,68 @@ export default function CustomerService() {
                       </Select>
                     </div>
 
-                    {showOtherServicesSection && (
-                      <div className="space-y-3 pt-3 border-t">
-                        <div className="space-y-2">
-                          <Label className="text-sm">Vehicle Type</Label>
-                          <Select value={otherServiceVehicleType} onValueChange={setOtherServiceVehicleType}>
-                            <SelectTrigger data-testid="select-other-service-vehicle-type">
-                              <SelectValue placeholder="Select vehicle type" />
-                            </SelectTrigger>
-                            <SelectContent className="max-h-64 overflow-y-auto">
-                              {VEHICLE_TYPES.map((type) => {
-                                const serviceData = otherServiceName ? OTHER_SERVICES[otherServiceName as keyof typeof OTHER_SERVICES] : null;
-                                const price = serviceData ? (serviceData as any)[type] : null;
-                                return (
-                                  <SelectItem key={type} value={type}>
-                                    {type} {price ? `- ₹${price.toLocaleString('en-IN')}` : ''}
-                                  </SelectItem>
-                                );
-                              })}
-                            </SelectContent>
-                          </Select>
+                    <div className="space-y-2">
+                      <Label className="text-sm">Vehicle Type</Label>
+                      <Select value={otherServiceVehicleType} onValueChange={setOtherServiceVehicleType}>
+                        <SelectTrigger data-testid="select-other-service-vehicle-type">
+                          <SelectValue placeholder="Select vehicle type" />
+                        </SelectTrigger>
+                        <SelectContent className="max-h-64 overflow-y-auto">
+                          {VEHICLE_TYPES.map((type) => {
+                            const serviceData = otherServiceName ? OTHER_SERVICES[otherServiceName as keyof typeof OTHER_SERVICES] : null;
+                            const price = serviceData ? (serviceData as any)[type] : null;
+                            return (
+                              <SelectItem key={type} value={type}>
+                                {type} {price ? `- ₹${price.toLocaleString('en-IN')}` : ''}
+                              </SelectItem>
+                            );
+                          })}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <Button type="button" variant="outline" onClick={handleAddOtherService} disabled={!otherServiceName || !otherServiceVehicleType} className="w-full">
+                      Add Service
+                    </Button>
+
+                    {selectedOtherServices.length > 0 && (
+                      <div className="space-y-4 mt-3">
+                        <div className="border-b pb-2">
+                          <Label className="text-sm font-semibold">Selected Services</Label>
                         </div>
-
-                        <Button type="button" variant="outline" onClick={handleAddOtherService} disabled={!otherServiceName || !otherServiceVehicleType} className="w-full">
-                          Add Service
-                        </Button>
-
-                        {selectedOtherServices.length > 0 && (
-                          <div className="space-y-4 mt-3">
-                            <div className="border-b pb-2">
-                              <Label className="text-sm font-semibold">Selected Services</Label>
-                            </div>
-                            <div className="border rounded-lg divide-y">
-                              {selectedOtherServices.map((service, index) => (
-                                <div key={index} className="space-y-2 p-3">
-                                  <div className="flex items-center justify-between">
-                                    <div>
-                                      <p className="font-medium text-sm">{service.name}</p>
-                                      <p className="text-xs text-muted-foreground">{service.vehicleType}</p>
-                                    </div>
-                                    <Button type="button" variant="ghost" size="icon" onClick={() => handleRemoveOtherService(index)}>
-                                      <Trash2 className="w-4 h-4 text-red-500" />
-                                    </Button>
-                                  </div>
-                                  <div className="bg-gray-50 p-2 rounded-md border border-gray-200">
-                                    <div className="flex justify-between items-center mb-2">
-                                      <Label className="text-sm font-medium">Service Price</Label>
-                                      <span className="text-lg font-bold text-primary">₹{service.price.toLocaleString('en-IN')}</span>
-                                    </div>
-                                    <div className="w-full">
-                                      <Label className="text-xs">Discount</Label>
-                                      <Input 
-                                        type="number" 
-                                        value={service.discount || ''} 
-                                        onChange={(e) => {
-                                          const newServices = [...selectedOtherServices];
-                                          newServices[index].discount = parseFloat(e.target.value) || 0;
-                                          setSelectedOtherServices(newServices);
-                                        }} 
-                                      />
-                                    </div>
-                                  </div>
+                        <div className="border rounded-lg divide-y">
+                          {selectedOtherServices.map((service, index) => (
+                            <div key={index} className="space-y-2 p-3">
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <p className="font-medium text-sm">{service.name}</p>
+                                  <p className="text-xs text-muted-foreground">{service.vehicleType}</p>
                                 </div>
-                              ))}
+                                <Button type="button" variant="ghost" size="icon" onClick={() => handleRemoveOtherService(index)}>
+                                  <Trash2 className="w-4 h-4 text-red-500" />
+                                </Button>
+                              </div>
+                              <div className="bg-gray-50 p-2 rounded-md border border-gray-200">
+                                <div className="flex justify-between items-center mb-2">
+                                  <Label className="text-sm font-medium">Service Price</Label>
+                                  <span className="text-lg font-bold text-primary">₹{service.price.toLocaleString('en-IN')}</span>
+                                </div>
+                                <div className="w-full">
+                                  <Label className="text-xs">Discount</Label>
+                                  <Input 
+                                    type="number" 
+                                    value={service.discount || ''} 
+                                    onChange={(e) => {
+                                      const newServices = [...selectedOtherServices];
+                                      newServices[index].discount = parseFloat(e.target.value) || 0;
+                                      setSelectedOtherServices(newServices);
+                                    }} 
+                                  />
+                                </div>
+                              </div>
                             </div>
-                          </div>
-                        )}
+                          ))}
+                        </div>
                       </div>
                     )}
                   </CardContent>
