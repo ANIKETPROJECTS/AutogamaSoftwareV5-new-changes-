@@ -330,9 +330,9 @@ export default function Accessories() {
                     const item = accessoryInventory.find((i: any) => i.name === value && i.unit === category);
                     if (item?.price) setPrice(item.price.toString());
                   }
-                }} disabled={!category}>
+                }} disabled={!category && !isAddingNewCategory}>
                   <SelectTrigger>
-                    <SelectValue placeholder={category ? "Select an accessory" : "First select a category"} />
+                    <SelectValue placeholder={(category || isAddingNewCategory) ? "Select an accessory" : "First select a category"} />
                   </SelectTrigger>
                   <SelectContent>
                     {filteredNames.map((n: any) => (
