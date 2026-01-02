@@ -474,11 +474,13 @@ export default function RegisteredCustomers() {
                               <span className="text-xs font-semibold text-red-600">{customer.vehicles.length}</span>
                             </div>
                           )}
-                          {customer.vehicles?.some((v: any) => v.otherServices?.length > 0) && (
+                          {customer.vehicles?.some((v: any) => v.otherServices?.some((s: any) => s.vehicleType === "Accessory")) && (
                             <div className="flex items-center gap-1 px-2 py-0.5 bg-blue-50 rounded-lg">
                               <Package className="w-2.5 h-2.5 text-blue-500" />
                               <span className="text-xs font-semibold text-blue-600">
-                                {customer.vehicles.reduce((acc: number, v: any) => acc + (v.otherServices?.length || 0), 0)} Accessories
+                                {customer.vehicles.reduce((acc: number, v: any) => 
+                                  acc + (v.otherServices?.filter((s: any) => s.vehicleType === "Accessory").length || 0), 0
+                                )} Accessories
                               </span>
                             </div>
                           )}

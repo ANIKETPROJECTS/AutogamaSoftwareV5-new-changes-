@@ -198,13 +198,38 @@ export default function CustomerDetails() {
                     </div>
                     <div>
                       <p className="text-[10px] text-slate-400 font-medium uppercase mb-0.5">Selected Services</p>
-                      <p className="text-sm font-semibold text-slate-900 leading-snug">{customer.service}</p>
+                      <p className="text-sm font-semibold text-slate-900 leading-snug">
+                        {customer.service.split(' + ').filter((s: string) => {
+                          const accessories = customer.vehicles?.[0]?.otherServices?.filter((as: any) => as.vehicleType === "Accessory") || [];
+                          return !accessories.some((acc: any) => s.includes(acc.name));
+                        }).join(' + ')}
+                      </p>
                     </div>
                   </div>
+
+                  {customer.vehicles?.[0]?.otherServices?.some((s: any) => s.vehicleType === "Accessory") && (
+                    <div className="flex items-start gap-3 pt-3 border-t border-red-200/60">
+                      <div className="mt-0.5 p-1.5 bg-white rounded-md shadow-sm border border-slate-100">
+                        <Package className="w-3 h-3 text-blue-600" />
+                      </div>
+                      <div>
+                        <p className="text-[10px] text-slate-400 font-medium uppercase mb-0.5">Selected Accessories</p>
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {customer.vehicles[0].otherServices
+                            .filter((s: any) => s.vehicleType === "Accessory")
+                            .map((acc: any, idx: number) => (
+                              <Badge key={idx} variant="outline" className="text-[10px] bg-blue-50 text-blue-700 border-blue-100">
+                                {acc.name}
+                              </Badge>
+                            ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
                   
                   {customer.serviceCost && (
                     <div className="pt-3 border-t border-red-200/60 flex items-center justify-between">
-                      <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Estimated</span>
+                      <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Estimated Total</span>
                       <span className="text-lg font-bold text-red-700">₹{customer.serviceCost.toLocaleString('en-IN')}</span>
                     </div>
                   )}
