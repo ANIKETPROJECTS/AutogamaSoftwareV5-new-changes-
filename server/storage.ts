@@ -416,17 +416,19 @@ export class MongoStorage implements IStorage {
 
       // Mark as finished if depleted
       if ((roll.remaining_meters || 0) <= 0 && (roll.remaining_sqft || 0) <= 0) {
-        roll.status = 'Finished';
+        console.log(`[Storage] Archiving roll in FIFO: ${roll.name}`);
         // Move to finishedRolls
         if (!item.finishedRolls) item.finishedRolls = [];
-        // Ensure we store a clean object and include finish date
+        // Use toObject() to get a clean data object if it's a mongoose document
+        const rollObj = (roll as any).toObject ? (roll as any).toObject() : { ...roll };
         const finishedRoll = {
-          ...roll,
+          ...rollObj,
           status: 'Finished' as const,
           finishedAt: new Date()
         };
         item.finishedRolls.push(finishedRoll);
         item.rolls = item.rolls.filter(r => r._id?.toString() !== roll._id?.toString());
+        console.log(`[Storage] Roll archived. finishedRolls count: ${item.finishedRolls.length}`);
       }
     }
 
@@ -469,16 +471,18 @@ export class MongoStorage implements IStorage {
     
     // Mark as Finished if depleted
     if (roll.remaining_meters <= 0 && (roll.remaining_sqft || 0) <= 0) {
-      roll.status = 'Finished';
+      console.log(`[Storage] Archiving roll in deductRoll: ${roll.name}`);
       if (!item.finishedRolls) item.finishedRolls = [];
-      // Ensure we store a clean object and include finish date
+      // Use toObject() to get a clean data object if it's a mongoose document
+      const rollObj = (roll as any).toObject ? (roll as any).toObject() : { ...roll };
       const finishedRoll = {
-        ...(roll instanceof mongoose.Document ? roll.toObject() : roll),
+        ...rollObj,
         status: 'Finished' as const,
         finishedAt: new Date()
       };
       item.finishedRolls.push(finishedRoll);
       item.rolls.splice(rollIndex, 1);
+      console.log(`[Storage] Roll archived. finishedRolls count: ${item.finishedRolls.length}`);
     }
     
     await item.save();
