@@ -306,6 +306,7 @@ export default function Inventory() {
                               className="w-full"
                               onClick={(e) => {
                                 e.stopPropagation();
+                                console.log('[Inventory] Setting selectedItem for Add Roll:', displayItem);
                                 setSelectedItem(displayItem);
                                 setRollDialogOpen(true);
                               }}
@@ -508,7 +509,55 @@ export default function Inventory() {
       </div>
 
       <Dialog open={rollDialogOpen} onOpenChange={setRollDialogOpen}>
-        {/* ... existing roll dialog content ... */}
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Add New Roll - {selectedItem?.category}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Roll Name/ID</Label>
+              <Input 
+                placeholder="e.g. Roll #123"
+                value={rollName}
+                onChange={(e) => setRollName(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Total Square Feet</Label>
+              <Input 
+                type="number"
+                placeholder="e.g. 250"
+                value={rollQuantity}
+                onChange={(e) => setRollQuantity(e.target.value)}
+              />
+            </div>
+            <Button 
+              className="w-full"
+              disabled={!rollName || !rollQuantity || addRollMutation.isPending}
+              onClick={() => {
+                if (selectedItem?._id) {
+                  addRollMutation.mutate({
+                    id: selectedItem._id,
+                    roll: {
+                      name: rollName,
+                      meters: 0, // Backend will handle if squareFeet is provided
+                      squareFeet: parseFloat(rollQuantity),
+                      unit: 'Square Feet'
+                    }
+                  });
+                } else {
+                  toast({ 
+                    title: 'Error', 
+                    description: 'No product selected. Please try clicking Add Roll again.',
+                    variant: 'destructive' 
+                  });
+                }
+              }}
+            >
+              {addRollMutation.isPending ? 'Adding...' : 'Add Roll'}
+            </Button>
+          </div>
+        </DialogContent>
       </Dialog>
 
       <Dialog open={accessoryDialogOpen} onOpenChange={setAccessoryDialogOpen}>
