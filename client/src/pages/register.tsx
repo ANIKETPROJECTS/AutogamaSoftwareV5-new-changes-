@@ -789,7 +789,7 @@ export default function CustomerRegistration() {
                 {customerData.referralSource === "Friend/Family" && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-6">
-                      <Label>Referrer's Name *</Label>
+                      <Label>Referrer's Name</Label>
                       <Input
                         value={customerData.referrerName}
                         onChange={(e) => {
@@ -802,21 +802,12 @@ export default function CustomerRegistration() {
                         }}
                         placeholder="Enter name of the person who referred you"
                         data-testid="input-referrer-name"
-                        className={
-                          errors.referrerName
-                            ? "border-red-500"
-                            : "border-slate-300"
-                        }
+                        className="border-slate-300"
                       />
-                      {errors.referrerName && (
-                        <p className="text-sm text-red-500">
-                          {errors.referrerName}
-                        </p>
-                      )}
                     </div>
 
                     <div className="space-y-6">
-                      <Label>Referrer's Phone Number *</Label>
+                      <Label>Referrer's Phone Number</Label>
                       <Input
                         value={customerData.referrerPhone}
                         onChange={(e) => {
@@ -830,17 +821,8 @@ export default function CustomerRegistration() {
                         placeholder="10-digit mobile number"
                         maxLength={10}
                         data-testid="input-referrer-phone"
-                        className={
-                          errors.referrerPhone
-                            ? "border-red-500"
-                            : "border-slate-300"
-                        }
+                        className="border-slate-300"
                       />
-                      {errors.referrerPhone && (
-                        <p className="text-sm text-red-500">
-                          {errors.referrerPhone}
-                        </p>
-                      )}
                     </div>
                   </div>
                 )}
