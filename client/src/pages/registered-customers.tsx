@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Search, Mail, MapPin, Car, Users, Filter, Grid3X3, List, Trash2, ExternalLink, Check, ImagePlus } from "lucide-react";
+import { Search, Mail, MapPin, Car, Users, Filter, Grid3X3, List, Trash2, ExternalLink, Check, ImagePlus, Package } from "lucide-react";
 import { Link } from "wouter";
 import { useState, useMemo } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
