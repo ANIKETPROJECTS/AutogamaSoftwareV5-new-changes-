@@ -892,11 +892,13 @@ export default function CustomerService() {
                           <SelectValue placeholder="Choose a product" />
                         </SelectTrigger>
                         <SelectContent>
-                          {(Array.isArray(inventory) ? inventory : []).map((item: any) => (
-                            <SelectItem key={item._id} value={item._id}>
-                              {item.category}
-                            </SelectItem>
-                          ))}
+                          {(Array.isArray(inventory) ? inventory : [])
+                            .filter((item: any) => item.category !== 'Accessories')
+                            .map((item: any) => (
+                              <SelectItem key={item._id} value={item._id}>
+                                {item.name}
+                              </SelectItem>
+                            ))}
                         </SelectContent>
                       </Select>
                     </div>
