@@ -60,7 +60,7 @@ export default function Inventory() {
     queryFn: api.inventory.list,
   });
 
-  const isLowStock = (item: any) => (item.rolls?.length || 0) <= 1;
+  const isLowStock = (item: any) => (item.rolls?.filter((r: any) => r.status !== 'Finished').length || 0) <= 1;
 
   const filteredAndSortedItems = useMemo(() => {
     let items = PPF_ITEMS.map((ppfItem) => {
@@ -294,7 +294,7 @@ export default function Inventory() {
                         <CardContent className="space-y-3">
                           <div className="flex items-baseline justify-between">
                             <span className="text-3xl font-display font-bold">
-                              {displayItem.rolls?.length || 0}
+                              {displayItem.rolls?.filter((r: any) => r.status !== 'Finished').length || 0}
                             </span>
                             <span className="text-sm text-muted-foreground">rolls</span>
                           </div>
