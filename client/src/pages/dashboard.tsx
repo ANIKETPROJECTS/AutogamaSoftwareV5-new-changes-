@@ -12,6 +12,7 @@ import { useLocation } from "wouter";
 import {
   IndianRupee,
   Package,
+  ShoppingBag,
   AlertTriangle,
   Users,
   TrendingUp,
