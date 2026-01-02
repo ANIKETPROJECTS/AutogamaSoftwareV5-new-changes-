@@ -356,12 +356,12 @@ export default function Inventory() {
                     <CardContent className="flex-1 flex flex-col justify-between pt-4 space-y-6">
                       <div className="flex items-end justify-between">
                         <div>
-                          <span className="text-4xl font-display font-bold block">{item.quantity}</span>
-                          <span className="text-sm font-medium text-muted-foreground block">Quantity</span>
+                          <span className="text-2xl font-display font-bold block">{item.quantity}</span>
+                          <span className="text-xs font-medium text-muted-foreground block">Quantity</span>
                         </div>
                         <div className="text-right">
-                          <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground block mb-1">Price</span>
-                          <span className="text-2xl font-display font-bold text-primary block">₹{item.price || 0}</span>
+                          <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground block mb-0.5">Price</span>
+                          <span className="text-lg font-display font-bold text-primary block">₹{item.price || 0}</span>
                         </div>
                       </div>
                       
