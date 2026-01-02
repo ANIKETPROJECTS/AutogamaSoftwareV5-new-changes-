@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'wouter';
-import { Menu, X, LayoutDashboard, UserPlus, Filter, Users, Wrench, UserCog, FileText, CreditCard, Package, Calendar, MessageCircle, Settings, LogOut, Bell, User, MessageSquare } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { Menu, X, LayoutDashboard, UserPlus, Filter, Users, Wrench, UserCog, FileText, CreditCard, Package, Calendar, MessageCircle, Settings, LogOut, Bell, User, MessageSquare, CalendarClock } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/auth-context';
@@ -15,6 +15,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Card } from '@/components/ui/card';
+import { format, isToday, isTomorrow, addDays, startOfDay, endOfDay } from 'date-fns';
 
 const menuItems = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
@@ -75,6 +76,26 @@ export function Layout({ children }: { children: React.ReactNode }) {
   });
 
   const todayCompletedJobs = completedJobsToday.length;
+
+  const upcomingAppointments = useMemo(() => {
+    if (!Array.isArray(appointments)) return [];
+    const today = startOfDay(new Date());
+    const nextWeek = endOfDay(addDays(today, 7));
+    
+    return appointments
+      .filter((appt: any) => {
+        const date = new Date(appt.date);
+        return date >= today && date <= nextWeek && appt.status === 'Scheduled';
+      })
+      .sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  }, [appointments]);
+
+  const hasUrgentAppointment = useMemo(() => {
+    return upcomingAppointments.some((appt: any) => {
+      const date = new Date(appt.date);
+      return isToday(date) || isTomorrow(date);
+    });
+  }, [upcomingAppointments]);
 
   const handleClearNotifications = () => {
     setNotifications([]);
@@ -158,17 +179,78 @@ export function Layout({ children }: { children: React.ReactNode }) {
             </div>
           )}
           <div className="flex items-center gap-4 ml-auto">
-          {/* Appointment Badge */}
-          {pendingAppointments > 0 && (
-            <Link href="/appointments">
-              <div className="flex items-center gap-2 px-3 py-1 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg cursor-pointer hover:bg-blue-100 transition-colors">
-                <Calendar className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                <span className="text-xs font-medium text-blue-700 dark:text-blue-300">
-                  {pendingAppointments} {pendingAppointments === 1 ? 'appointment' : 'appointments'}
-                </span>
+          {/* Upcoming Appointments Dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="relative h-9 w-9"
+                data-testid="button-appointment-alerts"
+              >
+                <CalendarClock className={cn(
+                  "w-5 h-5 transition-colors",
+                  hasUrgentAppointment ? "text-red-500 animate-pulse" : "text-slate-600"
+                )} />
+                {upcomingAppointments.length > 0 && (
+                  <span className={cn(
+                    "absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold text-white",
+                    hasUrgentAppointment ? "bg-red-500" : "bg-blue-500"
+                  )}>
+                    {upcomingAppointments.length}
+                  </span>
+                )}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-80">
+              <div className="p-3">
+                <div className="flex items-center justify-between mb-3 border-b pb-2">
+                  <h3 className="font-semibold text-sm flex items-center gap-2">
+                    <CalendarClock className="w-4 h-4" />
+                    Upcoming Appointments
+                  </h3>
+                  <Link href="/appointments">
+                    <Button variant="ghost" size="sm" className="h-7 text-xs px-2">View all</Button>
+                  </Link>
+                </div>
+                
+                <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
+                  {upcomingAppointments.length > 0 ? (
+                    upcomingAppointments.map((appt: any) => {
+                      const apptDate = new Date(appt.date);
+                      const urgent = isToday(apptDate) || isTomorrow(apptDate);
+                      return (
+                        <div 
+                          key={appt._id} 
+                          className={cn(
+                            "p-2 rounded-md border text-sm transition-colors",
+                            urgent 
+                              ? "bg-red-50 border-red-200 text-red-900" 
+                              : "bg-slate-50 border-slate-100 text-slate-900"
+                          )}
+                        >
+                          <div className="flex justify-between items-start gap-2">
+                            <span className="font-semibold truncate">{appt.customerName}</span>
+                            <Badge variant={urgent ? "destructive" : "outline"} className="text-[10px] h-4 px-1 shrink-0">
+                              {isToday(apptDate) ? 'Today' : isTomorrow(apptDate) ? 'Tomorrow' : format(apptDate, 'MMM dd')}
+                            </Badge>
+                          </div>
+                          <div className="flex items-center justify-between mt-1 text-[11px] opacity-80">
+                            <span>{appt.vehicleName}</span>
+                            <span>{appt.time}</span>
+                          </div>
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <div className="text-center py-4 text-slate-500 text-sm">
+                      No appointments in the next 7 days
+                    </div>
+                  )}
+                </div>
               </div>
-            </Link>
-          )}
+            </DropdownMenuContent>
+          </DropdownMenu>
 
           {/* Notification Button */}
           <DropdownMenu>
