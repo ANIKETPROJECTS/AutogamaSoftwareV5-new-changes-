@@ -415,10 +415,10 @@ export default function Inventory() {
               </div>
               
               <CardContent className="p-0">
-                {!selectedItemForDetail.rolls || selectedItemForDetail.rolls.length === 0 ? (
+                {(!selectedItemForDetail.rolls || selectedItemForDetail.rolls.filter((r: any) => r.status !== 'Finished').length === 0) ? (
                   <div className="p-12 text-center text-muted-foreground">
                     <Package className="w-12 h-12 mx-auto mb-4 opacity-20" />
-                    <p>No rolls found for this product.</p>
+                    <p>No active rolls found for this product.</p>
                     <Button variant="outline" className="mt-4" onClick={() => {
                       setSelectedItem(selectedItemForDetail);
                       setRollDialogOpen(true);
@@ -430,7 +430,9 @@ export default function Inventory() {
                 ) : (
                   <>
                     <div className="p-4 space-y-3 max-h-[calc(100vh-250px)] overflow-y-auto">
-                      {selectedItemForDetail.rolls.map((roll: any) => (
+                      {selectedItemForDetail.rolls
+                        .filter((roll: any) => roll.status !== 'Finished')
+                        .map((roll: any) => (
                         <div 
                           key={roll._id} 
                           className="group relative p-2 bg-card border rounded-lg hover:border-primary/40 transition-all shadow-sm"

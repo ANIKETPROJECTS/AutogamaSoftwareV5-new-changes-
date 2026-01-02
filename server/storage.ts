@@ -462,7 +462,7 @@ export class MongoStorage implements IStorage {
     }
     
     // Mark as Finished if depleted
-    if (roll.remaining_meters <= 0 && roll.remaining_sqft <= 0) {
+    if (roll.remaining_meters <= 0 && (roll.remaining_sqft || 0) <= 0) {
       roll.status = 'Finished';
       if (!item.finishedRolls) item.finishedRolls = [];
       item.finishedRolls.push(roll);
