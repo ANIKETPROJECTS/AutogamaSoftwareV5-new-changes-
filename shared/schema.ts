@@ -83,7 +83,9 @@ export const rollSchema = z.object({
   meters: z.number().min(0),
   squareFeet: z.number().min(0),
   remaining_meters: z.number().min(0),
-  remaining_sqft: z.number().min(0)
+  remaining_sqft: z.number().min(0),
+  status: z.enum(['Available', 'Finished']).default('Available'),
+  createdAt: z.date().optional()
 });
 
 export const inventorySchema = z.object({
@@ -93,51 +95,6 @@ export const inventorySchema = z.object({
   unit: z.string().min(1),
   minStock: z.number().min(0).default(0),
   rolls: z.array(rollSchema).default([]),
+  finishedRolls: z.array(rollSchema).default([]),
   price: z.number().optional()
 });
-
-export const accessorySaleSchema = z.object({
-  category: z.string().min(1),
-  accessoryName: z.string().min(1),
-  price: z.number().min(0),
-  quantity: z.number().min(1),
-  total: z.number().min(0),
-  date: z.date().optional()
-});
-
-export type AccessorySale = z.infer<typeof accessorySaleSchema>;
-
-export const appointmentSchema = z.object({
-  customerName: z.string().min(1),
-  customerPhone: z.string().regex(/^\d{10}$/, "Phone must be 10 digits"),
-  customerEmail: z.string().email("Invalid email").optional(),
-  vehicleInfo: z.string().min(1),
-  serviceType: z.string().min(1),
-  date: z.string(),
-  time: z.string().min(1),
-  notes: z.string().optional(),
-  status: z.enum(['Scheduled', 'Done']).default('Scheduled')
-});
-
-export const priceInquirySchema = z.object({
-  inquiryId: z.string().optional(), // Format: INQ001, INQ002...
-  name: z.string().min(1),
-  phone: z.string().min(1),
-  email: z.string().email().optional(),
-  service: z.string().min(1),
-  serviceDetailsJson: z.string().optional(), // Store the JSON breakdown of services
-  priceOffered: z.number().min(0),
-  priceStated: z.number().min(0),
-  notes: z.string().optional(),
-  createdAt: z.date().optional()
-});
-
-export type Vehicle = z.infer<typeof vehicleSchema>;
-export type Customer = z.infer<typeof customerSchema>;
-export type ServiceItem = z.infer<typeof serviceItemSchema>;
-export type Payment = z.infer<typeof paymentSchema>;
-export type Job = z.infer<typeof jobSchema>;
-export type Technician = z.infer<typeof technicianSchema>;
-export type InventoryItem = z.infer<typeof inventorySchema>;
-export type Appointment = z.infer<typeof appointmentSchema>;
-export type PriceInquiry = z.infer<typeof priceInquirySchema>;

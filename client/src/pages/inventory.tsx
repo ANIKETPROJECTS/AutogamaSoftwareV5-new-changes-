@@ -49,6 +49,9 @@ export default function Inventory() {
   const [accUnit, setAccUnit] = useState('');
   const [accPrice, setAccPrice] = useState('');
 
+  const [historyDialogOpen, setHistoryDialogOpen] = useState(false);
+  const [selectedHistoryItem, setSelectedHistoryItem] = useState<any>(null);
+
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -399,7 +402,16 @@ export default function Inventory() {
                   </h2>
                   <p className="text-sm text-muted-foreground">Detailed Roll Inventory</p>
                 </div>
-                {/* Fixed the double Add button issue - Removed from here and kept at card level for specific items if needed or overall button below */}
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => {
+                    setSelectedHistoryItem(selectedItemForDetail);
+                    setHistoryDialogOpen(true);
+                  }}
+                >
+                  History
+                </Button>
               </div>
               
               <CardContent className="p-0">
@@ -535,6 +547,33 @@ export default function Inventory() {
               {upsertAccessoryMutation.isPending ? 'Saving...' : 'Save Accessory'}
             </Button>
           </form>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={historyDialogOpen} onOpenChange={setHistoryDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>{selectedHistoryItem?.category} - Roll History</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
+            {!selectedHistoryItem?.finishedRolls || selectedHistoryItem.finishedRolls.length === 0 ? (
+              <p className="text-center py-8 text-muted-foreground">No finished rolls in history.</p>
+            ) : (
+              <div className="space-y-3">
+                {selectedHistoryItem.finishedRolls.map((roll: any, idx: number) => (
+                  <div key={idx} className="p-3 bg-muted/30 border rounded-lg flex justify-between items-center">
+                    <div>
+                      <p className="font-bold text-sm">{roll.name}</p>
+                      <div className="flex gap-4 text-[10px] text-muted-foreground">
+                        <span>Total: {roll.squareFeet?.toFixed(1)} sqft</span>
+                        <span>Finished: {roll.finishedAt ? new Date(roll.finishedAt).toLocaleDateString() : 'N/A'}</span>
+                      </div>
+                    </div>
+                    <Badge variant="outline">Finished</Badge>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </DialogContent>
       </Dialog>
     </div>

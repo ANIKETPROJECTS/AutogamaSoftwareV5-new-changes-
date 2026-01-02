@@ -411,6 +411,10 @@ export class MongoStorage implements IStorage {
       // Mark as finished if depleted
       if ((roll.remaining_meters || 0) <= 0 && (roll.remaining_sqft || 0) <= 0) {
         roll.status = 'Finished';
+        // Move to finishedRolls
+        if (!item.finishedRolls) item.finishedRolls = [];
+        item.finishedRolls.push({...roll, finishedAt: new Date()});
+        item.rolls = item.rolls.filter(r => r._id?.toString() !== roll._id?.toString());
       }
     }
 
@@ -427,8 +431,9 @@ export class MongoStorage implements IStorage {
     const item = await Inventory.findById(inventoryId);
     if (!item) return null;
     
-    const roll = item.rolls.find(r => r._id?.toString() === rollId);
-    if (!roll) return null;
+    const rollIndex = item.rolls.findIndex(r => r._id?.toString() === rollId);
+    if (rollIndex === -1) return null;
+    const roll = item.rolls[rollIndex];
     
     // Handle deduction based on what we have available
     // If remaining_sqft is set (non-zero), deduct from that, otherwise from meters
@@ -453,6 +458,9 @@ export class MongoStorage implements IStorage {
     // Mark as Finished if depleted
     if (roll.remaining_meters <= 0 && roll.remaining_sqft <= 0) {
       roll.status = 'Finished';
+      if (!item.finishedRolls) item.finishedRolls = [];
+      item.finishedRolls.push({...roll.toObject(), finishedAt: new Date()});
+      item.rolls.splice(rollIndex, 1);
     }
     
     await item.save();
