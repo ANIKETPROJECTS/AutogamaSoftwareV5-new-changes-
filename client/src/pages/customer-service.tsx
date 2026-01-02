@@ -65,9 +65,18 @@ export default function CustomerService() {
   const [otherServiceName, setOtherServiceName] = useState('');
   const [otherServiceVehicleType, setOtherServiceVehicleType] = useState('');
 
-  const [showPpfSection, setShowPpfSection] = useState(true);
-  const [showOtherServicesSection, setShowOtherServicesSection] = useState(true);
+  const [showPpfSection, setShowPpfSection] = useState(false);
+  const [showOtherServicesSection, setShowOtherServicesSection] = useState(false);
+  const [showAddAccessorySection, setShowAddAccessorySection] = useState(false);
   const [isLoadingLastService, setIsLoadingLastService] = useState(false);
+
+  useEffect(() => {
+    if (ppfCategory) setShowPpfSection(true);
+  }, [ppfCategory]);
+
+  useEffect(() => {
+    if (selectedAccessoryCategory) setShowAddAccessorySection(true);
+  }, [selectedAccessoryCategory]);
 
   const { data: customersData = [] } = useQuery<any>({
     queryKey: ['customers'],
@@ -688,6 +697,86 @@ export default function CustomerService() {
                 </Card>
 
                 <Card className="border border-red-200">
+                  <CardHeader className="py-3 cursor-pointer" onClick={() => setShowAddAccessorySection(!showAddAccessorySection)}>
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-base">Add Accessory</CardTitle>
+                      {showAddAccessorySection ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                    </div>
+                  </CardHeader>
+                  {showAddAccessorySection && (
+                    <CardContent className="space-y-3">
+                      <div className="space-y-2">
+                        <Label className="text-sm">Category</Label>
+                        <Select value={selectedAccessoryCategory} onValueChange={(val) => {
+                          setSelectedAccessoryCategory(val);
+                          setSelectedAccessoryId('');
+                        }}>
+                          <SelectTrigger data-testid="select-accessory-category">
+                            <SelectValue placeholder="Select category" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {Array.from(new Set(inventory.filter((i: any) => i.category === 'Accessories').map((i: any) => i.name))).map((name: any) => (
+                              <SelectItem key={name} value={name}>{name}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label className="text-sm">Accessory Name</Label>
+                        <Select value={selectedAccessoryId} onValueChange={setSelectedAccessoryId} disabled={!selectedAccessoryCategory}>
+                          <SelectTrigger data-testid="select-accessory-name">
+                            <SelectValue placeholder="Select accessory" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {inventory
+                              .filter((i: any) => i.category === 'Accessories' && i.name === selectedAccessoryCategory)
+                              .map((item: any) => (
+                                <SelectItem key={item._id} value={item._id}>
+                                  {item.name} - ₹{item.price?.toLocaleString('en-IN')} (Stock: {item.quantity})
+                                </SelectItem>
+                              ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label className="text-sm">Quantity</Label>
+                        <Input 
+                          type="number" 
+                          value={accessoryQuantity} 
+                          onChange={(e) => setAccessoryQuantity(e.target.value)} 
+                          min="1" 
+                        />
+                      </div>
+
+                      <Button type="button" variant="outline" onClick={handleAddAccessory} disabled={!selectedAccessoryId} className="w-full">
+                        Add Accessory
+                      </Button>
+
+                      {selectedAccessories.length > 0 && (
+                        <div className="space-y-2 mt-3">
+                          <Label className="text-sm font-semibold">Selected Accessories</Label>
+                          <div className="border rounded-lg divide-y">
+                            {selectedAccessories.map((acc, index) => (
+                              <div key={index} className="flex items-center justify-between p-3">
+                                <div>
+                                  <p className="font-medium text-sm">{acc.name}</p>
+                                  <p className="text-xs text-muted-foreground">{acc.quantity} units @ ₹{acc.price.toLocaleString('en-IN')}</p>
+                                </div>
+                                <Button type="button" variant="ghost" size="icon" onClick={() => handleRemoveAccessory(index)}>
+                                  <Trash2 className="w-4 h-4 text-red-500" />
+                                </Button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </CardContent>
+                  )}
+                </Card>
+
+                <Card className="border border-red-200">
                   <CardHeader className="py-3 cursor-pointer" onClick={() => setShowOtherServicesSection(!showOtherServicesSection)}>
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-base">Other Services</CardTitle>
@@ -769,86 +858,6 @@ export default function CustomerService() {
                                     />
                                   </div>
                                 </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </CardContent>
-                  )}
-                </Card>
-
-                <Card className="border border-red-200">
-                  <CardHeader className="py-3 cursor-pointer" onClick={() => setShowAddAccessorySection(!showAddAccessorySection)}>
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="text-base">Add Accessory</CardTitle>
-                      {showAddAccessorySection ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                    </div>
-                  </CardHeader>
-                  {showAddAccessorySection && (
-                    <CardContent className="space-y-3">
-                      <div className="space-y-2">
-                        <Label className="text-sm">Category</Label>
-                        <Select value={selectedAccessoryCategory} onValueChange={(val) => {
-                          setSelectedAccessoryCategory(val);
-                          setSelectedAccessoryId('');
-                        }}>
-                          <SelectTrigger data-testid="select-accessory-category">
-                            <SelectValue placeholder="Select category" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {Array.from(new Set(inventory.filter((i: any) => i.category === 'Accessories').map((i: any) => i.name))).map((name: any) => (
-                              <SelectItem key={name} value={name}>{name}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label className="text-sm">Accessory Name</Label>
-                        <Select value={selectedAccessoryId} onValueChange={setSelectedAccessoryId} disabled={!selectedAccessoryCategory}>
-                          <SelectTrigger data-testid="select-accessory-name">
-                            <SelectValue placeholder="Select accessory" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {inventory
-                              .filter((i: any) => i.category === 'Accessories' && i.name === selectedAccessoryCategory)
-                              .map((item: any) => (
-                                <SelectItem key={item._id} value={item._id}>
-                                  {item.name} - ₹{item.price?.toLocaleString('en-IN')} (Stock: {item.quantity})
-                                </SelectItem>
-                              ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label className="text-sm">Quantity</Label>
-                        <Input 
-                          type="number" 
-                          value={accessoryQuantity} 
-                          onChange={(e) => setAccessoryQuantity(e.target.value)} 
-                          min="1" 
-                        />
-                      </div>
-
-                      <Button type="button" variant="outline" onClick={handleAddAccessory} disabled={!selectedAccessoryId} className="w-full">
-                        Add Accessory
-                      </Button>
-
-                      {selectedAccessories.length > 0 && (
-                        <div className="space-y-2 mt-3">
-                          <Label className="text-sm font-semibold">Selected Accessories</Label>
-                          <div className="border rounded-lg divide-y">
-                            {selectedAccessories.map((acc, index) => (
-                              <div key={index} className="flex items-center justify-between p-3">
-                                <div>
-                                  <p className="font-medium text-sm">{acc.name}</p>
-                                  <p className="text-xs text-muted-foreground">{acc.quantity} units @ ₹{acc.price.toLocaleString('en-IN')}</p>
-                                </div>
-                                <Button type="button" variant="ghost" size="icon" onClick={() => handleRemoveAccessory(index)}>
-                                  <Trash2 className="w-4 h-4 text-red-500" />
-                                </Button>
                               </div>
                             ))}
                           </div>
