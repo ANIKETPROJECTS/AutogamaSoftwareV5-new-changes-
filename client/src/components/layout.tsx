@@ -214,7 +214,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   </Link>
                 </div>
                 
-                <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
+                <div className="space-y-2 max-h-[180px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent">
                   {upcomingAppointments.length > 0 ? (
                     upcomingAppointments.map((appt: any) => {
                       const apptDate = new Date(appt.date);
