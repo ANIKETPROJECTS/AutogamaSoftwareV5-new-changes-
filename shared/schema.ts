@@ -3,7 +3,7 @@ import { z } from "zod";
 export type JobStage = 'New Lead' | 'Inspection Done' | 'Work In Progress' | 'Completed' | 'Cancelled';
 export type PaymentStatus = 'Pending' | 'Partially Paid' | 'Paid';
 export type TechnicianStatus = 'Available' | 'Busy' | 'Off';
-export type InventoryCategory = 'Elite' | 'Garware Plus' | 'Garware Premium' | 'Garware Matt';
+export type InventoryCategory = 'Elite' | 'Garware Plus' | 'Garware Premium' | 'Garware Matt' | 'Accessories';
 export type CustomerStatus = 'Inquired' | 'Working' | 'Waiting' | 'Completed' | 'Cancelled';
 export type PaymentMode = 'Cash' | 'UPI' | 'Credit Card' | 'Debit Card' | 'Bank Transfer' | 'Cheque' | 'Other';
 
@@ -88,7 +88,7 @@ export const rollSchema = z.object({
 
 export const inventorySchema = z.object({
   name: z.string().min(1),
-  category: z.enum(['Elite', 'Garware Plus', 'Garware Premium', 'Garware Matt']),
+  category: z.enum(['Elite', 'Garware Plus', 'Garware Premium', 'Garware Matt', 'Accessories']),
   quantity: z.number().min(0).default(0),
   unit: z.string().min(1),
   minStock: z.number().min(0).default(0),

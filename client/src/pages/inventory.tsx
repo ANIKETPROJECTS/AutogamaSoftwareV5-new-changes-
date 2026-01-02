@@ -26,7 +26,8 @@ const CATEGORY_COLORS: Record<string, string> = {
   'Elite': 'bg-blue-500/20 text-blue-400',
   'Garware Plus': 'bg-purple-500/20 text-purple-400',
   'Garware Premium': 'bg-orange-500/20 text-orange-400',
-  'Garware Matt': 'bg-green-500/20 text-green-400'
+  'Garware Matt': 'bg-green-500/20 text-green-400',
+  'Accessories': 'bg-slate-500/20 text-slate-400'
 };
 
 export default function Inventory() {
@@ -77,6 +78,10 @@ export default function Inventory() {
 
     return items;
   }, [inventory, searchQuery, filterCategory, sortBy]);
+
+  const accessoryItems = useMemo(() => {
+    return inventory.filter((inv: any) => inv.category === 'Accessories');
+  }, [inventory]);
 
   const selectedItemForDetail = useMemo(() => {
     if (!selectedProductId) return null;
@@ -238,6 +243,42 @@ export default function Inventory() {
                 })
             )}
           </div>
+
+          {!selectedProductId && (
+            <div className="pt-8 space-y-4">
+              <div>
+                <h2 className="font-display text-2xl font-bold tracking-tight">Accessories Inventory</h2>
+                <p className="text-muted-foreground mt-1">Manage stock for accessory products</p>
+              </div>
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                {accessoryItems.length === 0 ? (
+                  <div className="col-span-full text-center py-8 text-muted-foreground border rounded-lg bg-muted/20">
+                    No accessories in inventory.
+                  </div>
+                ) : (
+                  accessoryItems.map((item: any) => (
+                    <Card 
+                      key={item._id}
+                      className="card-modern border transition-all hover:ring-2 hover:ring-primary/20"
+                    >
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-base">{item.name}</CardTitle>
+                        <Badge className="mt-1 bg-slate-500/20 text-slate-400">
+                          Accessories
+                        </Badge>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex items-baseline justify-between">
+                          <span className="text-3xl font-display font-bold">{item.quantity}</span>
+                          <span className="text-sm text-muted-foreground">{item.unit}</span>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))
+                )}
+              </div>
+            </div>
+          )}
         </div>
 
         {selectedProductId && selectedItemForDetail && (
