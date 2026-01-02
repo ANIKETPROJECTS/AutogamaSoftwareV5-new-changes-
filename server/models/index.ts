@@ -3,7 +3,7 @@ import mongoose, { Schema, Document } from 'mongoose';
 export type JobStage = 'New Lead' | 'Inspection Done' | 'Work In Progress' | 'Completed' | 'Cancelled';
 export type PaymentStatus = 'Pending' | 'Partially Paid' | 'Paid';
 export type TechnicianStatus = 'Available' | 'Busy' | 'Off';
-export type InventoryCategory = 'Elite' | 'Garware Plus' | 'Garware Premium' | 'Garware Matt';
+export type InventoryCategory = 'Elite' | 'Garware Plus' | 'Garware Premium' | 'Garware Matt' | 'Accessories';
 export type PaymentMode = 'Cash' | 'UPI' | 'Card' | 'Bank Transfer';
 
 export interface IOtherService {
@@ -324,7 +324,7 @@ const RollSchema = new Schema<IRoll>({
 
 const InventorySchema = new Schema<IInventoryItem>({
   name: { type: String, required: true },
-  category: { type: String, enum: ['Elite', 'Garware Plus', 'Garware Premium', 'Garware Matt'], required: true },
+  category: { type: String, enum: ['Elite', 'Garware Plus', 'Garware Premium', 'Garware Matt', 'Accessories'], required: true },
   quantity: { type: Number, required: true, default: 0 },
   unit: { type: String, required: true },
   minStock: { type: Number, required: true, default: 0 },
