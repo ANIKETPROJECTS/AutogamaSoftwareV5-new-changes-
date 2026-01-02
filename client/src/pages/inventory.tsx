@@ -329,60 +329,57 @@ export default function Inventory() {
                 accessoryItems.map((item: any) => (
                   <Card 
                     key={item._id}
-                    className="card-modern border transition-all hover:ring-2 hover:ring-primary/20 group"
+                    className="card-modern border transition-all hover:ring-2 hover:ring-primary/20 group h-full flex flex-col"
                   >
                     <CardHeader className="pb-2">
                       <div className="flex justify-between items-start">
                         <div>
-                          <CardTitle className="text-base">{item.name}</CardTitle>
+                          <CardTitle className="text-xl font-bold">{item.name}</CardTitle>
                           <Badge className="mt-1 bg-slate-500/20 text-slate-400">
                             {item.unit}
                           </Badge>
                         </div>
-                        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            className="h-8"
-                            onClick={() => {
-                              setEditingAccessory(item);
-                              setAccName(item.name);
-                              setAccQuantity(item.quantity.toString());
-                              setAccUnit(item.unit);
-                              setAccPrice(item.price?.toString() || '');
-                              setAccessoryDialogOpen(true);
-                            }}
-                          >
-                            <Package className="w-4 h-4 mr-1" />
-                            Edit
-                          </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            className="h-8 w-8 text-destructive"
-                            onClick={() => {
-                              if (confirm('Delete this accessory?')) {
-                                deleteAccessoryMutation.mutate(item._id);
-                              }
-                            }}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-8 w-8 text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={() => {
+                            if (confirm('Delete this accessory?')) {
+                              deleteAccessoryMutation.mutate(item._id);
+                            }
+                          }}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
                       </div>
                     </CardHeader>
-                    <CardContent>
-                      <div className="flex items-baseline justify-between">
+                    <CardContent className="flex-1 flex flex-col justify-between pt-4 space-y-6">
+                      <div className="flex items-end justify-between">
                         <div>
-                          <span className="text-3xl font-display font-bold block">{item.quantity}</span>
-                          <span className="text-sm text-muted-foreground block -mt-1">Quantity</span>
+                          <span className="text-4xl font-display font-bold block">{item.quantity}</span>
+                          <span className="text-sm font-medium text-muted-foreground block">Quantity</span>
                         </div>
                         <div className="text-right">
-                          {item.price && (
-                            <span className="text-xl font-display font-bold text-primary block">₹{item.price}</span>
-                          )}
+                          <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground block mb-1">Price</span>
+                          <span className="text-2xl font-display font-bold text-primary block">₹{item.price || 0}</span>
                         </div>
                       </div>
+                      
+                      <Button 
+                        variant="outline" 
+                        className="w-full mt-4 bg-muted/30 hover:bg-primary/10 hover:border-primary/50 transition-colors"
+                        onClick={() => {
+                          setEditingAccessory(item);
+                          setAccName(item.name);
+                          setAccQuantity(item.quantity.toString());
+                          setAccUnit(item.unit);
+                          setAccPrice(item.price?.toString() || '');
+                          setAccessoryDialogOpen(true);
+                        }}
+                      >
+                        <Package className="w-4 h-4 mr-2" />
+                        Edit Accessory
+                      </Button>
                     </CardContent>
                   </Card>
                 ))
