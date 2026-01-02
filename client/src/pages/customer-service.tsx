@@ -540,7 +540,7 @@ export default function CustomerService() {
                   </Select>
                 </div>
 
-                <Card className="border border-red-200">
+                <Card className={`border border-red-200 transition-all duration-200 ${!ppfCategory ? 'h-fit' : ''}`}>
                   <CardHeader className="py-3 cursor-pointer" onClick={() => setShowPpfSection(!showPpfSection)}>
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-base">PPF Service</CardTitle>
@@ -553,7 +553,9 @@ export default function CustomerService() {
                         <Label className="text-sm">PPF Category</Label>
                         <Select value={ppfCategory} onValueChange={(val) => {
                           setPpfCategory(val);
+                          setPpfVehicleType('');
                           setPpfWarranty('');
+                          setPpfPrice(0);
                         }}>
                           <SelectTrigger data-testid="select-ppf-category">
                             <SelectValue placeholder="Select category" />
@@ -566,57 +568,61 @@ export default function CustomerService() {
                         </Select>
                       </div>
 
-                      <div className="space-y-2">
-                        <Label className="text-sm">Vehicle Type</Label>
-                        <Select value={ppfVehicleType} onValueChange={(val) => {
-                          setPpfVehicleType(val);
-                          setPpfWarranty('');
-                        }}>
-                          <SelectTrigger data-testid="select-ppf-vehicle-type">
-                            <SelectValue placeholder="Select vehicle type" />
-                          </SelectTrigger>
-                          <SelectContent className="max-h-64 overflow-y-auto">
-                            {VEHICLE_TYPES.map((type) => (
-                              <SelectItem key={type} value={type}>{type}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
+                      {ppfCategory && (
+                        <>
+                          <div className="space-y-2">
+                            <Label className="text-sm">Vehicle Type</Label>
+                            <Select value={ppfVehicleType} onValueChange={(val) => {
+                              setPpfVehicleType(val);
+                              setPpfWarranty('');
+                            }}>
+                              <SelectTrigger data-testid="select-ppf-vehicle-type">
+                                <SelectValue placeholder="Select vehicle type" />
+                              </SelectTrigger>
+                              <SelectContent className="max-h-64 overflow-y-auto">
+                                {VEHICLE_TYPES.map((type) => (
+                                  <SelectItem key={type} value={type}>{type}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
 
-                      <div className="space-y-2">
-                        <Label className="text-sm">Warranty & Price</Label>
-                        <Select key={`${ppfCategory}-${ppfVehicleType}`} value={ppfWarranty} onValueChange={setPpfWarranty} disabled={!ppfCategory || !ppfVehicleType}>
-                          <SelectTrigger data-testid="select-ppf-warranty">
-                            <SelectValue placeholder="Select warranty" />
-                          </SelectTrigger>
-                          <SelectContent className="max-h-64 overflow-y-auto">
-                            {getAvailableWarranties().map((warranty) => {
-                              const categoryData = PPF_CATEGORIES[ppfCategory as keyof typeof PPF_CATEGORIES];
-                              const vehicleData = categoryData ? (categoryData[ppfVehicleType as keyof typeof categoryData] as Record<string, number>) : null;
-                              const price = vehicleData ? vehicleData[warranty] : null;
-                              return (
-                                <SelectItem key={warranty} value={warranty}>
-                                  {warranty} {price ? `- ₹${price.toLocaleString('en-IN')}` : ''}
-                                </SelectItem>
-                              );
-                            })}
-                          </SelectContent>
-                        </Select>
-                      </div>
+                          <div className="space-y-2">
+                            <Label className="text-sm">Warranty & Price</Label>
+                            <Select key={`${ppfCategory}-${ppfVehicleType}`} value={ppfWarranty} onValueChange={setPpfWarranty} disabled={!ppfCategory || !ppfVehicleType}>
+                              <SelectTrigger data-testid="select-ppf-warranty">
+                                <SelectValue placeholder="Select warranty" />
+                              </SelectTrigger>
+                              <SelectContent className="max-h-64 overflow-y-auto">
+                                {getAvailableWarranties().map((warranty) => {
+                                  const categoryData = PPF_CATEGORIES[ppfCategory as keyof typeof PPF_CATEGORIES];
+                                  const vehicleData = categoryData ? (categoryData[ppfVehicleType as keyof typeof categoryData] as Record<string, number>) : null;
+                                  const price = vehicleData ? vehicleData[warranty] : null;
+                                  return (
+                                    <SelectItem key={warranty} value={warranty}>
+                                      {warranty} {price ? `- ₹${price.toLocaleString('en-IN')}` : ''}
+                                    </SelectItem>
+                                  );
+                                })}
+                              </SelectContent>
+                            </Select>
+                          </div>
 
-                      {ppfPrice > 0 && (
-                        <div className="space-y-3">
-                          <div className="bg-gray-50 p-3 rounded-md border border-gray-200">
-                            <div className="flex justify-between items-center">
-                              <Label className="text-sm font-medium">PPF Price</Label>
-                              <span className="text-lg font-bold text-primary">₹{ppfPrice.toLocaleString('en-IN')}</span>
+                          {ppfPrice > 0 && (
+                            <div className="space-y-3">
+                              <div className="bg-gray-50 p-3 rounded-md border border-gray-200">
+                                <div className="flex justify-between items-center">
+                                  <Label className="text-sm font-medium">PPF Price</Label>
+                                  <span className="text-lg font-bold text-primary">₹{ppfPrice.toLocaleString('en-IN')}</span>
+                                </div>
+                              </div>
+                              <div className="w-full">
+                                <Label className="text-xs">Discount</Label>
+                                <Input type="number" value={ppfDiscount} onChange={(e) => setPpfDiscount(e.target.value)} />
+                              </div>
                             </div>
-                          </div>
-                          <div className="w-full">
-                            <Label className="text-xs">Discount</Label>
-                            <Input type="number" value={ppfDiscount} onChange={(e) => setPpfDiscount(e.target.value)} />
-                          </div>
-                        </div>
+                          )}
+                        </>
                       )}
                     </CardContent>
                   )}
