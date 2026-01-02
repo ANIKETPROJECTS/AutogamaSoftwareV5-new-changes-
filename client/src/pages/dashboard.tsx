@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { MetricCard } from "@/components/metric-card";
 import { useAuth } from "@/contexts/auth-context";
 import { usePageContext } from "@/contexts/page-context";
+import { useLocation } from "wouter";
 import {
   IndianRupee,
   Package,
@@ -179,6 +180,8 @@ export default function Dashboard() {
 
   const activeJobs = jobs
     .filter((j: any) => j.stage !== "Completed" && j.stage !== "Cancelled");
+
+  const [, setLocation] = useLocation();
 
   const todaySales = jobs.reduce((sum: number, job: any) => {
     const jobDate = new Date(job.createdAt);
@@ -395,117 +398,68 @@ export default function Dashboard() {
       </div>
 
       {/* Active Jobs Table */}
-      <Card
-        className="bg-gradient-to-br from-white to-slate-50 border border-red-300 rounded-xl overflow-hidden shadow-sm hover:shadow-lg hover:border-red-400 transition-all"
-        data-testid="card-active-jobs"
-      >
-        <CardHeader className="pb-4 border-b border-slate-200 bg-gradient-to-r from-primary/5 to-transparent">
-          <CardTitle className="flex items-center gap-3 text-base text-slate-900 font-semibold">
-            <Clock className="w-5 h-5 text-primary" />
-            Active Jobs
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="pt-6">
-          {activeJobs.length > 0 ? (
-            <div className="space-y-4">
-              {activeJobs.map((job: any, index: number) => (
-                <Link key={job.id || job._id || `job-${index}`} href="/funnel">
-                  <div
-                    className="p-4 rounded-lg bg-gradient-to-r from-slate-50 to-white hover:from-slate-100 hover:to-slate-50 transition-all border border-slate-200 hover:border-slate-300 cursor-pointer mb-4"
-                    data-testid={`job-row-${job.id}`}
-                  >
-                  {/* Header with customer and stage */}
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex-1">
-                      <p className="font-semibold text-slate-900 text-sm">{job.customerName}</p>
-                      <p className="text-xs text-slate-600 mt-0.5">{job.vehicleName} • {job.plateNumber}</p>
-                    </div>
-                    <Badge
-                      variant="outline"
-                      className="bg-white text-primary border-primary/50 text-xs font-semibold ml-2 flex-shrink-0"
+      <div className="grid gap-6 lg:grid-cols-2">
+        <Card
+          className="bg-gradient-to-br from-white to-slate-50 border border-red-300 rounded-xl overflow-hidden shadow-sm hover:shadow-lg hover:border-red-400 transition-all"
+          data-testid="card-active-jobs"
+        >
+          <CardHeader className="pb-4 border-b border-slate-200 bg-gradient-to-r from-primary/5 to-transparent">
+            <CardTitle className="flex items-center gap-3 text-base text-slate-900 font-semibold">
+              <Clock className="w-5 h-5 text-primary" />
+              Active Jobs
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-6">
+            {activeJobs.length > 0 ? (
+              <div className="space-y-4">
+                {activeJobs.slice(0, 5).map((job: any, index: number) => (
+                  <Link key={job.id || job._id || `job-${index}`} href="/funnel">
+                    <div
+                      className="p-4 rounded-lg bg-gradient-to-r from-slate-50 to-white hover:from-slate-100 hover:to-slate-50 transition-all border border-slate-200 hover:border-slate-300 cursor-pointer mb-4"
                     >
-                      {job.stage}
-                    </Badge>
-                  </div>
-
-                  {/* Job details grid */}
-                  <div className="grid grid-cols-2 gap-3 text-xs">
-                    {job.technicianName && (
-                      <div>
-                        <p className="text-slate-600">Technician</p>
-                        <p className="font-medium text-slate-900">{job.technicianName}</p>
-                      </div>
-                    )}
-                    <div>
-                      <p className="text-slate-600">Payment Status</p>
-                      <p className="font-medium text-slate-900">{job.paymentStatus}</p>
-                    </div>
-                    {/* Roll details */}
-                    {(job.materials?.some((m: any) => m.rollDetails?.length > 0) || job.serviceItems?.some((item: any) => item.rollName)) && (
-                      <div className="col-span-2 mt-2 pt-2 border-t border-slate-100">
-                        <p className="text-slate-600 mb-1">Materials Used</p>
-                        <div className="space-y-1">
-                          {/* Display from serviceItems (old way) */}
-                          {job.serviceItems
-                            ?.filter((item: any) => item.rollName)
-                            .map((item: any, i: number) => (
-                              <div key={`svc-${i}`} className="flex justify-between items-center bg-slate-50 p-1.5 rounded text-[10px]">
-                                <span className="font-medium text-slate-700">{item.rollName}</span>
-                                <span className="text-slate-900 font-bold">{item.sizeUsed || 0} sqft</span>
-                              </div>
-                            ))}
-                          {/* Display from materials.rollDetails (new way) */}
-                          {job.materials
-                            ?.filter((m: any) => m.rollDetails?.length > 0)
-                            .map((m: any, mi: number) => (
-                              <div key={`mat-${mi}`} className="space-y-1">
-                                {m.rollDetails.map((rd: any, rdi: number) => (
-                                  <div key={`rd-${mi}-${rdi}`} className="flex justify-between items-center bg-red-50 p-1.5 rounded text-[10px]">
-                                    <span className="font-medium text-red-700">{m.name}: {rd.rollName}</span>
-                                    <span className="text-red-900 font-bold">{rd.quantityUsed} sqft</span>
-                                  </div>
-                                ))}
-                              </div>
-                            ))}
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <p className="font-semibold text-slate-900 text-sm">{job.customerName}</p>
+                          <p className="text-xs text-slate-600 mt-0.5">{job.vehicleName}</p>
                         </div>
+                        <Badge variant="outline" className="text-primary border-primary/50 text-[10px]">
+                          {job.stage}
+                        </Badge>
                       </div>
-                    )}
-                    <div>
-                      <p className="text-slate-600">Total Amount</p>
-                      <p className="font-medium text-slate-900">₹{job.totalAmount}</p>
                     </div>
-                    <div>
-                      <p className="text-slate-600">Paid</p>
-                      <p className="font-medium text-slate-900">₹{job.paidAmount}</p>
-                    </div>
-                  </div>
+                  </Link>
+                ))}
+                {activeJobs.length > 5 && (
+                  <Button variant="ghost" className="w-full text-xs" onClick={() => setLocation('/funnel')}>
+                    View all active jobs
+                  </Button>
+                )}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-slate-500">
+                <p className="font-medium">No active jobs</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
-                  {/* Progress bar if partially paid */}
-                  {job.totalAmount > 0 && job.paidAmount > 0 && job.paidAmount < job.totalAmount && (
-                    <div className="mt-3 pt-3 border-t border-slate-200">
-                      <div className="flex items-center justify-between mb-1">
-                        <p className="text-xs text-slate-600">Payment Progress</p>
-                        <p className="text-xs font-semibold text-slate-900">{Math.round((job.paidAmount / job.totalAmount) * 100)}%</p>
-                      </div>
-                      <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-green-500 rounded-full transition-all"
-                          style={{ width: `${(job.paidAmount / job.totalAmount) * 100}%` }}
-                        />
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </Link>
-            ))}
-            </div>
-          ) : (
-            <div className="text-center py-8 text-slate-500">
-              <p className="font-medium">No active jobs</p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+        <Card
+          className="bg-gradient-to-br from-white to-slate-50 border border-red-300 rounded-xl overflow-hidden shadow-sm hover:shadow-lg hover:border-red-400 transition-all"
+        >
+          <CardHeader className="pb-4 border-b border-slate-200 bg-gradient-to-r from-primary/5 to-transparent">
+            <CardTitle className="flex items-center gap-3 text-base text-slate-900 font-semibold">
+              <ShoppingBag className="w-5 h-5 text-primary" />
+              Quick Accessories Sale
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-6">
+            <p className="text-sm text-slate-600 mb-4">Click below to record an accessory sale and auto-create inventory items.</p>
+            <Button className="w-full" onClick={() => setLocation('/accessories')}>
+              Go to Accessories Section
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

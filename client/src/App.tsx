@@ -9,6 +9,7 @@ import { Layout } from "@/components/layout";
 import Login from "@/pages/login";
 import Dashboard from "@/pages/dashboard";
 import ServiceFunnel from "@/pages/funnel";
+import Accessories from "@/pages/accessories";
 import Customers from "@/pages/customers";
 import CustomerRegistration from "@/pages/register";
 import RegisteredCustomers from "@/pages/registered-customers";
@@ -39,6 +40,7 @@ function ProtectedRoutes() {
           <Route path="/technicians" component={Technicians} />
           <Route path="/invoices" component={Invoices} />
           <Route path="/inventory" component={Inventory} />
+          <Route path="/accessories" component={Accessories} />
           <Route path="/appointments" component={Appointments} />
           <Route path="/price-inquiries" component={PriceInquiries} />
           <Route path="/settings" component={Settings} />
