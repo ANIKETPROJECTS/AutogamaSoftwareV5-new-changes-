@@ -157,12 +157,12 @@ export default function CustomerDetails() {
                             </div>
                             {vehicle.otherServices && vehicle.otherServices.length > 0 && (
                               <div className="mt-2 space-y-2">
-                                {vehicle.otherServices.some((s: any) => s.vehicleType !== "Accessory") && (
+                                {vehicle.otherServices.some((s: any) => s.vehicleType?.toLowerCase() !== "accessory") && (
                                   <div>
                                     <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-1">Services</p>
                                     <div className="flex flex-wrap gap-1">
                                       {vehicle.otherServices
-                                        .filter((s: any) => s.vehicleType !== "Accessory")
+                                        .filter((s: any) => s.vehicleType?.toLowerCase() !== "accessory")
                                         .map((service: any, idx: number) => (
                                           <Badge key={idx} variant="outline" className="text-[9px] bg-blue-50 text-blue-700 border-blue-100 py-0 h-4">
                                             {service.name}
@@ -171,12 +171,12 @@ export default function CustomerDetails() {
                                     </div>
                                   </div>
                                 )}
-                                {vehicle.otherServices.some((s: any) => s.vehicleType === "Accessory") && (
+                                {vehicle.otherServices.some((s: any) => s.vehicleType?.toLowerCase() === "accessory") && (
                                   <div>
                                     <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-1">Accessories</p>
                                     <div className="flex flex-wrap gap-1">
                                       {vehicle.otherServices
-                                        .filter((s: any) => s.vehicleType === "Accessory")
+                                        .filter((s: any) => s.vehicleType?.toLowerCase() === "accessory")
                                         .map((acc: any, idx: number) => (
                                           <Badge key={idx} variant="outline" className="text-[9px] bg-emerald-50 text-emerald-700 border-emerald-100 py-0 h-4">
                                             {acc.name}
