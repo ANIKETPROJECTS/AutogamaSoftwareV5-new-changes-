@@ -560,20 +560,26 @@ export default function Inventory() {
             {!selectedHistoryItem?.finishedRolls || selectedHistoryItem.finishedRolls.length === 0 ? (
               <p className="text-center py-8 text-muted-foreground">No finished rolls in history.</p>
             ) : (
-              <div className="space-y-3">
-                {selectedHistoryItem.finishedRolls.map((roll: any, idx: number) => (
-                  <div key={idx} className="p-3 bg-muted/30 border rounded-lg flex justify-between items-center">
-                    <div>
-                      <p className="font-bold text-sm">{roll.name}</p>
-                      <div className="flex gap-4 text-[10px] text-muted-foreground">
-                        <span>Total: {roll.squareFeet?.toFixed(1)} sqft</span>
-                        <span>Finished: {roll.finishedAt ? new Date(roll.finishedAt).toLocaleDateString() : 'N/A'}</span>
+                  <div className="space-y-3">
+                    {[...(selectedHistoryItem.finishedRolls || [])]
+                      .sort((a: any, b: any) => {
+                        const dateA = a.finishedAt ? new Date(a.finishedAt).getTime() : 0;
+                        const dateB = b.finishedAt ? new Date(b.finishedAt).getTime() : 0;
+                        return dateB - dateA;
+                      })
+                      .map((roll: any, idx: number) => (
+                      <div key={idx} className="p-3 bg-muted/30 border rounded-lg flex justify-between items-center">
+                        <div>
+                          <p className="font-bold text-sm">{roll.name}</p>
+                          <div className="flex gap-4 text-[10px] text-muted-foreground">
+                            <span>Total: {roll.squareFeet?.toFixed(1)} sqft</span>
+                            <span>Finished: {roll.finishedAt ? new Date(roll.finishedAt).toLocaleDateString() : 'N/A'}</span>
+                          </div>
+                        </div>
+                        <Badge variant="outline" className="bg-orange-500/10 text-orange-600 border-orange-200">Finished</Badge>
                       </div>
-                    </div>
-                    <Badge variant="outline">Finished</Badge>
+                    ))}
                   </div>
-                ))}
-              </div>
             )}
           </div>
         </DialogContent>

@@ -417,9 +417,6 @@ export class MongoStorage implements IStorage {
       // Mark as finished if depleted
       if ((roll.remaining_meters || 0) <= 0 && (roll.remaining_sqft || 0) <= 0) {
         console.log(`[Storage] Archiving roll in FIFO: ${roll.name}`);
-        // Move to finishedRolls
-        if (!item.finishedRolls) item.finishedRolls = [];
-        
         // Use toObject() to get a clean data object if it's a mongoose document
         const rollObj = (roll as any).toObject ? (roll as any).toObject() : { ...roll };
         const finishedRoll = {
@@ -428,7 +425,7 @@ export class MongoStorage implements IStorage {
           finishedAt: new Date()
         };
         
-        // Use $push to ensure atomic update and persistence
+        // Use atomic update to ensure persistence
         await Inventory.findByIdAndUpdate(item._id, {
           $push: { finishedRolls: finishedRoll },
           $pull: { rolls: { _id: roll._id } }
