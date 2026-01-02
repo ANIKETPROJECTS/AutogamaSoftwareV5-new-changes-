@@ -22,8 +22,18 @@ import {
   ArrowUpDown,
   CreditCard,
 } from "lucide-react";
-import { useState, useRef } from "react";
+import { useState, useRef, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { format } from "date-fns";
+import { Calendar as CalendarIcon } from "lucide-react";
+import { DateRange } from "react-day-picker";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 import {
   Select,
   SelectContent,
@@ -38,6 +48,7 @@ export default function Invoices() {
   const [filterStatus, setFilterStatus] = useState<"all" | "paid" | "unpaid">("all");
   const [filterBusiness, setFilterBusiness] = useState<string>("all");
   const [filterPaymentMode, setFilterPaymentMode] = useState<string>("all");
+  const [dateRange, setDateRange] = useState<DateRange | undefined>();
   const [selectedInvoice, setSelectedInvoice] = useState<any>(null);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
@@ -89,7 +100,12 @@ export default function Invoices() {
       (filterBusiness === "Auto Gamma" && !invoice.businessId?.includes("business_2") && !invoice.business?.includes("Business 2")) ||
       (filterBusiness === "Business 2" && (invoice.businessId?.includes("business_2") || invoice.business?.includes("Business 2")));
     
-    return matchesSearch && matchesStatus && matchesPaymentMode && matchesBusiness;
+    const matchesDate = !dateRange?.from || !dateRange?.to || (
+      new Date(invoice.createdAt) >= dateRange.from && 
+      new Date(invoice.createdAt) <= new Date(new Date(dateRange.to).setHours(23, 59, 59, 999))
+    );
+    
+    return matchesSearch && matchesStatus && matchesPaymentMode && matchesBusiness && matchesDate;
   });
 
   filteredInvoices = [...filteredInvoices].sort((a: any, b: any) => {
@@ -516,6 +532,59 @@ export default function Invoices() {
                 <SelectItem value="amount-asc">Lowest Amount</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  id="date"
+                  variant={"outline"}
+                  size="sm"
+                  className={cn(
+                    "w-[260px] justify-start text-left font-normal h-9 border-slate-300",
+                    !dateRange && "text-muted-foreground"
+                  )}
+                  data-testid="button-date-range-filter"
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {dateRange?.from ? (
+                    dateRange.to ? (
+                      <>
+                        {format(dateRange.from, "LLL dd, y")} -{" "}
+                        {format(dateRange.to, "LLL dd, y")}
+                      </>
+                    ) : (
+                      format(dateRange.from, "LLL dd, y")
+                    )
+                  ) : (
+                    <span>Filter by date range</span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  initialFocus
+                  mode="range"
+                  defaultMonth={dateRange?.from}
+                  selected={dateRange}
+                  onSelect={setDateRange}
+                  numberOfMonths={2}
+                />
+                {dateRange && (
+                  <div className="p-2 border-t border-slate-100 flex justify-end">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => setDateRange(undefined)}
+                      className="text-xs h-7"
+                    >
+                      Clear Range
+                    </Button>
+                  </div>
+                )}
+              </PopoverContent>
+            </Popover>
           </div>
         </div>
       </div>
