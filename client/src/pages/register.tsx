@@ -231,7 +231,7 @@ const OTHER_SERVICES = {
 
 const validatePhone = (phone: string): boolean => {
   // Remove all non-digit characters
-  const digitsOnly = phone.replace(/\D/g, '');
+  const digitsOnly = phone.replace(/\D/g, "");
   // Check if exactly 10 digits
   return digitsOnly.length === 10;
 };
@@ -243,34 +243,138 @@ const validateEmail = (email: string): boolean => {
 };
 
 const VEHICLE_MAKES = [
-  "Other", "Toyota", "Honda", "Maruti Suzuki", "Hyundai", "Tata", "Mahindra", "Kia", "MG", "Volkswagen", "Skoda", "BMW", "Mercedes-Benz", "Audi", "Land Rover", "Jaguar", "Volvo", "Porsche", "Lexus", "Jeep"
+  "Other",
+  "Toyota",
+  "Honda",
+  "Maruti Suzuki",
+  "Hyundai",
+  "Tata",
+  "Mahindra",
+  "Kia",
+  "MG",
+  "Volkswagen",
+  "Skoda",
+  "BMW",
+  "Mercedes-Benz",
+  "Audi",
+  "Land Rover",
+  "Jaguar",
+  "Volvo",
+  "Porsche",
+  "Lexus",
+  "Jeep",
 ];
 
 const VEHICLE_MODELS: Record<string, string[]> = {
-  "Toyota": ["Fortuner", "Innova", "Innova Crysta", "Creta", "Fortuner GR-S", "Vios", "Yaris", "Glanza", "Urban Cruiser", "Rumion"],
-  "Honda": ["City", "Accord", "Civic", "CR-V", "Jazz", "Amaze", "WR-V", "Elevate", "BR-V"],
-  "Maruti Suzuki": ["Swift", "Alto", "WagonR", "Celerio", "Ertiga", "XL5", "Vitara Brezza", "S-Cross", "Jimny", "Baleno"],
-  "Hyundai": ["Creta", "Tucson", "Kona", "Venue", "i20", "i10", "Grand i10 Nios", "Aura", "Alcazar", "Santa Fe"],
-  "Tata": ["Nexon", "Harrier", "Safari", "Punch", "Altroz", "Tigor", "Tiago", "Hexa", "Nexon EV"],
-  "Mahindra": ["XUV500", "XUV700", "Scorpio", "Bolero", "TUV300", "Xylo", "Quanto", "KUV100"],
-  "Kia": ["Seltos", "Sonet", "Niro", "Carens", "EV6"],
-  "MG": ["Hector", "Astor", "ZS EV", "Gloster", "Comet"],
-  "Volkswagen": ["Polo", "Vento", "Tiguan", "Taigun", "Passat"],
-  "Skoda": ["Slavia", "Superb", "Karoq", "Octavia"],
-  "BMW": ["3 Series", "5 Series", "7 Series", "X1", "X3", "X5", "X7", "Z4"],
-  "Mercedes-Benz": ["C-Class", "E-Class", "S-Class", "GLA", "GLC", "GLE", "GLS", "A-Class"],
-  "Audi": ["A4", "A6", "A8", "Q3", "Q5", "Q7", "Q8"],
+  Toyota: [
+    "Fortuner",
+    "Innova",
+    "Innova Crysta",
+    "Creta",
+    "Fortuner GR-S",
+    "Vios",
+    "Yaris",
+    "Glanza",
+    "Urban Cruiser",
+    "Rumion",
+  ],
+  Honda: [
+    "City",
+    "Accord",
+    "Civic",
+    "CR-V",
+    "Jazz",
+    "Amaze",
+    "WR-V",
+    "Elevate",
+    "BR-V",
+  ],
+  "Maruti Suzuki": [
+    "Swift",
+    "Alto",
+    "WagonR",
+    "Celerio",
+    "Ertiga",
+    "XL5",
+    "Vitara Brezza",
+    "S-Cross",
+    "Jimny",
+    "Baleno",
+  ],
+  Hyundai: [
+    "Creta",
+    "Tucson",
+    "Kona",
+    "Venue",
+    "i20",
+    "i10",
+    "Grand i10 Nios",
+    "Aura",
+    "Alcazar",
+    "Santa Fe",
+  ],
+  Tata: [
+    "Nexon",
+    "Harrier",
+    "Safari",
+    "Punch",
+    "Altroz",
+    "Tigor",
+    "Tiago",
+    "Hexa",
+    "Nexon EV",
+  ],
+  Mahindra: [
+    "XUV500",
+    "XUV700",
+    "Scorpio",
+    "Bolero",
+    "TUV300",
+    "Xylo",
+    "Quanto",
+    "KUV100",
+  ],
+  Kia: ["Seltos", "Sonet", "Niro", "Carens", "EV6"],
+  MG: ["Hector", "Astor", "ZS EV", "Gloster", "Comet"],
+  Volkswagen: ["Polo", "Vento", "Tiguan", "Taigun", "Passat"],
+  Skoda: ["Slavia", "Superb", "Karoq", "Octavia"],
+  BMW: ["3 Series", "5 Series", "7 Series", "X1", "X3", "X5", "X7", "Z4"],
+  "Mercedes-Benz": [
+    "C-Class",
+    "E-Class",
+    "S-Class",
+    "GLA",
+    "GLC",
+    "GLE",
+    "GLS",
+    "A-Class",
+  ],
+  Audi: ["A4", "A6", "A8", "Q3", "Q5", "Q7", "Q8"],
   "Land Rover": ["Range Rover", "Range Rover Evoque", "Discovery", "Defender"],
-  "Jaguar": ["XE", "XF", "F-PACE", "E-PACE"],
-  "Volvo": ["S60", "S90", "XC60", "XC90", "V90"],
-  "Porsche": ["911", "Cayenne", "Panamera", "Macan"],
-  "Lexus": ["LX", "RX", "NX", "ES", "CT"],
-  "Jeep": ["Wrangler", "Compass", "Meridian", "Cherokee"],
-  "Other": ["Other"]
+  Jaguar: ["XE", "XF", "F-PACE", "E-PACE"],
+  Volvo: ["S60", "S90", "XC60", "XC90", "V90"],
+  Porsche: ["911", "Cayenne", "Panamera", "Macan"],
+  Lexus: ["LX", "RX", "NX", "ES", "CT"],
+  Jeep: ["Wrangler", "Compass", "Meridian", "Cherokee"],
+  Other: ["Other"],
 };
 
 const VEHICLE_COLORS = [
-  "White", "Silver", "Grey", "Black", "Red", "Blue", "Brown", "Beige", "Golden", "Orange", "Yellow", "Green", "Maroon", "Purple", "Other"
+  "White",
+  "Silver",
+  "Grey",
+  "Black",
+  "Red",
+  "Blue",
+  "Brown",
+  "Beige",
+  "Golden",
+  "Orange",
+  "Yellow",
+  "Green",
+  "Maroon",
+  "Purple",
+  "Other",
 ];
 
 export default function CustomerRegistration() {
@@ -278,7 +382,12 @@ export default function CustomerRegistration() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [errors, setErrors] = useState<{ phone?: string; email?: string; referrerName?: string; referrerPhone?: string }>({});
+  const [errors, setErrors] = useState<{
+    phone?: string;
+    email?: string;
+    referrerName?: string;
+    referrerPhone?: string;
+  }>({});
 
   // Customer info
   const [customerData, setCustomerData] = useState({
@@ -299,7 +408,11 @@ export default function CustomerRegistration() {
     tempAccessoryCategory: "",
     tempAccessoryName: "",
     accessoryQuantity: 1,
-    selectedOtherServices: [] as Array<{ name: string; vehicleType: string; price: number }>,
+    selectedOtherServices: [] as Array<{
+      name: string;
+      vehicleType: string;
+      price: number;
+    }>,
     tempServiceName: "",
     tempServiceVehicleType: "",
   });
@@ -318,18 +431,27 @@ export default function CustomerRegistration() {
     image: "" as string | undefined,
   });
 
+  const [customMakes, setCustomMakes] = useState<string[]>([]);
+  const [customModels, setCustomModels] = useState<Record<string, string[]>>({});
+
   const [vehicleImagePreview, setVehicleImagePreview] = useState<string>("");
 
   const { data: inventory = [] } = useQuery<any[]>({
     queryKey: ["/api/inventory"],
   });
 
-  const accessoryInventory = inventory.filter(item => item.category === 'Accessories');
-  
-  const accessoryCategories = Array.from(new Set(accessoryInventory.map(item => item.unit))).filter(Boolean);
-  
-  const filteredAccessories = accessoryInventory.filter(item => 
-    !customerData.tempAccessoryCategory || item.unit === customerData.tempAccessoryCategory
+  const accessoryInventory = inventory.filter(
+    (item) => item.category === "Accessories",
+  );
+
+  const accessoryCategories = Array.from(
+    new Set(accessoryInventory.map((item) => item.unit)),
+  ).filter(Boolean);
+
+  const filteredAccessories = accessoryInventory.filter(
+    (item) =>
+      !customerData.tempAccessoryCategory ||
+      item.unit === customerData.tempAccessoryCategory,
   );
 
   const createCustomerMutation = useMutation({
@@ -358,74 +480,113 @@ export default function CustomerRegistration() {
   };
 
   const handleSubmit = () => {
-    const selectedService = customerData.ppfCategory 
+    const selectedService = customerData.ppfCategory
       ? `${customerData.ppfCategory} - ${customerData.ppfWarranty}`
-      : '';
-    
+      : "";
+
     // Calculate total service cost (PPF + All selected Other Services)
     let totalServiceCost = 0;
     if (customerData.ppfPrice > 0) {
       totalServiceCost += customerData.ppfPrice;
     }
-    customerData.selectedOtherServices.forEach(service => {
+    customerData.selectedOtherServices.forEach((service) => {
       if (service.price > 0) {
         totalServiceCost += service.price;
       }
     });
-    
-    const otherServicesStr = customerData.selectedOtherServices.length > 0
-      ? customerData.selectedOtherServices.map(s => s.name).join(', ')
-      : '';
-    
-    const servicesList = [selectedService, otherServicesStr].filter(Boolean).join(' + ') || undefined;
-    
-    createCustomerMutation.mutate({
-      name: customerData.name,
-      phone: customerData.phone,
-      email: customerData.email || undefined,
-      address: `${customerData.address}, ${customerData.city}, ${customerData.district}, ${customerData.state}`,
-      service: servicesList,
-      serviceCost: totalServiceCost,
-      referrerName: customerData.referrerName || undefined,
-      referrerPhone: customerData.referrerPhone || undefined,
-      vehicles: [
-        {
-          make: vehicleData.make === "Other" ? vehicleData.otherMake : vehicleData.make,
-          model: (vehicleData.make === "Other" || vehicleData.model === "Other") ? vehicleData.otherModel : vehicleData.model,
-          year: vehicleData.year,
-          plateNumber: vehicleData.plateNumber,
-          color: vehicleData.color,
-          vin: vehicleData.chassisNumber,
-          image: vehicleData.image,
-          ppfCategory: customerData.ppfCategory,
-          ppfVehicleType: customerData.ppfVehicleType,
-          ppfWarranty: customerData.ppfWarranty,
-          ppfPrice: customerData.ppfPrice,
-          laborCost: 0,
-          otherServices: customerData.selectedOtherServices,
+
+    const otherServicesStr =
+      customerData.selectedOtherServices.length > 0
+        ? customerData.selectedOtherServices.map((s) => s.name).join(", ")
+        : "";
+
+    const servicesList =
+      [selectedService, otherServicesStr].filter(Boolean).join(" + ") ||
+      undefined;
+
+    createCustomerMutation.mutate(
+      {
+        name: customerData.name,
+        phone: customerData.phone,
+        email: customerData.email || undefined,
+        address: `${customerData.address}, ${customerData.city}, ${customerData.district}, ${customerData.state}`,
+        service: servicesList,
+        serviceCost: totalServiceCost,
+        referrerName: customerData.referrerName || undefined,
+        referrerPhone: customerData.referrerPhone || undefined,
+        vehicles: [
+          {
+            make:
+              vehicleData.make === "Other"
+                ? vehicleData.otherMake
+                : vehicleData.make,
+            model:
+              vehicleData.make === "Other" || vehicleData.model === "Other"
+                ? vehicleData.otherModel
+                : vehicleData.model,
+            year: vehicleData.year,
+            plateNumber: vehicleData.plateNumber,
+            color: vehicleData.color,
+            vin: vehicleData.chassisNumber,
+            image: vehicleData.image,
+            ppfCategory: customerData.ppfCategory,
+            ppfVehicleType: customerData.ppfVehicleType,
+            ppfWarranty: customerData.ppfWarranty,
+            ppfPrice: customerData.ppfPrice,
+            laborCost: 0,
+            otherServices: customerData.selectedOtherServices,
+          },
+        ],
+      },
+      {
+        onSuccess: () => {
+          // Add custom make/model to lists if they were used
+          if (vehicleData.make === "Other" && vehicleData.otherMake) {
+            setCustomMakes(prev => [...new Set([...prev, vehicleData.otherMake])]);
+            if (vehicleData.otherModel) {
+              setCustomModels(prev => ({
+                ...prev,
+                [vehicleData.otherMake]: [...new Set([...(prev[vehicleData.otherMake] || []), vehicleData.otherModel])]
+              }));
+            }
+          } else if (vehicleData.model === "Other" && vehicleData.otherModel) {
+            setCustomModels(prev => ({
+              ...prev,
+              [vehicleData.make]: [...new Set([...(prev[vehicleData.make] || []), vehicleData.otherModel])]
+            }));
+          }
+          queryClient.invalidateQueries({ queryKey: ["customers"] });
+          toast({ title: "Customer registered successfully!" });
+          setLocation("/funnel");
         },
-      ],
-    }, {
-      onError: (error: any) => {
-        const message = error?.message || "Failed to register customer";
-        toast({ 
-          title: "Registration Failed", 
-          description: message,
-          variant: "destructive" 
-        });
-      }
-    });
+        onError: (error: any) => {
+          const message = error?.message || "Failed to register customer";
+          toast({
+            title: "Registration Failed",
+            description: message,
+            variant: "destructive",
+          });
+        },
+      },
+    );
   };
 
   const validateStep1 = async () => {
-    const newErrors: { phone?: string; email?: string; referrerName?: string; referrerPhone?: string } = {};
-    
+    const newErrors: {
+      phone?: string;
+      email?: string;
+      referrerName?: string;
+      referrerPhone?: string;
+    } = {};
+
     if (!validatePhone(customerData.phone)) {
       newErrors.phone = "Please enter a valid 10-digit mobile number";
     } else {
       // Check if phone number already exists
       try {
-        const response = await fetch(`/api/customers/check-phone/${customerData.phone}`);
+        const response = await fetch(
+          `/api/customers/check-phone/${customerData.phone}`,
+        );
         const data = await response.json();
         if (data.exists) {
           newErrors.phone = "This mobile number is already registered";
@@ -434,7 +595,7 @@ export default function CustomerRegistration() {
         console.error("Error checking phone number:", error);
       }
     }
-    
+
     if (!validateEmail(customerData.email)) {
       newErrors.email = "Please enter a valid email address";
     }
@@ -443,11 +604,14 @@ export default function CustomerRegistration() {
       if (!customerData.referrerName) {
         newErrors.referrerName = "Please enter referrer's name";
       }
-      if (!customerData.referrerPhone || !validatePhone(customerData.referrerPhone)) {
+      if (
+        !customerData.referrerPhone ||
+        !validatePhone(customerData.referrerPhone)
+      ) {
         newErrors.referrerPhone = "Please enter valid 10-digit phone number";
       }
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -456,13 +620,19 @@ export default function CustomerRegistration() {
     if (await validateStep1()) {
       // Pre-fill vehicle type from PPF selection in step 2
       if (customerData.ppfVehicleType) {
-        setVehicleData({ ...vehicleData, vehicleType: customerData.ppfVehicleType });
+        setVehicleData({
+          ...vehicleData,
+          vehicleType: customerData.ppfVehicleType,
+        });
       }
       setStep(2);
     }
   };
 
-  const canProceedStep1 = customerData.name && customerData.phone && validatePhone(customerData.phone);
+  const canProceedStep1 =
+    customerData.name &&
+    customerData.phone &&
+    validatePhone(customerData.phone);
   const canProceedStep2 =
     vehicleData.make && vehicleData.model && vehicleData.plateNumber;
 
@@ -480,7 +650,9 @@ export default function CustomerRegistration() {
                 <User className="w-5 h-5 text-primary" />
                 Customer Information
               </CardTitle>
-              <p className="text-sm text-slate-600 mt-2">Provide your personal details and service preferences</p>
+              <p className="text-sm text-slate-600 mt-2">
+                Provide your personal details and service preferences
+              </p>
             </CardHeader>
             <CardContent className="space-y-6 pt-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -506,14 +678,19 @@ export default function CustomerRegistration() {
                         ...customerData,
                         phone: e.target.value,
                       });
-                      if (errors.phone) setErrors({ ...errors, phone: undefined });
+                      if (errors.phone)
+                        setErrors({ ...errors, phone: undefined });
                     }}
                     placeholder="10-digit mobile number"
                     maxLength={10}
                     data-testid="input-mobile"
-                    className={errors.phone ? "border-red-500" : "border-slate-300"}
+                    className={
+                      errors.phone ? "border-red-500" : "border-slate-300"
+                    }
                   />
-                  {errors.phone && <p className="text-sm text-red-500">{errors.phone}</p>}
+                  {errors.phone && (
+                    <p className="text-sm text-red-500">{errors.phone}</p>
+                  )}
                 </div>
 
                 <div className="space-y-6">
@@ -526,13 +703,18 @@ export default function CustomerRegistration() {
                         ...customerData,
                         email: e.target.value,
                       });
-                      if (errors.email) setErrors({ ...errors, email: undefined });
+                      if (errors.email)
+                        setErrors({ ...errors, email: undefined });
                     }}
                     placeholder="your@email.com (optional)"
                     data-testid="input-email"
-                    className={errors.email ? "border-red-500" : "border-slate-300"}
+                    className={
+                      errors.email ? "border-red-500" : "border-slate-300"
+                    }
                   />
-                  {errors.email && <p className="text-sm text-red-500">{errors.email}</p>}
+                  {errors.email && (
+                    <p className="text-sm text-red-500">{errors.email}</p>
+                  )}
                 </div>
 
                 <div className="space-y-6">
@@ -543,25 +725,41 @@ export default function CustomerRegistration() {
                       setCustomerData({
                         ...customerData,
                         referralSource: value,
-                        referrerName: value === "Friend/Family" ? customerData.referrerName : "",
-                        referrerPhone: value === "Friend/Family" ? customerData.referrerPhone : "",
+                        referrerName:
+                          value === "Friend/Family"
+                            ? customerData.referrerName
+                            : "",
+                        referrerPhone:
+                          value === "Friend/Family"
+                            ? customerData.referrerPhone
+                            : "",
                       })
                     }
                   >
-                    <SelectTrigger className="border-slate-300" data-testid="select-referral">
+                    <SelectTrigger
+                      className="border-slate-300"
+                      data-testid="select-referral"
+                    >
                       <SelectValue placeholder="Select referral source" />
                     </SelectTrigger>
-                    <SelectContent position="popper" className="max-h-60 w-[var(--radix-select-trigger-width)]">
+                    <SelectContent
+                      position="popper"
+                      className="max-h-60 w-[var(--radix-select-trigger-width)]"
+                    >
                       <div className="p-2 sticky top-0 bg-white z-10 border-b">
                         <Input
                           placeholder="Search..."
                           className="h-8 text-sm"
                           onChange={(e) => {
                             const search = e.target.value.toLowerCase();
-                            const items = e.target.closest('[role="listbox"]')?.querySelectorAll('[role="option"]');
+                            const items = e.target
+                              .closest('[role="listbox"]')
+                              ?.querySelectorAll('[role="option"]');
                             items?.forEach((item) => {
-                              const text = item.textContent?.toLowerCase() || "";
-                              (item as HTMLElement).style.display = text.includes(search) ? "flex" : "none";
+                              const text =
+                                item.textContent?.toLowerCase() || "";
+                              (item as HTMLElement).style.display =
+                                text.includes(search) ? "flex" : "none";
                             });
                           }}
                           onKeyDown={(e) => e.stopPropagation()}
@@ -587,15 +785,24 @@ export default function CustomerRegistration() {
                             ...customerData,
                             referrerName: e.target.value,
                           });
-                          if (errors.referrerName) setErrors({ ...errors, referrerName: undefined });
+                          if (errors.referrerName)
+                            setErrors({ ...errors, referrerName: undefined });
                         }}
                         placeholder="Enter name of the person who referred you"
                         data-testid="input-referrer-name"
-                        className={errors.referrerName ? "border-red-500" : "border-slate-300"}
+                        className={
+                          errors.referrerName
+                            ? "border-red-500"
+                            : "border-slate-300"
+                        }
                       />
-                      {errors.referrerName && <p className="text-sm text-red-500">{errors.referrerName}</p>}
+                      {errors.referrerName && (
+                        <p className="text-sm text-red-500">
+                          {errors.referrerName}
+                        </p>
+                      )}
                     </div>
-                    
+
                     <div className="space-y-6">
                       <Label>Referrer's Phone Number *</Label>
                       <Input
@@ -605,18 +812,26 @@ export default function CustomerRegistration() {
                             ...customerData,
                             referrerPhone: e.target.value,
                           });
-                          if (errors.referrerPhone) setErrors({ ...errors, referrerPhone: undefined });
+                          if (errors.referrerPhone)
+                            setErrors({ ...errors, referrerPhone: undefined });
                         }}
                         placeholder="10-digit mobile number"
                         maxLength={10}
                         data-testid="input-referrer-phone"
-                        className={errors.referrerPhone ? "border-red-500" : "border-slate-300"}
+                        className={
+                          errors.referrerPhone
+                            ? "border-red-500"
+                            : "border-slate-300"
+                        }
                       />
-                      {errors.referrerPhone && <p className="text-sm text-red-500">{errors.referrerPhone}</p>}
+                      {errors.referrerPhone && (
+                        <p className="text-sm text-red-500">
+                          {errors.referrerPhone}
+                        </p>
+                      )}
                     </div>
                   </div>
                 )}
-
 
                 {/* PPF & Services in 2 Columns */}
                 <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -642,20 +857,30 @@ export default function CustomerRegistration() {
                               })
                             }
                           >
-                            <SelectTrigger className="border-slate-300" data-testid="select-ppf-category">
+                            <SelectTrigger
+                              className="border-slate-300"
+                              data-testid="select-ppf-category"
+                            >
                               <SelectValue placeholder="Select category" />
                             </SelectTrigger>
-                            <SelectContent position="popper" className="max-h-60 w-[var(--radix-select-trigger-width)]">
+                            <SelectContent
+                              position="popper"
+                              className="max-h-60 w-[var(--radix-select-trigger-width)]"
+                            >
                               <div className="p-2 sticky top-0 bg-white z-10 border-b">
                                 <Input
                                   placeholder="Search category..."
                                   className="h-8 text-sm"
                                   onChange={(e) => {
                                     const search = e.target.value.toLowerCase();
-                                    const items = e.target.closest('[role="listbox"]')?.querySelectorAll('[role="option"]');
+                                    const items = e.target
+                                      .closest('[role="listbox"]')
+                                      ?.querySelectorAll('[role="option"]');
                                     items?.forEach((item) => {
-                                      const text = item.textContent?.toLowerCase() || "";
-                                      (item as HTMLElement).style.display = text.includes(search) ? "flex" : "none";
+                                      const text =
+                                        item.textContent?.toLowerCase() || "";
+                                      (item as HTMLElement).style.display =
+                                        text.includes(search) ? "flex" : "none";
                                     });
                                   }}
                                   onKeyDown={(e) => e.stopPropagation()}
@@ -684,26 +909,43 @@ export default function CustomerRegistration() {
                                 })
                               }
                             >
-                              <SelectTrigger className="border-slate-300" data-testid="select-ppf-vehicle">
+                              <SelectTrigger
+                                className="border-slate-300"
+                                data-testid="select-ppf-vehicle"
+                              >
                                 <SelectValue placeholder="Select vehicle type" />
                               </SelectTrigger>
-                              <SelectContent position="popper" className="max-h-60 w-[var(--radix-select-trigger-width)]">
+                              <SelectContent
+                                position="popper"
+                                className="max-h-60 w-[var(--radix-select-trigger-width)]"
+                              >
                                 <div className="p-2 sticky top-0 bg-white z-10 border-b">
                                   <Input
                                     placeholder="Search..."
                                     className="h-8 text-sm"
                                     onChange={(e) => {
-                                      const search = e.target.value.toLowerCase();
-                                      const items = e.target.closest('[role="listbox"]')?.querySelectorAll('[role="option"]');
+                                      const search =
+                                        e.target.value.toLowerCase();
+                                      const items = e.target
+                                        .closest('[role="listbox"]')
+                                        ?.querySelectorAll('[role="option"]');
                                       items?.forEach((item) => {
-                                        const text = item.textContent?.toLowerCase() || "";
-                                        (item as HTMLElement).style.display = text.includes(search) ? "flex" : "none";
+                                        const text =
+                                          item.textContent?.toLowerCase() || "";
+                                        (item as HTMLElement).style.display =
+                                          text.includes(search)
+                                            ? "flex"
+                                            : "none";
                                       });
                                     }}
                                     onKeyDown={(e) => e.stopPropagation()}
                                   />
                                 </div>
-                                {Object.keys(PPF_CATEGORIES[customerData.ppfCategory as keyof typeof PPF_CATEGORIES]).map((type) => (
+                                {Object.keys(
+                                  PPF_CATEGORIES[
+                                    customerData.ppfCategory as keyof typeof PPF_CATEGORIES
+                                  ],
+                                ).map((type) => (
                                   <SelectItem key={type} value={type}>
                                     {type}
                                   </SelectItem>
@@ -719,8 +961,12 @@ export default function CustomerRegistration() {
                             <Select
                               value={customerData.ppfWarranty}
                               onValueChange={(value) => {
-                                const categoryData = PPF_CATEGORIES[customerData.ppfCategory as keyof typeof PPF_CATEGORIES] as Record<string, Record<string, number>>;
-                                const price = categoryData[customerData.ppfVehicleType][value] as number;
+                                const categoryData = PPF_CATEGORIES[
+                                  customerData.ppfCategory as keyof typeof PPF_CATEGORIES
+                                ] as Record<string, Record<string, number>>;
+                                const price = categoryData[
+                                  customerData.ppfVehicleType
+                                ][value] as number;
                                 setCustomerData({
                                   ...customerData,
                                   ppfWarranty: value,
@@ -728,28 +974,48 @@ export default function CustomerRegistration() {
                                 });
                               }}
                             >
-                              <SelectTrigger className="border-slate-300" data-testid="select-ppf-warranty">
+                              <SelectTrigger
+                                className="border-slate-300"
+                                data-testid="select-ppf-warranty"
+                              >
                                 <SelectValue placeholder="Select warranty" />
                               </SelectTrigger>
-                              <SelectContent position="popper" className="max-h-60 w-[var(--radix-select-trigger-width)]">
+                              <SelectContent
+                                position="popper"
+                                className="max-h-60 w-[var(--radix-select-trigger-width)]"
+                              >
                                 <div className="p-2 sticky top-0 bg-white z-10 border-b">
                                   <Input
                                     placeholder="Search..."
                                     className="h-8 text-sm"
                                     onChange={(e) => {
-                                      const search = e.target.value.toLowerCase();
-                                      const items = e.target.closest('[role="listbox"]')?.querySelectorAll('[role="option"]');
+                                      const search =
+                                        e.target.value.toLowerCase();
+                                      const items = e.target
+                                        .closest('[role="listbox"]')
+                                        ?.querySelectorAll('[role="option"]');
                                       items?.forEach((item) => {
-                                        const text = item.textContent?.toLowerCase() || "";
-                                        (item as HTMLElement).style.display = text.includes(search) ? "flex" : "none";
+                                        const text =
+                                          item.textContent?.toLowerCase() || "";
+                                        (item as HTMLElement).style.display =
+                                          text.includes(search)
+                                            ? "flex"
+                                            : "none";
                                       });
                                     }}
                                     onKeyDown={(e) => e.stopPropagation()}
                                   />
                                 </div>
-                                {Object.entries((PPF_CATEGORIES[customerData.ppfCategory as keyof typeof PPF_CATEGORIES] as Record<string, Record<string, number>>)[customerData.ppfVehicleType]).map(([warranty, price]) => (
+                                {Object.entries(
+                                  (
+                                    PPF_CATEGORIES[
+                                      customerData.ppfCategory as keyof typeof PPF_CATEGORIES
+                                    ] as Record<string, Record<string, number>>
+                                  )[customerData.ppfVehicleType],
+                                ).map(([warranty, price]) => (
                                   <SelectItem key={warranty} value={warranty}>
-                                    {warranty} - ₹{(price as number).toLocaleString('en-IN')}
+                                    {warranty} - ₹
+                                    {(price as number).toLocaleString("en-IN")}
                                   </SelectItem>
                                 ))}
                               </SelectContent>
@@ -778,24 +1044,37 @@ export default function CustomerRegistration() {
                                 <SelectTrigger className="border-slate-300">
                                   <SelectValue placeholder="Select category" />
                                 </SelectTrigger>
-                                <SelectContent position="popper" className="max-h-60 w-[var(--radix-select-trigger-width)]">
+                                <SelectContent
+                                  position="popper"
+                                  className="max-h-60 w-[var(--radix-select-trigger-width)]"
+                                >
                                   <div className="p-2 sticky top-0 bg-white z-10 border-b">
                                     <Input
                                       placeholder="Search..."
                                       className="h-8 text-sm"
                                       onChange={(e) => {
-                                        const search = e.target.value.toLowerCase();
-                                        const items = e.target.closest('[role="listbox"]')?.querySelectorAll('[role="option"]');
+                                        const search =
+                                          e.target.value.toLowerCase();
+                                        const items = e.target
+                                          .closest('[role="listbox"]')
+                                          ?.querySelectorAll('[role="option"]');
                                         items?.forEach((item) => {
-                                          const text = item.textContent?.toLowerCase() || "";
-                                          (item as HTMLElement).style.display = text.includes(search) ? "flex" : "none";
+                                          const text =
+                                            item.textContent?.toLowerCase() ||
+                                            "";
+                                          (item as HTMLElement).style.display =
+                                            text.includes(search)
+                                              ? "flex"
+                                              : "none";
                                         });
                                       }}
                                       onKeyDown={(e) => e.stopPropagation()}
                                     />
                                   </div>
-                                  {accessoryCategories.map(cat => (
-                                    <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                                  {accessoryCategories.map((cat) => (
+                                    <SelectItem key={cat} value={cat}>
+                                      {cat}
+                                    </SelectItem>
                                   ))}
                                 </SelectContent>
                               </Select>
@@ -807,35 +1086,58 @@ export default function CustomerRegistration() {
                                   <Select
                                     value={customerData.tempAccessoryName}
                                     onValueChange={(value) => {
-                                      const item = accessoryInventory.find(i => i.name === value);
+                                      const item = accessoryInventory.find(
+                                        (i) => i.name === value,
+                                      );
                                       setCustomerData({
                                         ...customerData,
                                         tempAccessoryName: value,
-                                        tempAccessoryCategory: item?.unit || customerData.tempAccessoryCategory
+                                        tempAccessoryCategory:
+                                          item?.unit ||
+                                          customerData.tempAccessoryCategory,
                                       });
                                     }}
                                   >
                                     <SelectTrigger className="border-slate-300">
                                       <SelectValue placeholder="Select accessory" />
                                     </SelectTrigger>
-                                    <SelectContent position="popper" className="max-h-60 w-[var(--radix-select-trigger-width)]">
+                                    <SelectContent
+                                      position="popper"
+                                      className="max-h-60 w-[var(--radix-select-trigger-width)]"
+                                    >
                                       <div className="p-2 sticky top-0 bg-white z-10 border-b">
                                         <Input
                                           placeholder="Search..."
                                           className="h-8 text-sm"
                                           onChange={(e) => {
-                                            const search = e.target.value.toLowerCase();
-                                            const items = e.target.closest('[role="listbox"]')?.querySelectorAll('[role="option"]');
+                                            const search =
+                                              e.target.value.toLowerCase();
+                                            const items = e.target
+                                              .closest('[role="listbox"]')
+                                              ?.querySelectorAll(
+                                                '[role="option"]',
+                                              );
                                             items?.forEach((item) => {
-                                              const text = item.textContent?.toLowerCase() || "";
-                                              (item as HTMLElement).style.display = text.includes(search) ? "flex" : "none";
+                                              const text =
+                                                item.textContent?.toLowerCase() ||
+                                                "";
+                                              (
+                                                item as HTMLElement
+                                              ).style.display = text.includes(
+                                                search,
+                                              )
+                                                ? "flex"
+                                                : "none";
                                             });
                                           }}
                                           onKeyDown={(e) => e.stopPropagation()}
                                         />
                                       </div>
-                                      {filteredAccessories.map(item => (
-                                        <SelectItem key={item._id} value={item.name}>
+                                      {filteredAccessories.map((item) => (
+                                        <SelectItem
+                                          key={item._id}
+                                          value={item.name}
+                                        >
                                           {item.name} ({item.quantity} in stock)
                                         </SelectItem>
                                       ))}
@@ -851,7 +1153,8 @@ export default function CustomerRegistration() {
                                     onChange={(e) =>
                                       setCustomerData({
                                         ...customerData,
-                                        accessoryQuantity: parseInt(e.target.value) || 1,
+                                        accessoryQuantity:
+                                          parseInt(e.target.value) || 1,
                                       })
                                     }
                                     className="border-slate-300"
@@ -867,24 +1170,45 @@ export default function CustomerRegistration() {
 
                   {/* Other Services Selection - Right Column */}
                   <div className="space-y-6">
-                    <h3 className="font-medium text-sm">Other Services (Multiple)</h3>
+                    <h3 className="font-medium text-sm">
+                      Other Services (Multiple)
+                    </h3>
                     <div>
                       <Label>Service</Label>
-                      <Select value={customerData.tempServiceName} onValueChange={(value) => setCustomerData({...customerData, tempServiceName: value, tempServiceVehicleType: ""})}>
-                        <SelectTrigger className="border-slate-300" data-testid="select-service-name">
+                      <Select
+                        value={customerData.tempServiceName}
+                        onValueChange={(value) =>
+                          setCustomerData({
+                            ...customerData,
+                            tempServiceName: value,
+                            tempServiceVehicleType: "",
+                          })
+                        }
+                      >
+                        <SelectTrigger
+                          className="border-slate-300"
+                          data-testid="select-service-name"
+                        >
                           <SelectValue placeholder="Select service" />
                         </SelectTrigger>
-                        <SelectContent position="popper" className="max-h-60 w-[var(--radix-select-trigger-width)]">
+                        <SelectContent
+                          position="popper"
+                          className="max-h-60 w-[var(--radix-select-trigger-width)]"
+                        >
                           <div className="p-2 sticky top-0 bg-white z-10 border-b">
                             <Input
                               placeholder="Search..."
                               className="h-8 text-sm"
                               onChange={(e) => {
                                 const search = e.target.value.toLowerCase();
-                                const items = e.target.closest('[role="listbox"]')?.querySelectorAll('[role="option"]');
+                                const items = e.target
+                                  .closest('[role="listbox"]')
+                                  ?.querySelectorAll('[role="option"]');
                                 items?.forEach((item) => {
-                                  const text = item.textContent?.toLowerCase() || "";
-                                  (item as HTMLElement).style.display = text.includes(search) ? "flex" : "none";
+                                  const text =
+                                    item.textContent?.toLowerCase() || "";
+                                  (item as HTMLElement).style.display =
+                                    text.includes(search) ? "flex" : "none";
                                 });
                               }}
                               onKeyDown={(e) => e.stopPropagation()}
@@ -902,58 +1226,129 @@ export default function CustomerRegistration() {
                     {customerData.tempServiceName && (
                       <div>
                         <Label>Vehicle Type</Label>
-                        <Select value={customerData.tempServiceVehicleType} onValueChange={(value) => setCustomerData({...customerData, tempServiceVehicleType: value})}>
-                          <SelectTrigger className="border-slate-300" data-testid="select-service-vehicle">
+                        <Select
+                          value={customerData.tempServiceVehicleType}
+                          onValueChange={(value) =>
+                            setCustomerData({
+                              ...customerData,
+                              tempServiceVehicleType: value,
+                            })
+                          }
+                        >
+                          <SelectTrigger
+                            className="border-slate-300"
+                            data-testid="select-service-vehicle"
+                          >
                             <SelectValue placeholder="Select vehicle type" />
                           </SelectTrigger>
-                          <SelectContent position="popper" className="max-h-60 w-[var(--radix-select-trigger-width)]">
+                          <SelectContent
+                            position="popper"
+                            className="max-h-60 w-[var(--radix-select-trigger-width)]"
+                          >
                             <div className="p-2 sticky top-0 bg-white z-10 border-b">
                               <Input
                                 placeholder="Search..."
                                 className="h-8 text-sm"
                                 onChange={(e) => {
                                   const search = e.target.value.toLowerCase();
-                                  const items = e.target.closest('[role="listbox"]')?.querySelectorAll('[role="option"]');
+                                  const items = e.target
+                                    .closest('[role="listbox"]')
+                                    ?.querySelectorAll('[role="option"]');
                                   items?.forEach((item) => {
-                                    const text = item.textContent?.toLowerCase() || "";
-                                    (item as HTMLElement).style.display = text.includes(search) ? "flex" : "none";
+                                    const text =
+                                      item.textContent?.toLowerCase() || "";
+                                    (item as HTMLElement).style.display =
+                                      text.includes(search) ? "flex" : "none";
                                   });
                                 }}
                                 onKeyDown={(e) => e.stopPropagation()}
                               />
                             </div>
-                            {Object.entries(OTHER_SERVICES[customerData.tempServiceName as keyof typeof OTHER_SERVICES]).map(([type, price]) => (
+                            {Object.entries(
+                              OTHER_SERVICES[
+                                customerData.tempServiceName as keyof typeof OTHER_SERVICES
+                              ],
+                            ).map(([type, price]) => (
                               <SelectItem key={type} value={type}>
-                                {type} - ₹{(price as number).toLocaleString('en-IN')}
+                                {type} - ₹
+                                {(price as number).toLocaleString("en-IN")}
                               </SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
-                        <Button type="button" size="sm" className="mt-2 w-full" onClick={() => {
-                          if (customerData.tempServiceName && customerData.tempServiceVehicleType) {
-                            const serviceData = OTHER_SERVICES[customerData.tempServiceName as keyof typeof OTHER_SERVICES] as Record<string, number>;
-                            const price = serviceData[customerData.tempServiceVehicleType] as number;
-                            setCustomerData({
-                              ...customerData,
-                              selectedOtherServices: [...customerData.selectedOtherServices, {name: customerData.tempServiceName, vehicleType: customerData.tempServiceVehicleType, price}],
-                              tempServiceName: "",
-                              tempServiceVehicleType: ""
-                            });
-                          }
-                        }} data-testid="button-add-service">Add Service</Button>
+                        <Button
+                          type="button"
+                          size="sm"
+                          className="mt-2 w-full"
+                          onClick={() => {
+                            if (
+                              customerData.tempServiceName &&
+                              customerData.tempServiceVehicleType
+                            ) {
+                              const serviceData = OTHER_SERVICES[
+                                customerData.tempServiceName as keyof typeof OTHER_SERVICES
+                              ] as Record<string, number>;
+                              const price = serviceData[
+                                customerData.tempServiceVehicleType
+                              ] as number;
+                              setCustomerData({
+                                ...customerData,
+                                selectedOtherServices: [
+                                  ...customerData.selectedOtherServices,
+                                  {
+                                    name: customerData.tempServiceName,
+                                    vehicleType:
+                                      customerData.tempServiceVehicleType,
+                                    price,
+                                  },
+                                ],
+                                tempServiceName: "",
+                                tempServiceVehicleType: "",
+                              });
+                            }
+                          }}
+                          data-testid="button-add-service"
+                        >
+                          Add Service
+                        </Button>
                       </div>
                     )}
 
                     {customerData.selectedOtherServices.length > 0 && (
                       <div className="space-y-6 bg-slate-50 p-4 rounded-lg border border-slate-200">
-                        <Label className="font-semibold text-slate-900">Selected Services</Label>
+                        <Label className="font-semibold text-slate-900">
+                          Selected Services
+                        </Label>
                         <div className="space-y-6">
-                          {customerData.selectedOtherServices.map((svc, idx) => (
-                            <div key={idx} className="flex items-center justify-between p-3 bg-white rounded-lg border border-slate-200 hover:border-slate-300 transition-colors">
-                              <span className="text-sm font-medium text-slate-900">{svc.name} - ₹{svc.price.toLocaleString('en-IN')}</span>
-                              <button type="button" onClick={() => setCustomerData({...customerData, selectedOtherServices: customerData.selectedOtherServices.filter((_, i) => i !== idx)})} className="text-red-600 text-xs font-semibold hover:text-red-700" data-testid={`button-remove-service-${idx}`}>Remove</button>
-                            </div>
-                          ))}
+                          {customerData.selectedOtherServices.map(
+                            (svc, idx) => (
+                              <div
+                                key={idx}
+                                className="flex items-center justify-between p-3 bg-white rounded-lg border border-slate-200 hover:border-slate-300 transition-colors"
+                              >
+                                <span className="text-sm font-medium text-slate-900">
+                                  {svc.name} - ₹
+                                  {svc.price.toLocaleString("en-IN")}
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    setCustomerData({
+                                      ...customerData,
+                                      selectedOtherServices:
+                                        customerData.selectedOtherServices.filter(
+                                          (_, i) => i !== idx,
+                                        ),
+                                    })
+                                  }
+                                  className="text-red-600 text-xs font-semibold hover:text-red-700"
+                                  data-testid={`button-remove-service-${idx}`}
+                                >
+                                  Remove
+                                </button>
+                              </div>
+                            ),
+                          )}
                         </div>
                       </div>
                     )}
@@ -1007,28 +1402,41 @@ export default function CustomerRegistration() {
 
                 <div className="space-y-6">
                   <Label>State *</Label>
-                  <Select value={customerData.state} onValueChange={(value) => setCustomerData({ ...customerData, state: value })}>
+                  <Select
+                    value={customerData.state}
+                    onValueChange={(value) =>
+                      setCustomerData({ ...customerData, state: value })
+                    }
+                  >
                     <SelectTrigger data-testid="select-state">
                       <SelectValue placeholder="Select state" />
                     </SelectTrigger>
-                    <SelectContent position="popper" className="max-h-60 w-[var(--radix-select-trigger-width)]">
+                    <SelectContent
+                      position="popper"
+                      className="max-h-60 w-[var(--radix-select-trigger-width)]"
+                    >
                       <div className="p-2 sticky top-0 bg-white z-10 border-b">
                         <Input
                           placeholder="Search state..."
                           className="h-8 text-sm"
                           onChange={(e) => {
                             const search = e.target.value.toLowerCase();
-                            const items = document.querySelectorAll('[role="option"]');
+                            const items =
+                              document.querySelectorAll('[role="option"]');
                             items.forEach((item) => {
-                              const text = item.textContent?.toLowerCase() || "";
-                              (item as HTMLElement).style.display = text.includes(search) ? "flex" : "none";
+                              const text =
+                                item.textContent?.toLowerCase() || "";
+                              (item as HTMLElement).style.display =
+                                text.includes(search) ? "flex" : "none";
                             });
                           }}
                           onKeyDown={(e) => e.stopPropagation()}
                         />
                       </div>
                       {INDIAN_STATES.map((state) => (
-                        <SelectItem key={state} value={state}>{state}</SelectItem>
+                        <SelectItem key={state} value={state}>
+                          {state}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -1043,7 +1451,6 @@ export default function CustomerRegistration() {
                   data-testid="button-next-step"
                 >
                   Next Step
-                   
                 </Button>
               </div>
             </CardContent>
@@ -1073,29 +1480,45 @@ export default function CustomerRegistration() {
                     <Select
                       value={vehicleData.make}
                       onValueChange={(value) =>
-                        setVehicleData({ ...vehicleData, make: value, model: "", otherMake: "", otherModel: "" })
+                        setVehicleData({
+                          ...vehicleData,
+                          make: value,
+                          model: value === "Other" ? "Other" : "",
+                          otherMake: "",
+                          otherModel: "",
+                        })
                       }
                     >
-                      <SelectTrigger className="border-slate-300" data-testid="select-vehicle-make">
+                      <SelectTrigger
+                        className="border-slate-300"
+                        data-testid="select-vehicle-make"
+                      >
                         <SelectValue placeholder="Select vehicle make" />
                       </SelectTrigger>
-                      <SelectContent position="popper" className="max-h-60 w-[var(--radix-select-trigger-width)]">
+                      <SelectContent
+                        position="popper"
+                        className="max-h-60 w-[var(--radix-select-trigger-width)]"
+                      >
                         <div className="p-2 sticky top-0 bg-white z-10 border-b">
                           <Input
                             placeholder="Search make..."
                             className="h-8 text-sm"
                             onChange={(e) => {
                               const search = e.target.value.toLowerCase();
-                              const items = e.target.closest('[role="listbox"]')?.querySelectorAll('[role="option"]');
+                              const items = e.target
+                                .closest('[role="listbox"]')
+                                ?.querySelectorAll('[role="option"]');
                               items?.forEach((item) => {
-                                const text = item.textContent?.toLowerCase() || "";
-                                (item as HTMLElement).style.display = text.includes(search) ? "flex" : "none";
+                                const text =
+                                  item.textContent?.toLowerCase() || "";
+                                (item as HTMLElement).style.display =
+                                  text.includes(search) ? "flex" : "none";
                               });
                             }}
                             onKeyDown={(e) => e.stopPropagation()}
                           />
                         </div>
-                        {VEHICLE_MAKES.map((make) => (
+                        {Array.from(new Set([...VEHICLE_MAKES, ...customMakes])).map((make) => (
                           <SelectItem key={make} value={make}>
                             {make}
                           </SelectItem>
@@ -1105,10 +1528,15 @@ export default function CustomerRegistration() {
                   </div>
                   {vehicleData.make === "Other" && (
                     <div className="space-y-2 animate-in fade-in slide-in-from-top-1">
-                      <Label>Enter Vehicle Make *</Label>
+                      <Label>Enter Vehicle Name *</Label>
                       <Input
                         value={vehicleData.otherMake}
-                        onChange={(e) => setVehicleData({ ...vehicleData, otherMake: e.target.value })}
+                        onChange={(e) =>
+                          setVehicleData({
+                            ...vehicleData,
+                            otherMake: e.target.value,
+                          })
+                        }
                         placeholder="e.g. Tesla, Ferrari"
                         className="border-slate-300"
                         data-testid="input-other-make"
@@ -1123,43 +1551,73 @@ export default function CustomerRegistration() {
                     <Select
                       value={vehicleData.model}
                       onValueChange={(value) =>
-                        setVehicleData({ ...vehicleData, model: value, otherModel: "" })
+                        setVehicleData({
+                          ...vehicleData,
+                          model: value,
+                          otherModel: "",
+                        })
                       }
                       disabled={!vehicleData.make}
                     >
-                      <SelectTrigger className="border-slate-300" data-testid="select-vehicle-model">
-                        <SelectValue placeholder={vehicleData.make ? "Select model" : "Select vehicle name first"} />
+                      <SelectTrigger
+                        className="border-slate-300"
+                        data-testid="select-vehicle-model"
+                      >
+                        <SelectValue
+                          placeholder={
+                            vehicleData.make
+                              ? "Select model"
+                              : "Select vehicle name first"
+                          }
+                        />
                       </SelectTrigger>
-                      <SelectContent position="popper" className="max-h-60 w-[var(--radix-select-trigger-width)]">
+                      <SelectContent
+                        position="popper"
+                        className="max-h-60 w-[var(--radix-select-trigger-width)]"
+                      >
                         <div className="p-2 sticky top-0 bg-white z-10 border-b">
                           <Input
                             placeholder="Search model..."
                             className="h-8 text-sm"
                             onChange={(e) => {
                               const search = e.target.value.toLowerCase();
-                              const items = e.target.closest('[role="listbox"]')?.querySelectorAll('[role="option"]');
+                              const items = e.target
+                                .closest('[role="listbox"]')
+                                ?.querySelectorAll('[role="option"]');
                               items?.forEach((item) => {
-                                const text = item.textContent?.toLowerCase() || "";
-                                (item as HTMLElement).style.display = text.includes(search) ? "flex" : "none";
+                                const text =
+                                  item.textContent?.toLowerCase() || "";
+                                (item as HTMLElement).style.display =
+                                  text.includes(search) ? "flex" : "none";
                               });
                             }}
                             onKeyDown={(e) => e.stopPropagation()}
                           />
                         </div>
-                        {vehicleData.make && VEHICLE_MODELS[vehicleData.make as keyof typeof VEHICLE_MODELS]?.map((model) => (
-                          <SelectItem key={model} value={model}>
-                            {model}
-                          </SelectItem>
-                        ))}
+                        {vehicleData.make &&
+                          Array.from(new Set([
+                            ...(VEHICLE_MODELS[vehicleData.make as keyof typeof VEHICLE_MODELS] || []),
+                            ...(customModels[vehicleData.make] || [])
+                          ])).map((model) => (
+                            <SelectItem key={model} value={model}>
+                              {model}
+                            </SelectItem>
+                          ))}
                       </SelectContent>
                     </Select>
                   </div>
-                  {(vehicleData.make === "Other" || vehicleData.model === "Other") && (
+                  {(vehicleData.make === "Other" ||
+                    vehicleData.model === "Other") && (
                     <div className="space-y-2 animate-in fade-in slide-in-from-top-1">
                       <Label>Enter Vehicle Model *</Label>
                       <Input
                         value={vehicleData.otherModel}
-                        onChange={(e) => setVehicleData({ ...vehicleData, otherModel: e.target.value })}
+                        onChange={(e) =>
+                          setVehicleData({
+                            ...vehicleData,
+                            otherModel: e.target.value,
+                          })
+                        }
                         placeholder="e.g. Model S, 488"
                         className="border-slate-300"
                         data-testid="input-other-model"
@@ -1170,8 +1628,11 @@ export default function CustomerRegistration() {
 
                 <div className="space-y-6">
                   <Label>Vehicle Type</Label>
-                  <div className="px-4 py-3 bg-white border border-slate-300 rounded-lg text-sm font-medium text-slate-900" data-testid="display-vehicle-type">
-                    {vehicleData.vehicleType || 'Not selected'}
+                  <div
+                    className="px-4 py-3 bg-white border border-slate-300 rounded-lg text-sm font-medium text-slate-900"
+                    data-testid="display-vehicle-type"
+                  >
+                    {vehicleData.vehicleType || "Not selected"}
                   </div>
                 </div>
 
@@ -1210,20 +1671,30 @@ export default function CustomerRegistration() {
                       setVehicleData({ ...vehicleData, color: value })
                     }
                   >
-                    <SelectTrigger className="border-slate-300" data-testid="select-vehicle-color">
+                    <SelectTrigger
+                      className="border-slate-300"
+                      data-testid="select-vehicle-color"
+                    >
                       <SelectValue placeholder="Select color" />
                     </SelectTrigger>
-                    <SelectContent position="popper" className="max-h-60 w-[var(--radix-select-trigger-width)]">
+                    <SelectContent
+                      position="popper"
+                      className="max-h-60 w-[var(--radix-select-trigger-width)]"
+                    >
                       <div className="p-2 sticky top-0 bg-white z-10 border-b">
                         <Input
                           placeholder="Search color..."
                           className="h-8 text-sm"
                           onChange={(e) => {
                             const search = e.target.value.toLowerCase();
-                            const items = e.target.closest('[role="listbox"]')?.querySelectorAll('[role="option"]');
+                            const items = e.target
+                              .closest('[role="listbox"]')
+                              ?.querySelectorAll('[role="option"]');
                             items?.forEach((item) => {
-                              const text = item.textContent?.toLowerCase() || "";
-                              (item as HTMLElement).style.display = text.includes(search) ? "flex" : "none";
+                              const text =
+                                item.textContent?.toLowerCase() || "";
+                              (item as HTMLElement).style.display =
+                                text.includes(search) ? "flex" : "none";
                             });
                           }}
                           onKeyDown={(e) => e.stopPropagation()}
@@ -1249,9 +1720,9 @@ export default function CustomerRegistration() {
                   />
                   {vehicleImagePreview && (
                     <div className="mt-3 relative w-full h-48 bg-slate-100 rounded-lg overflow-hidden border border-slate-200">
-                      <img 
-                        src={vehicleImagePreview} 
-                        alt="Vehicle preview" 
+                      <img
+                        src={vehicleImagePreview}
+                        alt="Vehicle preview"
                         className="w-full h-full object-cover"
                         data-testid="img-vehicle-preview"
                       />
@@ -1267,7 +1738,6 @@ export default function CustomerRegistration() {
                   className="border-slate-300 text-slate-700 hover:bg-slate-100"
                   data-testid="button-prev-step"
                 >
-                   
                   Previous
                 </Button>
                 <Button
