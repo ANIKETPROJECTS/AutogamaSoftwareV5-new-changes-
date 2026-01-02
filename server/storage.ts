@@ -423,7 +423,7 @@ export class MongoStorage implements IStorage {
           ...rollObj,
           remaining_meters: 0,
           remaining_sqft: 0,
-          status: 'Finished' as const,
+          status: 'Finished',
           finishedAt: new Date()
         };
         
@@ -479,7 +479,7 @@ export class MongoStorage implements IStorage {
         ...rollObj,
         remaining_meters: 0,
         remaining_sqft: 0,
-        status: 'Finished' as const,
+        status: 'Finished',
         finishedAt: new Date()
       };
       
