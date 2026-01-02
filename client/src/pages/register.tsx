@@ -839,7 +839,6 @@ export default function CustomerRegistration() {
                   <div className="space-y-6">
                     <Card className="border-red-300 shadow-sm p-4 space-y-4">
                       <h3 className="font-semibold text-sm text-primary flex items-center gap-2">
-                        <Zap className="w-4 h-4" />
                         PPF Services
                       </h3>
                       <div className="space-y-4">
@@ -1025,7 +1024,6 @@ export default function CustomerRegistration() {
 
                         <div className="space-y-4 pt-2 border-t border-slate-100">
                           <h3 className="font-semibold text-sm text-primary flex items-center gap-2">
-                            <Zap className="w-4 h-4" />
                             Accessory Section
                           </h3>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1071,9 +1069,9 @@ export default function CustomerRegistration() {
                                       onKeyDown={(e) => e.stopPropagation()}
                                     />
                                   </div>
-                                  {accessoryCategories.map((cat) => (
-                                    <SelectItem key={cat} value={cat}>
-                                      {cat}
+                                  {accessoryCategories.map((category) => (
+                                    <SelectItem key={category} value={category}>
+                                      {category}
                                     </SelectItem>
                                   ))}
                                 </SelectContent>
@@ -1235,26 +1233,336 @@ export default function CustomerRegistration() {
 
                   {/* Other Services Selection - Right Column */}
                   <div className="space-y-6">
-                    <h3 className="font-medium text-sm">
-                      Other Services (Multiple)
-                    </h3>
-                    <div>
-                      <Label>Service</Label>
+                    <Card className="border-red-300 shadow-sm p-4 h-full">
+                      <h3 className="font-semibold text-sm text-primary flex items-center gap-2 mb-4">
+                        Other Services (Multiple)
+                      </h3>
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>Service</Label>
+                          <Select
+                            value={customerData.tempServiceName}
+                            onValueChange={(value) =>
+                              setCustomerData({
+                                ...customerData,
+                                tempServiceName: value,
+                                tempServiceVehicleType: "",
+                              })
+                            }
+                          >
+                            <SelectTrigger
+                              className="border-slate-300"
+                              data-testid="select-service-name"
+                            >
+                              <SelectValue placeholder="Select service" />
+                            </SelectTrigger>
+                            <SelectContent
+                              position="popper"
+                              className="max-h-60 w-[var(--radix-select-trigger-width)]"
+                            >
+                              <div className="p-2 sticky top-0 bg-white z-10 border-b">
+                                <Input
+                                  placeholder="Search..."
+                                  className="h-8 text-sm"
+                                  onChange={(e) => {
+                                    const search = e.target.value.toLowerCase();
+                                    const items = e.target
+                                      .closest('[role="listbox"]')
+                                      ?.querySelectorAll('[role="option"]');
+                                    items?.forEach((item) => {
+                                      const text =
+                                        item.textContent?.toLowerCase() || "";
+                                      (item as HTMLElement).style.display =
+                                        text.includes(search) ? "flex" : "none";
+                                    });
+                                  }}
+                                  onKeyDown={(e) => e.stopPropagation()}
+                                />
+                              </div>
+                              {Object.keys(OTHER_SERVICES).map((service) => (
+                                <SelectItem key={service} value={service}>
+                                  {service}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        {customerData.tempServiceName && (
+                          <div className="space-y-2">
+                            <Label>Vehicle Type</Label>
+                            <Select
+                              value={customerData.tempServiceVehicleType}
+                              onValueChange={(value) =>
+                                setCustomerData({
+                                  ...customerData,
+                                  tempServiceVehicleType: value,
+                                })
+                              }
+                            >
+                              <SelectTrigger
+                                className="border-slate-300"
+                                data-testid="select-service-vehicle"
+                              >
+                                <SelectValue placeholder="Select vehicle type" />
+                              </SelectTrigger>
+                              <SelectContent
+                                position="popper"
+                                className="max-h-60 w-[var(--radix-select-trigger-width)]"
+                              >
+                                <div className="p-2 sticky top-0 bg-white z-10 border-b">
+                                  <Input
+                                    placeholder="Search..."
+                                    className="h-8 text-sm"
+                                    onChange={(e) => {
+                                      const search = e.target.value.toLowerCase();
+                                      const items = e.target
+                                        .closest('[role="listbox"]')
+                                        ?.querySelectorAll('[role="option"]');
+                                      items?.forEach((item) => {
+                                        const text =
+                                          item.textContent?.toLowerCase() || "";
+                                        (item as HTMLElement).style.display =
+                                          text.includes(search) ? "flex" : "none";
+                                      });
+                                    }}
+                                    onKeyDown={(e) => e.stopPropagation()}
+                                  />
+                                </div>
+                                {Object.entries(
+                                  OTHER_SERVICES[
+                                    customerData.tempServiceName as keyof typeof OTHER_SERVICES
+                                  ],
+                                ).map(([type, price]) => (
+                                  <SelectItem key={type} value={type}>
+                                    {type} - ₹
+                                    {(price as number).toLocaleString("en-IN")}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <Button
+                              type="button"
+                              size="sm"
+                              className="mt-2 w-full"
+                              onClick={() => {
+                                if (
+                                  customerData.tempServiceName &&
+                                  customerData.tempServiceVehicleType
+                                ) {
+                                  const serviceData = OTHER_SERVICES[
+                                    customerData.tempServiceName as keyof typeof OTHER_SERVICES
+                                  ] as Record<string, number>;
+                                  const price = serviceData[
+                                    customerData.tempServiceVehicleType
+                                  ];
+                                  setCustomerData({
+                                    ...customerData,
+                                    selectedOtherServices: [
+                                      ...customerData.selectedOtherServices,
+                                      {
+                                        name: customerData.tempServiceName,
+                                        vehicleType:
+                                          customerData.tempServiceVehicleType,
+                                        price,
+                                      },
+                                    ],
+                                    tempServiceName: "",
+                                    tempServiceVehicleType: "",
+                                  });
+                                }
+                              }}
+                            >
+                              Add Service
+                            </Button>
+                          </div>
+                        )}
+
+                        {customerData.selectedOtherServices.some(s => s.vehicleType !== "Accessory") && (
+                          <div className="mt-4 p-4 bg-slate-50 rounded-lg border border-slate-200">
+                            <Label className="font-semibold text-slate-900 mb-3 block">
+                              Selected Services
+                            </Label>
+                            <div className="space-y-2">
+                              {customerData.selectedOtherServices
+                                .filter(s => s.vehicleType !== "Accessory")
+                                .map((service, idx) => (
+                                  <div
+                                    key={idx}
+                                    className="flex items-center justify-between p-2 bg-white rounded border border-slate-200"
+                                  >
+                                    <span className="text-sm font-medium">
+                                      {service.name} ({service.vehicleType}) - ₹
+                                      {service.price.toLocaleString("en-IN")}
+                                    </span>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="h-7 text-red-600 hover:text-red-700 hover:bg-red-50"
+                                      onClick={() => {
+                                        const originalIndex = customerData.selectedOtherServices.findIndex(s => s === service);
+                                        setCustomerData({
+                                          ...customerData,
+                                          selectedOtherServices: customerData.selectedOtherServices.filter((_, i) => i !== originalIndex)
+                                        });
+                                      }}
+                                    >
+                                      Remove
+                                    </Button>
+                                  </div>
+                                ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </Card>
+                  </div>
+                </div>
+
+                <div className="md:col-span-2 space-y-6">
+                  <Label>Address</Label>
+                  <Input
+                    value={customerData.address}
+                    onChange={(e) =>
+                      setCustomerData({
+                        ...customerData,
+                        address: e.target.value,
+                      })
+                    }
+                    placeholder="Enter street address"
+                    data-testid="input-address"
+                    className="border-slate-300"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:col-span-2">
+                  <div className="space-y-2">
+                    <Label>City</Label>
+                    <Input
+                      value={customerData.city}
+                      onChange={(e) =>
+                        setCustomerData({ ...customerData, city: e.target.value })
+                      }
+                      placeholder="City"
+                      data-testid="input-city"
+                      className="border-slate-300"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>District</Label>
+                    <Input
+                      value={customerData.district}
+                      onChange={(e) =>
+                        setCustomerData({
+                          ...customerData,
+                          district: e.target.value,
+                        })
+                      }
+                      placeholder="District"
+                      data-testid="input-district"
+                      className="border-slate-300"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>State</Label>
+                    <Select
+                      value={customerData.state}
+                      onValueChange={(value) =>
+                        setCustomerData({ ...customerData, state: value })
+                      }
+                    >
+                      <SelectTrigger
+                        className="border-slate-300"
+                        data-testid="select-state"
+                      >
+                        <SelectValue placeholder="Select state" />
+                      </SelectTrigger>
+                      <SelectContent
+                        position="popper"
+                        className="max-h-60 w-[var(--radix-select-trigger-width)]"
+                      >
+                        <div className="p-2 sticky top-0 bg-white z-10 border-b">
+                          <Input
+                            placeholder="Search state..."
+                            className="h-8 text-sm"
+                            onChange={(e) => {
+                              const search = e.target.value.toLowerCase();
+                              const items = e.target
+                                .closest('[role="listbox"]')
+                                ?.querySelectorAll('[role="option"]');
+                              items?.forEach((item) => {
+                                const text =
+                                  item.textContent?.toLowerCase() || "";
+                                (item as HTMLElement).style.display =
+                                  text.includes(search) ? "flex" : "none";
+                              });
+                            }}
+                            onKeyDown={(e) => e.stopPropagation()}
+                          />
+                        </div>
+                        {INDIAN_STATES.map((state) => (
+                          <SelectItem key={state} value={state}>
+                            {state}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Navigation Buttons */}
+              <div className="flex justify-end pt-6 border-t border-slate-200">
+                <Button
+                  onClick={handleNextStep}
+                  disabled={!canProceedStep1}
+                  className="px-8 shadow-sm hover:shadow-md transition-all"
+                  data-testid="button-next-step"
+                >
+                  Vehicle Information
+                  <ChevronRight className="w-4 h-4 ml-2" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Step 2: Vehicle Information */}
+        {step === 2 && (
+          <Card
+            className="bg-gradient-to-br from-white to-slate-50 border-2 border-red-300 shadow-sm"
+            data-testid="card-vehicle-info"
+          >
+            <CardHeader className="pb-6 border-b border-slate-200 bg-gradient-to-r from-primary/5 to-transparent">
+              <CardTitle className="flex items-center gap-3 text-lg text-slate-900 font-semibold">
+                <Car className="w-5 h-5 text-primary" />
+                Vehicle Information
+              </CardTitle>
+              <p className="text-sm text-slate-600 mt-2">
+                Provide details about the vehicle being registered
+              </p>
+            </CardHeader>
+            <CardContent className="space-y-8 pt-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <Label>Make *</Label>
                       <Select
-                        value={customerData.tempServiceName}
+                        value={vehicleData.make}
                         onValueChange={(value) =>
-                          setCustomerData({
-                            ...customerData,
-                            tempServiceName: value,
-                            tempServiceVehicleType: "",
+                          setVehicleData({
+                            ...vehicleData,
+                            make: value,
+                            model: "",
                           })
                         }
                       >
                         <SelectTrigger
                           className="border-slate-300"
-                          data-testid="select-service-name"
+                          data-testid="select-make"
                         >
-                          <SelectValue placeholder="Select service" />
+                          <SelectValue placeholder="Select make" />
                         </SelectTrigger>
                         <SelectContent
                           position="popper"
@@ -1262,7 +1570,7 @@ export default function CustomerRegistration() {
                         >
                           <div className="p-2 sticky top-0 bg-white z-10 border-b">
                             <Input
-                              placeholder="Search..."
+                              placeholder="Search make..."
                               className="h-8 text-sm"
                               onChange={(e) => {
                                 const search = e.target.value.toLowerCase();
@@ -1279,552 +1587,259 @@ export default function CustomerRegistration() {
                               onKeyDown={(e) => e.stopPropagation()}
                             />
                           </div>
-                          {Object.keys(OTHER_SERVICES).map((service) => (
-                            <SelectItem key={service} value={service}>
-                              {service}
+                          {dynamicMakes.map((make) => (
+                            <SelectItem key={make} value={make}>
+                              {make}
                             </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
                     </div>
 
-                    {customerData.tempServiceName && (
-                      <div>
-                        <Label>Vehicle Type</Label>
-                        <Select
-                          value={customerData.tempServiceVehicleType}
-                          onValueChange={(value) =>
-                            setCustomerData({
-                              ...customerData,
-                              tempServiceVehicleType: value,
+                    {vehicleData.make === "Other" && (
+                      <div className="space-y-2">
+                        <Label>Enter Make *</Label>
+                        <Input
+                          value={vehicleData.otherMake}
+                          onChange={(e) =>
+                            setVehicleData({
+                              ...vehicleData,
+                              otherMake: e.target.value,
                             })
                           }
-                        >
-                          <SelectTrigger
-                            className="border-slate-300"
-                            data-testid="select-service-vehicle"
-                          >
-                            <SelectValue placeholder="Select vehicle type" />
-                          </SelectTrigger>
-                          <SelectContent
-                            position="popper"
-                            className="max-h-60 w-[var(--radix-select-trigger-width)]"
-                          >
-                            <div className="p-2 sticky top-0 bg-white z-10 border-b">
-                              <Input
-                                placeholder="Search..."
-                                className="h-8 text-sm"
-                                onChange={(e) => {
-                                  const search = e.target.value.toLowerCase();
-                                  const items = e.target
-                                    .closest('[role="listbox"]')
-                                    ?.querySelectorAll('[role="option"]');
-                                  items?.forEach((item) => {
-                                    const text =
-                                      item.textContent?.toLowerCase() || "";
-                                    (item as HTMLElement).style.display =
-                                      text.includes(search) ? "flex" : "none";
-                                  });
-                                }}
-                                onKeyDown={(e) => e.stopPropagation()}
-                              />
-                            </div>
-                            {Object.entries(
-                              OTHER_SERVICES[
-                                customerData.tempServiceName as keyof typeof OTHER_SERVICES
-                              ],
-                            ).map(([type, price]) => (
-                              <SelectItem key={type} value={type}>
-                                {type} - ₹
-                                {(price as number).toLocaleString("en-IN")}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <Button
-                          type="button"
-                          size="sm"
-                          className="mt-2 w-full"
-                          onClick={() => {
-                            if (
-                              customerData.tempServiceName &&
-                              customerData.tempServiceVehicleType
-                            ) {
-                              const serviceData = OTHER_SERVICES[
-                                customerData.tempServiceName as keyof typeof OTHER_SERVICES
-                              ] as Record<string, number>;
-                              const price = serviceData[
-                                customerData.tempServiceVehicleType
-                              ] as number;
-                              setCustomerData({
-                                ...customerData,
-                                selectedOtherServices: [
-                                  ...customerData.selectedOtherServices,
-                                  {
-                                    name: customerData.tempServiceName,
-                                    vehicleType:
-                                      customerData.tempServiceVehicleType,
-                                    price,
-                                  },
-                                ],
-                                tempServiceName: "",
-                                tempServiceVehicleType: "",
-                              });
-                            }
-                          }}
-                          data-testid="button-add-service"
-                        >
-                          Add Service
-                        </Button>
-                      </div>
-                    )}
-
-                    {customerData.selectedOtherServices.filter(s => s.vehicleType !== "Accessory").length > 0 && (
-                      <div className="space-y-6 bg-slate-50 p-4 rounded-lg border border-slate-200">
-                        <Label className="font-semibold text-slate-900">
-                          Selected Services
-                        </Label>
-                        <div className="space-y-6">
-                          {customerData.selectedOtherServices
-                            .filter(s => s.vehicleType !== "Accessory")
-                            .map((svc, idx) => (
-                              <div
-                                key={idx}
-                                className="flex items-center justify-between p-3 bg-white rounded-lg border border-slate-200 hover:border-slate-300 transition-colors"
-                              >
-                                <span className="text-sm font-medium text-slate-900">
-                                  {svc.name} - ₹
-                                  {svc.price.toLocaleString("en-IN")}
-                                </span>
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    setCustomerData({
-                                      ...customerData,
-                                      selectedOtherServices:
-                                        customerData.selectedOtherServices.filter(
-                                          (_, i) => i !== idx,
-                                        ),
-                                    })
-                                  }
-                                  className="text-red-600 text-xs font-semibold hover:text-red-700"
-                                  data-testid={`button-remove-service-${idx}`}
-                                >
-                                  Remove
-                                </button>
-                              </div>
-                            ),
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                <div className="md:col-span-2 space-y-6">
-                  <Label>Address</Label>
-                  <Input
-                    value={customerData.address}
-                    onChange={(e) =>
-                      setCustomerData({
-                        ...customerData,
-                        address: e.target.value,
-                      })
-                    }
-                    placeholder="Street address"
-                    data-testid="input-address"
-                    className="border border-input"
-                  />
-                </div>
-
-                <div className="space-y-6">
-                  <Label>City</Label>
-                  <Input
-                    value={customerData.city}
-                    onChange={(e) =>
-                      setCustomerData({ ...customerData, city: e.target.value })
-                    }
-                    placeholder="City"
-                    data-testid="input-city"
-                    className="border border-input"
-                  />
-                </div>
-
-                <div className="space-y-6">
-                  <Label>District</Label>
-                  <Input
-                    value={customerData.district}
-                    onChange={(e) =>
-                      setCustomerData({
-                        ...customerData,
-                        district: e.target.value,
-                      })
-                    }
-                    placeholder="District"
-                    data-testid="input-district"
-                    className="border border-input"
-                  />
-                </div>
-
-                <div className="space-y-6">
-                  <Label>State *</Label>
-                  <Select
-                    value={customerData.state}
-                    onValueChange={(value) =>
-                      setCustomerData({ ...customerData, state: value })
-                    }
-                  >
-                    <SelectTrigger data-testid="select-state">
-                      <SelectValue placeholder="Select state" />
-                    </SelectTrigger>
-                    <SelectContent
-                      position="popper"
-                      className="max-h-60 w-[var(--radix-select-trigger-width)]"
-                    >
-                      <div className="p-2 sticky top-0 bg-white z-10 border-b">
-                        <Input
-                          placeholder="Search state..."
-                          className="h-8 text-sm"
-                          onChange={(e) => {
-                            const search = e.target.value.toLowerCase();
-                            const items =
-                              document.querySelectorAll('[role="option"]');
-                            items.forEach((item) => {
-                              const text =
-                                item.textContent?.toLowerCase() || "";
-                              (item as HTMLElement).style.display =
-                                text.includes(search) ? "flex" : "none";
-                            });
-                          }}
-                          onKeyDown={(e) => e.stopPropagation()}
+                          placeholder="Enter vehicle make"
+                          data-testid="input-other-make"
+                          className="border-slate-300"
                         />
                       </div>
-                      {INDIAN_STATES.map((state) => (
-                        <SelectItem key={state} value={state}>
-                          {state}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
+                    )}
 
-              <div className="flex justify-end pt-6 border-t border-slate-200">
-                <Button
-                  onClick={handleNextStep}
-                  disabled={!canProceedStep1}
-                  className="bg-gradient-to-r from-primary to-primary/90 text-white hover:shadow-lg transition-all"
-                  data-testid="button-next-step"
-                >
-                  Next Step
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Step 2: Vehicle Details */}
-        {step === 2 && (
-          <Card
-            className="bg-gradient-to-br from-white to-slate-50 border-2 border-red-300 shadow-sm"
-            data-testid="card-vehicle-info"
-          >
-            <CardHeader className="pb-6 border-b border-slate-200 bg-gradient-to-r from-primary/5 to-transparent">
-              <CardTitle className="flex items-center gap-3 text-lg text-slate-900 font-semibold">
-                <Car className="w-5 h-5 text-primary" />
-                Vehicle Details
-              </CardTitle>
-              <p className="text-sm text-slate-600 mt-2">
-                Please provide your vehicle information
-              </p>
-            </CardHeader>
-            <CardContent className="space-y-6 pt-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label>Vehicle Name *</Label>
-                    <Select
-                      value={vehicleData.make}
-                      onValueChange={(value) =>
-                        setVehicleData({
-                          ...vehicleData,
-                          make: value,
-                          model: value === "Other" ? "Other" : "",
-                          otherMake: "",
-                          otherModel: "",
-                        })
-                      }
-                    >
-                      <SelectTrigger
-                        className="border-slate-300"
-                        data-testid="select-vehicle-make"
-                      >
-                        <SelectValue placeholder="Select vehicle make" />
-                      </SelectTrigger>
-                      <SelectContent
-                        position="popper"
-                        className="max-h-60 w-[var(--radix-select-trigger-width)]"
-                      >
-                        <div className="p-2 sticky top-0 bg-white z-10 border-b">
-                          <Input
-                            placeholder="Search make..."
-                            className="h-8 text-sm"
-                            onChange={(e) => {
-                              const search = e.target.value.toLowerCase();
-                              const items = e.target
-                                .closest('[role="listbox"]')
-                                ?.querySelectorAll('[role="option"]');
-                              items?.forEach((item) => {
-                                const text =
-                                  item.textContent?.toLowerCase() || "";
-                                (item as HTMLElement).style.display =
-                                  text.includes(search) ? "flex" : "none";
-                              });
-                            }}
-                            onKeyDown={(e) => e.stopPropagation()}
-                          />
-                        </div>
-                        {(() => {
-                          return dynamicMakes.map((make) => (
-                            <SelectItem key={make} value={make}>
-                              {make}
-                            </SelectItem>
-                          ));
-                        })()}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  {vehicleData.make === "Other" && (
-                    <div className="space-y-2 animate-in fade-in slide-in-from-top-1">
-                      <Label>Enter Vehicle Name *</Label>
-                      <Input
-                        value={vehicleData.otherMake}
-                        onChange={(e) =>
-                          setVehicleData({
-                            ...vehicleData,
-                            otherMake: e.target.value,
-                          })
+                    <div className="space-y-2">
+                      <Label>Model *</Label>
+                      <Select
+                        value={vehicleData.model}
+                        onValueChange={(value) =>
+                          setVehicleData({ ...vehicleData, model: value })
                         }
-                        placeholder="e.g. Tesla, Ferrari"
-                        className="border-slate-300"
-                        data-testid="input-other-make"
-                      />
-                    </div>
-                  )}
-                </div>
-
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label>Vehicle Model *</Label>
-                    <Select
-                      value={vehicleData.model}
-                      onValueChange={(value) =>
-                        setVehicleData({
-                          ...vehicleData,
-                          model: value,
-                          otherModel: "",
-                        })
-                      }
-                      disabled={!vehicleData.make}
-                    >
-                      <SelectTrigger
-                        className="border-slate-300"
-                        data-testid="select-vehicle-model"
+                        disabled={!vehicleData.make}
                       >
-                        <SelectValue
-                          placeholder={
-                            vehicleData.make
-                              ? "Select model"
-                              : "Select vehicle name first"
-                          }
-                        />
-                      </SelectTrigger>
-                      <SelectContent
-                        position="popper"
-                        className="max-h-60 w-[var(--radix-select-trigger-width)]"
-                      >
-                        <div className="p-2 sticky top-0 bg-white z-10 border-b">
-                          <Input
-                            placeholder="Search model..."
-                            className="h-8 text-sm"
-                            onChange={(e) => {
-                              const search = e.target.value.toLowerCase();
-                              const items = e.target
-                                .closest('[role="listbox"]')
-                                ?.querySelectorAll('[role="option"]');
-                              items?.forEach((item) => {
-                                const text =
-                                  item.textContent?.toLowerCase() || "";
-                                (item as HTMLElement).style.display =
-                                  text.includes(search) ? "flex" : "none";
-                              });
-                            }}
-                            onKeyDown={(e) => e.stopPropagation()}
-                          />
-                        </div>
-                        {vehicleData.make &&
-                          (() => {
-                            const standardModels = dynamicModels[vehicleData.make as keyof typeof dynamicModels] || [];
-                            const models = Array.from(new Set(["Other", ...standardModels])).sort((a, b) => {
-                              if (a === "Other") return -1;
-                              if (b === "Other") return 1;
-                              return a.localeCompare(b);
-                            });
-                            return models.map((model) => (
+                        <SelectTrigger
+                          className="border-slate-300"
+                          data-testid="select-model"
+                        >
+                          <SelectValue placeholder="Select model" />
+                        </SelectTrigger>
+                        <SelectContent
+                          position="popper"
+                          className="max-h-60 w-[var(--radix-select-trigger-width)]"
+                        >
+                          <div className="p-2 sticky top-0 bg-white z-10 border-b">
+                            <Input
+                              placeholder="Search model..."
+                              className="h-8 text-sm"
+                              onChange={(e) => {
+                                const search = e.target.value.toLowerCase();
+                                const items = e.target
+                                  .closest('[role="listbox"]')
+                                  ?.querySelectorAll('[role="option"]');
+                                items?.forEach((item) => {
+                                  const text =
+                                    item.textContent?.toLowerCase() || "";
+                                  (item as HTMLElement).style.display =
+                                    text.includes(search) ? "flex" : "none";
+                                });
+                              }}
+                              onKeyDown={(e) => e.stopPropagation()}
+                            />
+                          </div>
+                          {(dynamicModels[vehicleData.make] || []).map(
+                            (model) => (
                               <SelectItem key={model} value={model}>
                                 {model}
                               </SelectItem>
-                            ));
-                          })()}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  {(vehicleData.make === "Other" ||
-                    vehicleData.model === "Other") && (
-                    <div className="space-y-2 animate-in fade-in slide-in-from-top-1">
-                      <Label>Enter Vehicle Model *</Label>
+                            ),
+                          )}
+                          <SelectItem value="Other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {(vehicleData.make === "Other" ||
+                      vehicleData.model === "Other") && (
+                      <div className="space-y-2">
+                        <Label>Enter Model *</Label>
+                        <Input
+                          value={vehicleData.otherModel}
+                          onChange={(e) =>
+                            setVehicleData({
+                              ...vehicleData,
+                              otherModel: e.target.value,
+                            })
+                          }
+                          placeholder="Enter vehicle model"
+                          data-testid="input-other-model"
+                          className="border-slate-300"
+                        />
+                      </div>
+                    )}
+
+                    <div className="space-y-2">
+                      <Label>Year</Label>
                       <Input
-                        value={vehicleData.otherModel}
+                        type="number"
+                        value={vehicleData.year}
+                        onChange={(e) =>
+                          setVehicleData({ ...vehicleData, year: e.target.value })
+                        }
+                        placeholder="e.g. 2024"
+                        data-testid="input-year"
+                        className="border-slate-300"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Plate Number *</Label>
+                      <Input
+                        value={vehicleData.plateNumber}
                         onChange={(e) =>
                           setVehicleData({
                             ...vehicleData,
-                            otherModel: e.target.value,
+                            plateNumber: e.target.value.toUpperCase(),
                           })
                         }
-                        placeholder="e.g. Model S, 488"
+                        placeholder="MH 12 AB 1234"
+                        data-testid="input-plate"
                         className="border-slate-300"
-                        data-testid="input-other-model"
                       />
                     </div>
-                  )}
-                </div>
 
-                <div className="space-y-6">
-                  <Label>Vehicle Type</Label>
-                  <div
-                    className="px-4 py-3 bg-white border border-slate-300 rounded-lg text-sm font-medium text-slate-900"
-                    data-testid="display-vehicle-type"
-                  >
-                    {vehicleData.vehicleType || "Not selected"}
+                    <div className="space-y-2">
+                      <Label>Chassis Number (VIN)</Label>
+                      <Input
+                        value={vehicleData.chassisNumber}
+                        onChange={(e) =>
+                          setVehicleData({
+                            ...vehicleData,
+                            chassisNumber: e.target.value.toUpperCase(),
+                          })
+                        }
+                        placeholder="17-digit VIN (optional)"
+                        maxLength={17}
+                        data-testid="input-vin"
+                        className="border-slate-300"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Color</Label>
+                      <Select
+                        value={vehicleData.color}
+                        onValueChange={(value) =>
+                          setVehicleData({ ...vehicleData, color: value })
+                        }
+                      >
+                        <SelectTrigger
+                          className="border-slate-300"
+                          data-testid="select-color"
+                        >
+                          <SelectValue placeholder="Select color" />
+                        </SelectTrigger>
+                        <SelectContent
+                          position="popper"
+                          className="max-h-60 w-[var(--radix-select-trigger-width)]"
+                        >
+                          <div className="p-2 sticky top-0 bg-white z-10 border-b">
+                            <Input
+                              placeholder="Search color..."
+                              className="h-8 text-sm"
+                              onChange={(e) => {
+                                const search = e.target.value.toLowerCase();
+                                const items = e.target
+                                  .closest('[role="listbox"]')
+                                  ?.querySelectorAll('[role="option"]');
+                                items?.forEach((item) => {
+                                  const text =
+                                    item.textContent?.toLowerCase() || "";
+                                  (item as HTMLElement).style.display =
+                                    text.includes(search) ? "flex" : "none";
+                                });
+                              }}
+                              onKeyDown={(e) => e.stopPropagation()}
+                            />
+                          </div>
+                          {VEHICLE_COLORS.map((color) => (
+                            <SelectItem key={color} value={color}>
+                              {color}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
                 </div>
 
                 <div className="space-y-6">
-                  <Label>Year of Manufacture</Label>
-                  <Input
-                    value={vehicleData.year}
-                    onChange={(e) =>
-                      setVehicleData({ ...vehicleData, year: e.target.value })
-                    }
-                    placeholder="e.g., 2023"
-                    data-testid="input-vehicle-year"
-                  />
-                </div>
-
-                <div className="space-y-6">
-                  <Label>Vehicle Number *</Label>
-                  <Input
-                    value={vehicleData.plateNumber}
-                    onChange={(e) =>
-                      setVehicleData({
-                        ...vehicleData,
-                        plateNumber: e.target.value,
-                      })
-                    }
-                    placeholder="e.g., MH02 AB 1234"
-                    data-testid="input-plate-number"
-                  />
-                </div>
-
-                <div className="space-y-6">
-                  <Label>Color</Label>
-                  <Select
-                    value={vehicleData.color}
-                    onValueChange={(value) =>
-                      setVehicleData({ ...vehicleData, color: value })
-                    }
-                  >
-                    <SelectTrigger
-                      className="border-slate-300"
-                      data-testid="select-vehicle-color"
-                    >
-                      <SelectValue placeholder="Select color" />
-                    </SelectTrigger>
-                    <SelectContent
-                      position="popper"
-                      className="max-h-60 w-[var(--radix-select-trigger-width)]"
-                    >
-                      <div className="p-2 sticky top-0 bg-white z-10 border-b">
-                        <Input
-                          placeholder="Search color..."
-                          className="h-8 text-sm"
-                          onChange={(e) => {
-                            const search = e.target.value.toLowerCase();
-                            const items = e.target
-                              .closest('[role="listbox"]')
-                              ?.querySelectorAll('[role="option"]');
-                            items?.forEach((item) => {
-                              const text =
-                                item.textContent?.toLowerCase() || "";
-                              (item as HTMLElement).style.display =
-                                text.includes(search) ? "flex" : "none";
-                            });
-                          }}
-                          onKeyDown={(e) => e.stopPropagation()}
-                        />
-                      </div>
-                      {VEHICLE_COLORS.map((color) => (
-                        <SelectItem key={color} value={color}>
-                          {color}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="md:col-span-2 space-y-6">
                   <Label>Vehicle Image</Label>
-                  <Input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleVehicleImageChange}
-                    placeholder="Upload vehicle photo"
-                    data-testid="input-vehicle-image"
-                  />
-                  {vehicleImagePreview && (
-                    <div className="mt-3 relative w-full h-48 bg-slate-100 rounded-lg overflow-hidden border border-slate-200">
-                      <img
-                        src={vehicleImagePreview}
-                        alt="Vehicle preview"
-                        className="w-full h-full object-cover"
-                        data-testid="img-vehicle-preview"
-                      />
-                    </div>
-                  )}
+                  <div className="flex flex-col items-center gap-4">
+                    {vehicleImagePreview ? (
+                      <div className="relative w-full aspect-video rounded-xl overflow-hidden border-2 border-red-300 group">
+                        <img
+                          src={vehicleImagePreview}
+                          alt="Vehicle preview"
+                          className="w-full h-full object-cover"
+                        />
+                        <button
+                          onClick={() => {
+                            setVehicleImagePreview("");
+                            setVehicleData({ ...vehicleData, image: undefined });
+                          }}
+                          className="absolute top-2 right-2 bg-red-600 text-white p-1.5 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <ChevronLeft className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ) : (
+                      <label className="w-full aspect-video flex flex-col items-center justify-center border-2 border-dashed border-slate-300 rounded-xl cursor-pointer hover:border-primary hover:bg-primary/5 transition-all bg-slate-50">
+                        <Car className="w-12 h-12 text-slate-400 mb-2" />
+                        <span className="text-sm font-medium text-slate-600">
+                          Click to upload vehicle photo
+                        </span>
+                        <input
+                          type="file"
+                          className="hidden"
+                          accept="image/*"
+                          onChange={handleVehicleImageChange}
+                        />
+                      </label>
+                    )}
+                  </div>
                 </div>
               </div>
 
-              <div className="flex justify-between pt-6 border-t border-slate-200">
+              <div className="flex justify-between pt-8 border-t border-slate-200">
                 <Button
                   variant="outline"
                   onClick={() => setStep(1)}
-                  className="border-slate-300 text-slate-700 hover:bg-slate-100"
-                  data-testid="button-prev-step"
+                  className="px-8 border-slate-300 hover:bg-slate-50"
+                  data-testid="button-back"
                 >
-                  Previous
+                  <ChevronLeft className="w-4 h-4 mr-2" />
+                  Back to Personal Details
                 </Button>
                 <Button
                   onClick={handleSubmit}
-                  disabled={
-                    !canProceedStep2 || createCustomerMutation.isPending
-                  }
-                  className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white hover:shadow-lg transition-all"
-                  data-testid="button-submit-registration"
+                  disabled={!canProceedStep2 || createCustomerMutation.isPending}
+                  className="px-8 bg-primary hover:bg-primary/90 text-white font-semibold shadow-lg hover:shadow-xl transition-all"
+                  data-testid="button-submit"
                 >
-                  {createCustomerMutation.isPending
-                    ? "Registering..."
-                    : "Complete Registration"}
-                  <Check className="w-4 h-4 ml-2" />
+                  {createCustomerMutation.isPending ? (
+                    "Registering..."
+                  ) : (
+                    <>
+                      Complete Registration
+                      <Check className="w-4 h-4 ml-2" />
+                    </>
+                  )}
                 </Button>
               </div>
             </CardContent>
