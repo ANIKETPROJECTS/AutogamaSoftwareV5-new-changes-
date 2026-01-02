@@ -1,5 +1,5 @@
-import { Customer, Job, Technician, Inventory, Appointment, WhatsAppTemplate, Invoice, PriceInquiry } from './models';
-import type { ICustomer, IJob, ITechnician, IInventoryItem, IAppointment, IWhatsAppTemplate, IInvoice, JobStage, IPriceInquiry } from './models';
+import { Customer, Job, Technician, Inventory, Appointment, WhatsAppTemplate, Invoice, PriceInquiry, AccessorySale } from './models';
+import type { ICustomer, IJob, ITechnician, IInventoryItem, IAppointment, IWhatsAppTemplate, IInvoice, JobStage, IPriceInquiry, IAccessorySale } from './models';
 import mongoose from 'mongoose';
 
 export interface IStorage {
@@ -34,6 +34,8 @@ export interface IStorage {
   updateInventoryItem(id: string, data: Partial<IInventoryItem>): Promise<IInventoryItem | null>;
   adjustInventory(id: string, quantity: number): Promise<IInventoryItem | null>;
   getLowStockItems(): Promise<IInventoryItem[]>;
+  getAccessorySales(): Promise<IAccessorySale[]>;
+  createAccessorySale(data: Partial<IAccessorySale>): Promise<IAccessorySale>;
   
   addRoll(inventoryId: string, roll: any): Promise<IInventoryItem | null>;
   deleteRoll(inventoryId: string, rollId: string): Promise<IInventoryItem | null>;
@@ -329,6 +331,15 @@ export class MongoStorage implements IStorage {
     return Inventory.find({
       $expr: { $lte: ['$quantity', '$minStock'] }
     });
+  }
+
+  async getAccessorySales(): Promise<IAccessorySale[]> {
+    return AccessorySale.find().sort({ date: -1 });
+  }
+
+  async createAccessorySale(data: Partial<IAccessorySale>): Promise<IAccessorySale> {
+    const sale = new AccessorySale(data);
+    return sale.save();
   }
 
   async addRoll(inventoryId: string, roll: any): Promise<IInventoryItem | null> {

@@ -92,8 +92,20 @@ export const inventorySchema = z.object({
   quantity: z.number().min(0).default(0),
   unit: z.string().min(1),
   minStock: z.number().min(0).default(0),
-  rolls: z.array(rollSchema).default([])
+  rolls: z.array(rollSchema).default([]),
+  price: z.number().optional()
 });
+
+export const accessorySaleSchema = z.object({
+  category: z.string().min(1),
+  accessoryName: z.string().min(1),
+  price: z.number().min(0),
+  quantity: z.number().min(1),
+  total: z.number().min(0),
+  date: z.date().optional()
+});
+
+export type AccessorySale = z.infer<typeof accessorySaleSchema>;
 
 export const appointmentSchema = z.object({
   customerName: z.string().min(1),

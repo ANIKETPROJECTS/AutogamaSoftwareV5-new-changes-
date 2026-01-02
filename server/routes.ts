@@ -611,6 +611,24 @@ export async function registerRoutes(
     }
   });
 
+  app.get("/api/accessory-sales", async (req, res) => {
+    try {
+      const sales = await storage.getAccessorySales();
+      res.json(sales);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch accessory sales" });
+    }
+  });
+
+  app.post("/api/accessory-sales", async (req, res) => {
+    try {
+      const sale = await storage.createAccessorySale(req.body);
+      res.status(201).json(sale);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to record accessory sale" });
+    }
+  });
+
   app.get("/api/inventory/low-stock", async (req, res) => {
     try {
       const items = await storage.getLowStockItems();

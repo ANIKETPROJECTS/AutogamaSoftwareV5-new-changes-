@@ -127,6 +127,7 @@ export interface IInventoryItem extends Document {
   unit: string;
   minStock: number;
   rolls: IRoll[];
+  price?: number;
   createdAt: Date;
 }
 
@@ -329,8 +330,29 @@ const InventorySchema = new Schema<IInventoryItem>({
   unit: { type: String, required: true },
   minStock: { type: Number, required: true, default: 0 },
   rolls: [RollSchema],
+  price: { type: Number },
   createdAt: { type: Date, default: Date.now }
 });
+
+export interface IAccessorySale extends Document {
+  category: string;
+  accessoryName: string;
+  price: number;
+  quantity: number;
+  total: number;
+  date: Date;
+}
+
+const AccessorySaleSchema = new Schema<IAccessorySale>({
+  category: { type: String, required: true },
+  accessoryName: { type: String, required: true },
+  price: { type: Number, required: true },
+  quantity: { type: Number, required: true },
+  total: { type: Number, required: true },
+  date: { type: Date, default: Date.now }
+});
+
+export const AccessorySale = mongoose.model<IAccessorySale>('AccessorySale', AccessorySaleSchema);
 
 const AppointmentSchema = new Schema<IAppointment>({
   customerId: { type: Schema.Types.ObjectId, ref: 'Customer' },
