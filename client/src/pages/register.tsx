@@ -431,9 +431,6 @@ export default function CustomerRegistration() {
     image: "" as string | undefined,
   });
 
-  const [customMakes, setCustomMakes] = useState<string[]>([]);
-  const [customModels, setCustomModels] = useState<Record<string, string[]>>({});
-
   const { data: customersData } = useQuery({
     queryKey: ["customers"],
     queryFn: () => api.customers.list({ page: 1, limit: 1000 }),
@@ -442,7 +439,7 @@ export default function CustomerRegistration() {
   const existingCustomers = customersData?.customers || [];
 
   // Extract unique makes and models from existing customers
-  useEffect(() => {
+  const { makes: dynamicMakes, models: dynamicModels } = useMemo(() => {
     const makes = new Set<string>(VEHICLE_MAKES);
     const models = { ...VEHICLE_MODELS };
 
@@ -462,8 +459,14 @@ export default function CustomerRegistration() {
       }
     });
 
-    setCustomMakes(Array.from(makes).sort());
-    setCustomModels(models);
+    return {
+      makes: Array.from(makes).sort((a, b) => {
+        if (a === "Other") return -1;
+        if (b === "Other") return 1;
+        return a.localeCompare(b);
+      }),
+      models
+    };
   }, [existingCustomers]);
 
   const [vehicleImagePreview, setVehicleImagePreview] = useState<string>("");
@@ -572,44 +575,6 @@ export default function CustomerRegistration() {
       },
       {
         onSuccess: () => {
-          // Add custom make/model to lists if they were used
-          if (vehicleData.make === "Other" && vehicleData.otherMake) {
-            setCustomMakes(prev => {
-              const next = [...prev, vehicleData.otherMake];
-              const unique = [] as string[];
-              next.forEach(m => {
-                if (!unique.includes(m)) unique.push(m);
-              });
-              return unique;
-            });
-            if (vehicleData.otherModel) {
-              setCustomModels(prev => {
-                const existing = prev[vehicleData.otherMake] || [];
-                const next = [...existing, vehicleData.otherModel];
-                const unique = [] as string[];
-                next.forEach(m => {
-                  if (!unique.includes(m)) unique.push(m);
-                });
-                return {
-                  ...prev,
-                  [vehicleData.otherMake]: unique
-                };
-              });
-            }
-          } else if (vehicleData.model === "Other" && vehicleData.otherModel) {
-            setCustomModels(prev => {
-              const existing = prev[vehicleData.make] || [];
-              const next = [...existing, vehicleData.otherModel];
-              const unique = [] as string[];
-              next.forEach(m => {
-                if (!unique.includes(m)) unique.push(m);
-              });
-              return {
-                ...prev,
-                [vehicleData.make]: unique
-              };
-            });
-          }
           queryClient.invalidateQueries({ queryKey: ["customers"] });
           toast({ title: "Customer registered successfully!" });
           setLocation("/registered-customers");
@@ -1640,12 +1605,7 @@ export default function CustomerRegistration() {
                           />
                         </div>
                         {(() => {
-                          const makes = Array.from(new Set([...customMakes, ...VEHICLE_MAKES])).sort((a, b) => {
-                            if (a === "Other") return -1;
-                            if (b === "Other") return 1;
-                            return a.localeCompare(b);
-                          });
-                          return makes.map((make) => (
+                          return dynamicMakes.map((make) => (
                             <SelectItem key={make} value={make}>
                               {make}
                             </SelectItem>
@@ -1724,9 +1684,8 @@ export default function CustomerRegistration() {
                         </div>
                         {vehicleData.make &&
                           (() => {
-                            const standardModels = VEHICLE_MODELS[vehicleData.make as keyof typeof VEHICLE_MODELS] || [];
-                            const custom = customModels[vehicleData.make] || [];
-                            const models = Array.from(new Set(["Other", ...custom, ...standardModels])).sort((a, b) => {
+                            const standardModels = dynamicModels[vehicleData.make as keyof typeof dynamicModels] || [];
+                            const models = Array.from(new Set(["Other", ...standardModels])).sort((a, b) => {
                               if (a === "Other") return -1;
                               if (b === "Other") return 1;
                               return a.localeCompare(b);
