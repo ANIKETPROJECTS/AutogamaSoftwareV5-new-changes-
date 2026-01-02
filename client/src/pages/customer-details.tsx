@@ -214,12 +214,13 @@ export default function CustomerDetails() {
                     </div>
                     <div>
                       <p className="text-[10px] text-slate-400 font-medium uppercase mb-0.5">Selected Services</p>
-                      <p className="text-sm font-semibold text-slate-900 leading-snug">
-                        {customer.service.split(' + ').filter((s: string) => {
-                          const accessories = customer.vehicles?.[0]?.otherServices?.filter((as: any) => as.vehicleType === "Accessory") || [];
-                          return !accessories.some((acc: any) => s.includes(acc.name));
-                        }).join(' + ')}
-                      </p>
+                            <p className="text-sm font-semibold text-slate-900 leading-snug">
+                                {customer.service.split(' + ').filter((s: string) => {
+                                  const vehicle = customer.vehicles?.[0];
+                                  if (!vehicle?.otherServices) return true;
+                                  return !vehicle.otherServices.some((as: any) => as.vehicleType === "Accessory" && s.includes(as.name));
+                                }).join(' + ')}
+                              </p>
                     </div>
                   </div>
 
