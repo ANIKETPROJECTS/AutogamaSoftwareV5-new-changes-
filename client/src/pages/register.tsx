@@ -542,18 +542,41 @@ export default function CustomerRegistration() {
         onSuccess: () => {
           // Add custom make/model to lists if they were used
           if (vehicleData.make === "Other" && vehicleData.otherMake) {
-            setCustomMakes(prev => [...new Set([...prev, vehicleData.otherMake])]);
+            setCustomMakes(prev => {
+              const next = [...prev, vehicleData.otherMake];
+              const unique = [] as string[];
+              next.forEach(m => {
+                if (!unique.includes(m)) unique.push(m);
+              });
+              return unique;
+            });
             if (vehicleData.otherModel) {
-              setCustomModels(prev => ({
-                ...prev,
-                [vehicleData.otherMake]: [...new Set([...(prev[vehicleData.otherMake] || []), vehicleData.otherModel])]
-              }));
+              setCustomModels(prev => {
+                const existing = prev[vehicleData.otherMake] || [];
+                const next = [...existing, vehicleData.otherModel];
+                const unique = [] as string[];
+                next.forEach(m => {
+                  if (!unique.includes(m)) unique.push(m);
+                });
+                return {
+                  ...prev,
+                  [vehicleData.otherMake]: unique
+                };
+              });
             }
           } else if (vehicleData.model === "Other" && vehicleData.otherModel) {
-            setCustomModels(prev => ({
-              ...prev,
-              [vehicleData.make]: [...new Set([...(prev[vehicleData.make] || []), vehicleData.otherModel])]
-            }));
+            setCustomModels(prev => {
+              const existing = prev[vehicleData.make] || [];
+              const next = [...existing, vehicleData.otherModel];
+              const unique = [] as string[];
+              next.forEach(m => {
+                if (!unique.includes(m)) unique.push(m);
+              });
+              return {
+                ...prev,
+                [vehicleData.make]: unique
+              };
+            });
           }
           queryClient.invalidateQueries({ queryKey: ["customers"] });
           toast({ title: "Customer registered successfully!" });
@@ -1518,11 +1541,18 @@ export default function CustomerRegistration() {
                             onKeyDown={(e) => e.stopPropagation()}
                           />
                         </div>
-                        {Array.from(new Set([...VEHICLE_MAKES, ...customMakes])).map((make) => (
-                          <SelectItem key={make} value={make}>
-                            {make}
-                          </SelectItem>
-                        ))}
+                        {(() => {
+                          const allMakes = [...VEHICLE_MAKES, ...customMakes];
+                          const uniqueMakes = [] as string[];
+                          allMakes.forEach(m => {
+                            if (!uniqueMakes.includes(m)) uniqueMakes.push(m);
+                          });
+                          return uniqueMakes.map((make) => (
+                            <SelectItem key={make} value={make}>
+                              {make}
+                            </SelectItem>
+                          ));
+                        })()}
                       </SelectContent>
                     </Select>
                   </div>
@@ -1595,14 +1625,20 @@ export default function CustomerRegistration() {
                           />
                         </div>
                         {vehicleData.make &&
-                          Array.from(new Set([
-                            ...(VEHICLE_MODELS[vehicleData.make as keyof typeof VEHICLE_MODELS] || []),
-                            ...(customModels[vehicleData.make] || [])
-                          ])).map((model) => (
-                            <SelectItem key={model} value={model}>
-                              {model}
-                            </SelectItem>
-                          ))}
+                          (() => {
+                            const standardModels = VEHICLE_MODELS[vehicleData.make as keyof typeof VEHICLE_MODELS] || [];
+                            const custom = customModels[vehicleData.make] || [];
+                            const allModels = [...standardModels, ...custom];
+                            const uniqueModels = [] as string[];
+                            allModels.forEach(m => {
+                              if (!uniqueModels.includes(m)) uniqueModels.push(m);
+                            });
+                            return uniqueModels.map((model) => (
+                              <SelectItem key={model} value={model}>
+                                {model}
+                              </SelectItem>
+                            ));
+                          })()}
                       </SelectContent>
                     </Select>
                   </div>
