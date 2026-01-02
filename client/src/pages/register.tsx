@@ -459,7 +459,7 @@ export default function CustomerRegistration() {
     onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ["customers"] });
       toast({ title: "Customer registered successfully!" });
-      setLocation("/funnel");
+      setLocation("/registered-customers");
     },
     onError: () => {
       toast({ title: "Failed to register customer", variant: "destructive" });
@@ -580,7 +580,7 @@ export default function CustomerRegistration() {
           }
           queryClient.invalidateQueries({ queryKey: ["customers"] });
           toast({ title: "Customer registered successfully!" });
-          setLocation("/funnel");
+          setLocation("/registered-customers");
         },
         onError: (error: any) => {
           const message = error?.message || "Failed to register customer";
