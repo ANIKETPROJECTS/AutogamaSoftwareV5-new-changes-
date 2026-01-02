@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { User, Car, Check, ChevronRight, ChevronLeft } from "lucide-react";
+import { User, Car, Check, ChevronRight, ChevronLeft, Zap } from "lucide-react";
 import { useLocation } from "wouter";
 
 const REFERRAL_SOURCES = [
@@ -592,90 +592,97 @@ export default function CustomerRegistration() {
                 <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* PPF Selection - Left Column */}
                   <div className="space-y-6">
-                    <h3 className="font-medium text-sm">PPF Services</h3>
-                    <div>
-                      <Label>Category</Label>
-                      <Select
-                        value={customerData.ppfCategory}
-                        onValueChange={(value) =>
-                          setCustomerData({
-                            ...customerData,
-                            ppfCategory: value,
-                            ppfVehicleType: "",
-                            ppfWarranty: "",
-                            ppfPrice: 0,
-                          })
-                        }
-                      >
-                        <SelectTrigger className="border-slate-300" data-testid="select-ppf-category">
-                          <SelectValue placeholder="Select category" />
-                        </SelectTrigger>
-                        <SelectContent position="popper" className="max-h-60 w-[var(--radix-select-trigger-width)]">
-                          {Object.keys(PPF_CATEGORIES).map((category) => (
-                            <SelectItem key={category} value={category}>
-                              {category}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
+                    <Card className="border-red-300 shadow-sm p-4 space-y-4">
+                      <h3 className="font-semibold text-sm text-primary flex items-center gap-2">
+                        <Zap className="w-4 h-4" />
+                        PPF Services
+                      </h3>
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>PPF Category</Label>
+                          <Select
+                            value={customerData.ppfCategory}
+                            onValueChange={(value) =>
+                              setCustomerData({
+                                ...customerData,
+                                ppfCategory: value,
+                                ppfVehicleType: "",
+                                ppfWarranty: "",
+                                ppfPrice: 0,
+                              })
+                            }
+                          >
+                            <SelectTrigger className="border-slate-300" data-testid="select-ppf-category">
+                              <SelectValue placeholder="Select category" />
+                            </SelectTrigger>
+                            <SelectContent position="popper" className="max-h-60 w-[var(--radix-select-trigger-width)]">
+                              {Object.keys(PPF_CATEGORIES).map((category) => (
+                                <SelectItem key={category} value={category}>
+                                  {category}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
 
-                    {customerData.ppfCategory && (
-                      <div>
-                        <Label>Vehicle Type</Label>
-                        <Select
-                          value={customerData.ppfVehicleType}
-                          onValueChange={(value) =>
-                            setCustomerData({
-                              ...customerData,
-                              ppfVehicleType: value,
-                              ppfWarranty: "",
-                              ppfPrice: 0,
-                            })
-                          }
-                        >
-                          <SelectTrigger className="border-slate-300" data-testid="select-ppf-vehicle">
-                            <SelectValue placeholder="Select vehicle type" />
-                          </SelectTrigger>
-                          <SelectContent position="popper" className="max-h-60 w-[var(--radix-select-trigger-width)]">
-                            {Object.keys(PPF_CATEGORIES[customerData.ppfCategory as keyof typeof PPF_CATEGORIES]).map((type) => (
-                              <SelectItem key={type} value={type}>
-                                {type}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    )}
+                        {customerData.ppfCategory && (
+                          <div className="space-y-2">
+                            <Label>Vehicle Type</Label>
+                            <Select
+                              value={customerData.ppfVehicleType}
+                              onValueChange={(value) =>
+                                setCustomerData({
+                                  ...customerData,
+                                  ppfVehicleType: value,
+                                  ppfWarranty: "",
+                                  ppfPrice: 0,
+                                })
+                              }
+                            >
+                              <SelectTrigger className="border-slate-300" data-testid="select-ppf-vehicle">
+                                <SelectValue placeholder="Select vehicle type" />
+                              </SelectTrigger>
+                              <SelectContent position="popper" className="max-h-60 w-[var(--radix-select-trigger-width)]">
+                                {Object.keys(PPF_CATEGORIES[customerData.ppfCategory as keyof typeof PPF_CATEGORIES]).map((type) => (
+                                  <SelectItem key={type} value={type}>
+                                    {type}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        )}
 
-                    {customerData.ppfVehicleType && (
-                      <div>
-                        <Label>Warranty & Price</Label>
-                        <Select
-                          value={customerData.ppfWarranty}
-                          onValueChange={(value) => {
-                            const categoryData = PPF_CATEGORIES[customerData.ppfCategory as keyof typeof PPF_CATEGORIES] as Record<string, Record<string, number>>;
-                            const price = categoryData[customerData.ppfVehicleType][value] as number;
-                            setCustomerData({
-                              ...customerData,
-                              ppfWarranty: value,
-                              ppfPrice: price,
-                            });
-                          }}
-                        >
-                          <SelectTrigger className="border-slate-300" data-testid="select-ppf-warranty">
-                            <SelectValue placeholder="Select warranty" />
-                          </SelectTrigger>
-                          <SelectContent position="popper" className="max-h-60 w-[var(--radix-select-trigger-width)]">
-                            {Object.entries((PPF_CATEGORIES[customerData.ppfCategory as keyof typeof PPF_CATEGORIES] as Record<string, Record<string, number>>)[customerData.ppfVehicleType]).map(([warranty, price]) => (
-                              <SelectItem key={warranty} value={warranty}>
-                                {warranty} - ₹{(price as number).toLocaleString('en-IN')}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        {customerData.ppfVehicleType && (
+                          <div className="space-y-2">
+                            <Label>Warranty & Price</Label>
+                            <Select
+                              value={customerData.ppfWarranty}
+                              onValueChange={(value) => {
+                                const categoryData = PPF_CATEGORIES[customerData.ppfCategory as keyof typeof PPF_CATEGORIES] as Record<string, Record<string, number>>;
+                                const price = categoryData[customerData.ppfVehicleType][value] as number;
+                                setCustomerData({
+                                  ...customerData,
+                                  ppfWarranty: value,
+                                  ppfPrice: price,
+                                });
+                              }}
+                            >
+                              <SelectTrigger className="border-slate-300" data-testid="select-ppf-warranty">
+                                <SelectValue placeholder="Select warranty" />
+                              </SelectTrigger>
+                              <SelectContent position="popper" className="max-h-60 w-[var(--radix-select-trigger-width)]">
+                                {Object.entries((PPF_CATEGORIES[customerData.ppfCategory as keyof typeof PPF_CATEGORIES] as Record<string, Record<string, number>>)[customerData.ppfVehicleType]).map(([warranty, price]) => (
+                                  <SelectItem key={warranty} value={warranty}>
+                                    {warranty} - ₹{(price as number).toLocaleString('en-IN')}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        )}
                       </div>
-                    )}
+                    </Card>
                   </div>
 
                   {/* Other Services Selection - Right Column */}
