@@ -620,79 +620,82 @@ export default function CustomerService() {
                       {showPpfSection ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                     </div>
                   </CardHeader>
-                  {showPpfSection && (
-                    <CardContent className="space-y-3">
-                      <div className="space-y-2">
-                        <Label className="text-sm">PPF Category</Label>
-                        <Select value={ppfCategory} onValueChange={(val) => {
-                          setPpfCategory(val);
-                          setPpfWarranty('');
-                        }}>
-                          <SelectTrigger data-testid="select-ppf-category">
-                            <SelectValue placeholder="Select category" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {Object.keys(PPF_CATEGORIES).map((cat) => (
-                              <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
+                  <CardContent className="space-y-3 pt-0">
+                    <div className="space-y-2">
+                      <Label className="text-sm">PPF Category</Label>
+                      <Select value={ppfCategory} onValueChange={(val) => {
+                        setPpfCategory(val);
+                        setPpfWarranty('');
+                        setShowPpfSection(true);
+                      }}>
+                        <SelectTrigger data-testid="select-ppf-category">
+                          <SelectValue placeholder="Select category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {Object.keys(PPF_CATEGORIES).map((cat) => (
+                            <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
 
-                      <div className="space-y-2">
-                        <Label className="text-sm">Vehicle Type</Label>
-                        <Select value={ppfVehicleType} onValueChange={(val) => {
-                          setPpfVehicleType(val);
-                          setPpfWarranty('');
-                        }}>
-                          <SelectTrigger data-testid="select-ppf-vehicle-type">
-                            <SelectValue placeholder="Select vehicle type" />
-                          </SelectTrigger>
-                          <SelectContent className="max-h-64 overflow-y-auto">
-                            {VEHICLE_TYPES.map((type) => (
-                              <SelectItem key={type} value={type}>{type}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
+                    {showPpfSection && (
+                      <div className="space-y-3 pt-3 border-t">
+                        <div className="space-y-2">
+                          <Label className="text-sm">Vehicle Type</Label>
+                          <Select value={ppfVehicleType} onValueChange={(val) => {
+                            setPpfVehicleType(val);
+                            setPpfWarranty('');
+                          }}>
+                            <SelectTrigger data-testid="select-ppf-vehicle-type">
+                              <SelectValue placeholder="Select vehicle type" />
+                            </SelectTrigger>
+                            <SelectContent className="max-h-64 overflow-y-auto">
+                              {VEHICLE_TYPES.map((type) => (
+                                <SelectItem key={type} value={type}>{type}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
 
-                      <div className="space-y-2">
-                        <Label className="text-sm">Warranty & Price</Label>
-                        <Select key={`${ppfCategory}-${ppfVehicleType}`} value={ppfWarranty} onValueChange={setPpfWarranty} disabled={!ppfCategory || !ppfVehicleType}>
-                          <SelectTrigger data-testid="select-ppf-warranty">
-                            <SelectValue placeholder="Select warranty" />
-                          </SelectTrigger>
-                          <SelectContent className="max-h-64 overflow-y-auto">
-                            {getAvailableWarranties().map((warranty) => {
-                              const categoryData = PPF_CATEGORIES[ppfCategory as keyof typeof PPF_CATEGORIES];
-                              const vehicleData = categoryData ? (categoryData[ppfVehicleType as keyof typeof categoryData] as Record<string, number>) : null;
-                              const price = vehicleData ? vehicleData[warranty] : null;
-                              return (
-                                <SelectItem key={warranty} value={warranty}>
-                                  {warranty} {price ? `- ₹${price.toLocaleString('en-IN')}` : ''}
-                                </SelectItem>
-                              );
-                            })}
-                          </SelectContent>
-                        </Select>
-                      </div>
+                        <div className="space-y-2">
+                          <Label className="text-sm">Warranty & Price</Label>
+                          <Select key={`${ppfCategory}-${ppfVehicleType}`} value={ppfWarranty} onValueChange={setPpfWarranty} disabled={!ppfCategory || !ppfVehicleType}>
+                            <SelectTrigger data-testid="select-ppf-warranty">
+                              <SelectValue placeholder="Select warranty" />
+                            </SelectTrigger>
+                            <SelectContent className="max-h-64 overflow-y-auto">
+                              {getAvailableWarranties().map((warranty) => {
+                                const categoryData = PPF_CATEGORIES[ppfCategory as keyof typeof PPF_CATEGORIES];
+                                const vehicleData = categoryData ? (categoryData[ppfVehicleType as keyof typeof categoryData] as Record<string, number>) : null;
+                                const price = vehicleData ? vehicleData[warranty] : null;
+                                return (
+                                  <SelectItem key={warranty} value={warranty}>
+                                    {warranty} {price ? `- ₹${price.toLocaleString('en-IN')}` : ''}
+                                  </SelectItem>
+                                );
+                              })}
+                            </SelectContent>
+                          </Select>
+                        </div>
 
-                      {ppfPrice > 0 && (
-                        <div className="space-y-3">
-                          <div className="bg-gray-50 p-3 rounded-md border border-gray-200">
-                            <div className="flex justify-between items-center">
-                              <Label className="text-sm font-medium">PPF Price</Label>
-                              <span className="text-lg font-bold text-primary">₹{ppfPrice.toLocaleString('en-IN')}</span>
+                        {ppfPrice > 0 && (
+                          <div className="space-y-3">
+                            <div className="bg-gray-50 p-3 rounded-md border border-gray-200">
+                              <div className="flex justify-between items-center">
+                                <Label className="text-sm font-medium">PPF Price</Label>
+                                <span className="text-lg font-bold text-primary">₹{ppfPrice.toLocaleString('en-IN')}</span>
+                              </div>
+                            </div>
+                            <div className="w-full">
+                              <Label className="text-xs">Discount</Label>
+                              <Input type="number" value={ppfDiscount} onChange={(e) => setPpfDiscount(e.target.value)} />
                             </div>
                           </div>
-                          <div className="w-full">
-                            <Label className="text-xs">Discount</Label>
-                            <Input type="number" value={ppfDiscount} onChange={(e) => setPpfDiscount(e.target.value)} />
-                          </div>
-                        </div>
-                      )}
-                    </CardContent>
-                  )}
+                        )}
+                      </div>
+                    )}
+                  </CardContent>
                 </Card>
 
                 <Card className="border border-red-200">
@@ -702,77 +705,80 @@ export default function CustomerService() {
                       {showAddAccessorySection ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                     </div>
                   </CardHeader>
-                  {showAddAccessorySection && (
-                    <CardContent className="space-y-3">
-                      <div className="space-y-2">
-                        <Label className="text-sm">Category</Label>
-                        <Select value={selectedAccessoryCategory} onValueChange={(val) => {
-                          setSelectedAccessoryCategory(val);
-                          setSelectedAccessoryId('');
-                        }}>
-                          <SelectTrigger data-testid="select-accessory-category">
-                            <SelectValue placeholder="Select category" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {Array.from(new Set(inventory.filter((i: any) => i.category === 'Accessories').map((i: any) => i.name))).map((name: any) => (
-                              <SelectItem key={name} value={name}>{name}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
+                  <CardContent className="space-y-3 pt-0">
+                    <div className="space-y-2">
+                      <Label className="text-sm">Category</Label>
+                      <Select value={selectedAccessoryCategory} onValueChange={(val) => {
+                        setSelectedAccessoryCategory(val);
+                        setSelectedAccessoryId('');
+                        setShowAddAccessorySection(true);
+                      }}>
+                        <SelectTrigger data-testid="select-accessory-category">
+                          <SelectValue placeholder="Select category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {Array.from(new Set(inventory.filter((i: any) => i.category === 'Accessories').map((i: any) => i.name))).map((name: any) => (
+                            <SelectItem key={name} value={name}>{name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
 
-                      <div className="space-y-2">
-                        <Label className="text-sm">Accessory Name</Label>
-                        <Select value={selectedAccessoryId} onValueChange={setSelectedAccessoryId} disabled={!selectedAccessoryCategory}>
-                          <SelectTrigger data-testid="select-accessory-name">
-                            <SelectValue placeholder="Select accessory" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {inventory
-                              .filter((i: any) => i.category === 'Accessories' && i.name === selectedAccessoryCategory)
-                              .map((item: any) => (
-                                <SelectItem key={item._id} value={item._id}>
-                                  {item.name} - ₹{item.price?.toLocaleString('en-IN')} (Stock: {item.quantity})
-                                </SelectItem>
-                              ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label className="text-sm">Quantity</Label>
-                        <Input 
-                          type="number" 
-                          value={accessoryQuantity} 
-                          onChange={(e) => setAccessoryQuantity(e.target.value)} 
-                          min="1" 
-                        />
-                      </div>
-
-                      <Button type="button" variant="outline" onClick={handleAddAccessory} disabled={!selectedAccessoryId} className="w-full">
-                        Add Accessory
-                      </Button>
-
-                      {selectedAccessories.length > 0 && (
-                        <div className="space-y-2 mt-3">
-                          <Label className="text-sm font-semibold">Selected Accessories</Label>
-                          <div className="border rounded-lg divide-y">
-                            {selectedAccessories.map((acc, index) => (
-                              <div key={index} className="flex items-center justify-between p-3">
-                                <div>
-                                  <p className="font-medium text-sm">{acc.name}</p>
-                                  <p className="text-xs text-muted-foreground">{acc.quantity} units @ ₹{acc.price.toLocaleString('en-IN')}</p>
-                                </div>
-                                <Button type="button" variant="ghost" size="icon" onClick={() => handleRemoveAccessory(index)}>
-                                  <Trash2 className="w-4 h-4 text-red-500" />
-                                </Button>
-                              </div>
-                            ))}
-                          </div>
+                    {showAddAccessorySection && (
+                      <div className="space-y-3 pt-3 border-t">
+                        <div className="space-y-2">
+                          <Label className="text-sm">Accessory Name</Label>
+                          <Select value={selectedAccessoryId} onValueChange={setSelectedAccessoryId} disabled={!selectedAccessoryCategory}>
+                            <SelectTrigger data-testid="select-accessory-name">
+                              <SelectValue placeholder="Select accessory" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {inventory
+                                .filter((i: any) => i.category === 'Accessories' && i.name === selectedAccessoryCategory)
+                                .map((item: any) => (
+                                  <SelectItem key={item._id} value={item._id}>
+                                    {item.name} - ₹{item.price?.toLocaleString('en-IN')} (Stock: {item.quantity})
+                                  </SelectItem>
+                                ))}
+                            </SelectContent>
+                          </Select>
                         </div>
-                      )}
-                    </CardContent>
-                  )}
+
+                        <div className="space-y-2">
+                          <Label className="text-sm">Quantity</Label>
+                          <Input 
+                            type="number" 
+                            value={accessoryQuantity} 
+                            onChange={(e) => setAccessoryQuantity(e.target.value)} 
+                            min="1" 
+                          />
+                        </div>
+
+                        <Button type="button" variant="outline" onClick={handleAddAccessory} disabled={!selectedAccessoryId} className="w-full">
+                          Add Accessory
+                        </Button>
+
+                        {selectedAccessories.length > 0 && (
+                          <div className="space-y-2 mt-3">
+                            <Label className="text-sm font-semibold">Selected Accessories</Label>
+                            <div className="border rounded-lg divide-y">
+                              {selectedAccessories.map((acc, index) => (
+                                <div key={index} className="flex items-center justify-between p-3">
+                                  <div>
+                                    <p className="font-medium text-sm">{acc.name}</p>
+                                    <p className="text-xs text-muted-foreground">{acc.quantity} units @ ₹{acc.price.toLocaleString('en-IN')}</p>
+                                  </div>
+                                  <Button type="button" variant="ghost" size="icon" onClick={() => handleRemoveAccessory(index)}>
+                                    <Trash2 className="w-4 h-4 text-red-500" />
+                                  </Button>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </CardContent>
                 </Card>
 
                 <Card className="border border-red-200">
@@ -782,88 +788,93 @@ export default function CustomerService() {
                       {showOtherServicesSection ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                     </div>
                   </CardHeader>
-                  {showOtherServicesSection && (
-                    <CardContent className="space-y-3">
-                      <div className="space-y-2">
-                        <Label className="text-sm">Select Service</Label>
-                        <Select value={otherServiceName} onValueChange={setOtherServiceName}>
-                          <SelectTrigger data-testid="select-other-service">
-                            <SelectValue placeholder="Choose a service" />
-                          </SelectTrigger>
-                          <SelectContent className="max-h-64 overflow-y-auto">
-                            {Object.keys(OTHER_SERVICES).map((service) => (
-                              <SelectItem key={service} value={service}>{service}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
+                  <CardContent className="space-y-3 pt-0">
+                    <div className="space-y-2">
+                      <Label className="text-sm">Select Service</Label>
+                      <Select value={otherServiceName} onValueChange={(val) => {
+                        setOtherServiceName(val);
+                        setShowOtherServicesSection(true);
+                      }}>
+                        <SelectTrigger data-testid="select-other-service">
+                          <SelectValue placeholder="Choose a service" />
+                        </SelectTrigger>
+                        <SelectContent className="max-h-64 overflow-y-auto">
+                          {Object.keys(OTHER_SERVICES).map((service) => (
+                            <SelectItem key={service} value={service}>{service}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
 
-                      <div className="space-y-2">
-                        <Label className="text-sm">Vehicle Type</Label>
-                        <Select value={otherServiceVehicleType} onValueChange={setOtherServiceVehicleType}>
-                          <SelectTrigger data-testid="select-other-service-vehicle-type">
-                            <SelectValue placeholder="Select vehicle type" />
-                          </SelectTrigger>
-                          <SelectContent className="max-h-64 overflow-y-auto">
-                            {VEHICLE_TYPES.map((type) => {
-                              const serviceData = otherServiceName ? OTHER_SERVICES[otherServiceName as keyof typeof OTHER_SERVICES] : null;
-                              const price = serviceData ? (serviceData as any)[type] : null;
-                              return (
-                                <SelectItem key={type} value={type}>
-                                  {type} {price ? `- ₹${price.toLocaleString('en-IN')}` : ''}
-                                </SelectItem>
-                              );
-                            })}
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <Button type="button" variant="outline" onClick={handleAddOtherService} disabled={!otherServiceName || !otherServiceVehicleType} className="w-full">
-                        Add Service
-                      </Button>
-
-                      {selectedOtherServices.length > 0 && (
-                        <div className="space-y-4 mt-3">
-                          <div className="border-b pb-2">
-                            <Label className="text-sm font-semibold">Selected Services</Label>
-                          </div>
-                          <div className="border rounded-lg divide-y">
-                            {selectedOtherServices.map((service, index) => (
-                              <div key={index} className="space-y-2 p-3">
-                                <div className="flex items-center justify-between">
-                                  <div>
-                                    <p className="font-medium text-sm">{service.name}</p>
-                                    <p className="text-xs text-muted-foreground">{service.vehicleType}</p>
-                                  </div>
-                                  <Button type="button" variant="ghost" size="icon" onClick={() => handleRemoveOtherService(index)}>
-                                    <Trash2 className="w-4 h-4 text-red-500" />
-                                  </Button>
-                                </div>
-                                <div className="bg-gray-50 p-2 rounded-md border border-gray-200">
-                                  <div className="flex justify-between items-center mb-2">
-                                    <Label className="text-sm font-medium">Service Price</Label>
-                                    <span className="text-lg font-bold text-primary">₹{service.price.toLocaleString('en-IN')}</span>
-                                  </div>
-                                  <div className="w-full">
-                                    <Label className="text-xs">Discount</Label>
-                                    <Input 
-                                      type="number" 
-                                      value={service.discount || ''} 
-                                      onChange={(e) => {
-                                        const newServices = [...selectedOtherServices];
-                                        newServices[index].discount = parseFloat(e.target.value) || 0;
-                                        setSelectedOtherServices(newServices);
-                                      }} 
-                                    />
-                                  </div>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
+                    {showOtherServicesSection && (
+                      <div className="space-y-3 pt-3 border-t">
+                        <div className="space-y-2">
+                          <Label className="text-sm">Vehicle Type</Label>
+                          <Select value={otherServiceVehicleType} onValueChange={setOtherServiceVehicleType}>
+                            <SelectTrigger data-testid="select-other-service-vehicle-type">
+                              <SelectValue placeholder="Select vehicle type" />
+                            </SelectTrigger>
+                            <SelectContent className="max-h-64 overflow-y-auto">
+                              {VEHICLE_TYPES.map((type) => {
+                                const serviceData = otherServiceName ? OTHER_SERVICES[otherServiceName as keyof typeof OTHER_SERVICES] : null;
+                                const price = serviceData ? (serviceData as any)[type] : null;
+                                return (
+                                  <SelectItem key={type} value={type}>
+                                    {type} {price ? `- ₹${price.toLocaleString('en-IN')}` : ''}
+                                  </SelectItem>
+                                );
+                              })}
+                            </SelectContent>
+                          </Select>
                         </div>
-                      )}
-                    </CardContent>
-                  )}
+
+                        <Button type="button" variant="outline" onClick={handleAddOtherService} disabled={!otherServiceName || !otherServiceVehicleType} className="w-full">
+                          Add Service
+                        </Button>
+
+                        {selectedOtherServices.length > 0 && (
+                          <div className="space-y-4 mt-3">
+                            <div className="border-b pb-2">
+                              <Label className="text-sm font-semibold">Selected Services</Label>
+                            </div>
+                            <div className="border rounded-lg divide-y">
+                              {selectedOtherServices.map((service, index) => (
+                                <div key={index} className="space-y-2 p-3">
+                                  <div className="flex items-center justify-between">
+                                    <div>
+                                      <p className="font-medium text-sm">{service.name}</p>
+                                      <p className="text-xs text-muted-foreground">{service.vehicleType}</p>
+                                    </div>
+                                    <Button type="button" variant="ghost" size="icon" onClick={() => handleRemoveOtherService(index)}>
+                                      <Trash2 className="w-4 h-4 text-red-500" />
+                                    </Button>
+                                  </div>
+                                  <div className="bg-gray-50 p-2 rounded-md border border-gray-200">
+                                    <div className="flex justify-between items-center mb-2">
+                                      <Label className="text-sm font-medium">Service Price</Label>
+                                      <span className="text-lg font-bold text-primary">₹{service.price.toLocaleString('en-IN')}</span>
+                                    </div>
+                                    <div className="w-full">
+                                      <Label className="text-xs">Discount</Label>
+                                      <Input 
+                                        type="number" 
+                                        value={service.discount || ''} 
+                                        onChange={(e) => {
+                                          const newServices = [...selectedOtherServices];
+                                          newServices[index].discount = parseFloat(e.target.value) || 0;
+                                          setSelectedOtherServices(newServices);
+                                        }} 
+                                      />
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </CardContent>
                 </Card>
               </div>
 
