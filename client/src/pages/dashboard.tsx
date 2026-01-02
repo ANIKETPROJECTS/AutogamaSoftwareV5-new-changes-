@@ -399,7 +399,7 @@ export default function Dashboard() {
       </div>
 
       {/* Active Jobs Table */}
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-6">
         <Card
           className="bg-gradient-to-br from-white to-slate-50 border border-red-300 rounded-xl overflow-hidden shadow-sm hover:shadow-lg hover:border-red-400 transition-all"
           data-testid="card-active-jobs"
@@ -441,23 +441,6 @@ export default function Dashboard() {
                 <p className="font-medium">No active jobs</p>
               </div>
             )}
-          </CardContent>
-        </Card>
-
-        <Card
-          className="bg-gradient-to-br from-white to-slate-50 border border-red-300 rounded-xl overflow-hidden shadow-sm hover:shadow-lg hover:border-red-400 transition-all"
-        >
-          <CardHeader className="pb-4 border-b border-slate-200 bg-gradient-to-r from-primary/5 to-transparent">
-            <CardTitle className="flex items-center gap-3 text-base text-slate-900 font-semibold">
-              <ShoppingBag className="w-5 h-5 text-primary" />
-              Quick Accessories Sale
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pt-6">
-            <p className="text-sm text-slate-600 mb-4">Click below to record an accessory sale and auto-create inventory items.</p>
-            <Button className="w-full" onClick={() => setLocation('/accessories')}>
-              Go to Accessories Section
-            </Button>
           </CardContent>
         </Card>
       </div>
