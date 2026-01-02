@@ -621,15 +621,7 @@ export default function CustomerRegistration() {
     }
 
     if (customerData.referralSource === "Friend/Family") {
-      if (!customerData.referrerName) {
-        newErrors.referrerName = "Please enter referrer's name";
-      }
-      if (
-        !customerData.referrerPhone ||
-        !validatePhone(customerData.referrerPhone)
-      ) {
-        newErrors.referrerPhone = "Please enter valid 10-digit phone number";
-      }
+      // Fields are optional as per user request
     }
 
     setErrors(newErrors);
