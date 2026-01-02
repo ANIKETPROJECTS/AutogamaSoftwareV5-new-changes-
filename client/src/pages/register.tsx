@@ -296,6 +296,9 @@ export default function CustomerRegistration() {
     ppfVehicleType: "",
     ppfWarranty: "",
     ppfPrice: 0,
+    tempAccessoryCategory: "",
+    tempAccessoryName: "",
+    accessoryQuantity: 1,
     selectedOtherServices: [] as Array<{ name: string; vehicleType: string; price: number }>,
     tempServiceName: "",
     tempServiceVehicleType: "",
@@ -623,6 +626,77 @@ export default function CustomerRegistration() {
                               ))}
                             </SelectContent>
                           </Select>
+                        </div>
+
+                        <div className="space-y-4 pt-2 border-t border-slate-100">
+                          <h3 className="font-semibold text-sm text-primary flex items-center gap-2">
+                            <Zap className="w-4 h-4" />
+                            Accessory Section
+                          </h3>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <Label>Accessory Category</Label>
+                              <Select
+                                value={customerData.tempAccessoryCategory}
+                                onValueChange={(value) =>
+                                  setCustomerData({
+                                    ...customerData,
+                                    tempAccessoryCategory: value,
+                                    tempAccessoryName: "",
+                                  })
+                                }
+                              >
+                                <SelectTrigger className="border-slate-300">
+                                  <SelectValue placeholder="Select category" />
+                                </SelectTrigger>
+                                <SelectContent position="popper" className="max-h-60 w-[var(--radix-select-trigger-width)]">
+                                  <SelectItem value="Exterior">Exterior</SelectItem>
+                                  <SelectItem value="Interior">Interior</SelectItem>
+                                  <SelectItem value="Electronics">Electronics</SelectItem>
+                                  <SelectItem value="Other">Other</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="space-y-2">
+                              <Label>Accessory Name</Label>
+                              <Select
+                                value={customerData.tempAccessoryName}
+                                onValueChange={(value) =>
+                                  setCustomerData({
+                                    ...customerData,
+                                    tempAccessoryName: value,
+                                  })
+                                }
+                                disabled={!customerData.tempAccessoryCategory}
+                              >
+                                <SelectTrigger className="border-slate-300">
+                                  <SelectValue placeholder="Select accessory" />
+                                </SelectTrigger>
+                                <SelectContent position="popper" className="max-h-60 w-[var(--radix-select-trigger-width)]">
+                                  {/* This would ideally be populated from inventory or a constant */}
+                                  <SelectItem value="Car Mat">Car Mat</SelectItem>
+                                  <SelectItem value="Seat Cover">Seat Cover</SelectItem>
+                                  <SelectItem value="Dash Cam">Dash Cam</SelectItem>
+                                  <SelectItem value="Perfume">Perfume</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="space-y-2">
+                              <Label>Quantity</Label>
+                              <Input
+                                type="number"
+                                min="1"
+                                value={customerData.accessoryQuantity || 1}
+                                onChange={(e) =>
+                                  setCustomerData({
+                                    ...customerData,
+                                    accessoryQuantity: parseInt(e.target.value) || 1,
+                                  })
+                                }
+                                className="border-slate-300"
+                              />
+                            </div>
+                          </div>
                         </div>
 
                         {customerData.ppfCategory && (
