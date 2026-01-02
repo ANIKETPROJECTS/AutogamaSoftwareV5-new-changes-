@@ -1640,7 +1640,11 @@ export default function CustomerRegistration() {
                           />
                         </div>
                         {(() => {
-                          const makes = Array.from(new Set([...VEHICLE_MAKES, ...customMakes])).sort();
+                          const makes = Array.from(new Set([...customMakes, ...VEHICLE_MAKES])).sort((a, b) => {
+                            if (a === "Other") return -1;
+                            if (b === "Other") return 1;
+                            return a.localeCompare(b);
+                          });
                           return makes.map((make) => (
                             <SelectItem key={make} value={make}>
                               {make}
@@ -1722,7 +1726,11 @@ export default function CustomerRegistration() {
                           (() => {
                             const standardModels = VEHICLE_MODELS[vehicleData.make as keyof typeof VEHICLE_MODELS] || [];
                             const custom = customModels[vehicleData.make] || [];
-                            const models = Array.from(new Set([...standardModels, ...custom])).sort();
+                            const models = Array.from(new Set([...custom, ...standardModels])).sort((a, b) => {
+                              if (a === "Other") return -1;
+                              if (b === "Other") return 1;
+                              return a.localeCompare(b);
+                            });
                             return models.map((model) => (
                               <SelectItem key={model} value={model}>
                                 {model}
