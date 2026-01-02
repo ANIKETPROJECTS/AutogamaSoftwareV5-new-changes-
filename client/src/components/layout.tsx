@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'wouter';
-import { Menu, X, LayoutDashboard, UserPlus, Filter, Users, Wrench, UserCog, FileText, CreditCard, Package, Calendar, MessageCircle, Settings, LogOut, Bell, User, MessageSquare, CalendarClock } from 'lucide-react';
+import { Menu, X, LayoutDashboard, UserPlus, Filter, Users, Wrench, UserCog, FileText, CreditCard, Package, Calendar, MessageCircle, Settings, LogOut, Bell, User, MessageSquare, CalendarClock, Clock, Car, Phone, Mail, Info } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { cn } from '@/lib/utils';
@@ -16,6 +16,14 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Card } from '@/components/ui/card';
 import { format, isToday, isTomorrow, addDays, startOfDay, endOfDay } from 'date-fns';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
+import { Separator } from '@/components/ui/separator';
 
 const menuItems = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
@@ -46,6 +54,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
   const [dismissedJobs, setDismissedJobs] = useState<string[]>([]);
+  const [selectedAppointment, setSelectedAppointment] = useState<any>(null);
 
   const { data: appointmentsData } = useQuery({
     queryKey: ['appointments'],
@@ -222,11 +231,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
                       return (
                         <div 
                           key={appt._id} 
+                          onClick={() => setSelectedAppointment(appt)}
                           className={cn(
-                            "p-2 rounded-md border text-sm transition-colors",
+                            "p-2 rounded-md border text-sm transition-colors cursor-pointer hover:shadow-sm",
                             urgent 
-                              ? "bg-red-50 border-red-200 text-red-900" 
-                              : "bg-slate-50 border-slate-100 text-slate-900"
+                              ? "bg-red-50 border-red-200 text-red-900 hover:bg-red-100" 
+                              : "bg-slate-50 border-slate-100 text-slate-900 hover:bg-slate-100"
                           )}
                         >
                           <div className="flex justify-between items-start gap-2">
@@ -236,7 +246,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                             </Badge>
                           </div>
                           <div className="flex items-center justify-between mt-1 text-[11px] opacity-80">
-                            <span>{appt.vehicleName}</span>
+                            <span>{appt.vehicleInfo}</span>
                             <span>{appt.time}</span>
                           </div>
                         </div>
@@ -380,6 +390,113 @@ export function Layout({ children }: { children: React.ReactNode }) {
           {children}
         </div>
       </main>
+
+      <Dialog open={!!selectedAppointment} onOpenChange={(open) => !open && setSelectedAppointment(null)}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <div className="flex items-center gap-2 mb-1">
+              <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 uppercase text-[10px]">
+                {selectedAppointment?.status}
+              </Badge>
+              {selectedAppointment && (isToday(new Date(selectedAppointment.date)) || isTomorrow(new Date(selectedAppointment.date))) && (
+                <Badge variant="destructive" className="uppercase text-[10px]">Urgent</Badge>
+              )}
+            </div>
+            <DialogTitle className="text-xl flex items-center gap-2">
+              <User className="w-5 h-5 text-slate-400" />
+              {selectedAppointment?.customerName}
+            </DialogTitle>
+            <DialogDescription>
+              Appointment details for {selectedAppointment && format(new Date(selectedAppointment.date), 'MMMM dd, yyyy')}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="grid gap-4 py-4">
+            <div className="flex items-center gap-3 text-sm">
+              <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center shrink-0">
+                <Car className="w-4 h-4 text-slate-600" />
+              </div>
+              <div className="flex-1">
+                <p className="font-medium text-slate-900">Vehicle Info</p>
+                <p className="text-slate-500">{selectedAppointment?.vehicleInfo}</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 text-sm">
+              <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center shrink-0">
+                <Wrench className="w-4 h-4 text-slate-600" />
+              </div>
+              <div className="flex-1">
+                <p className="font-medium text-slate-900">Service Type</p>
+                <p className="text-slate-500">{selectedAppointment?.serviceType}</p>
+              </div>
+            </div>
+
+            <Separator />
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex items-center gap-3 text-sm">
+                <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center shrink-0">
+                  <Calendar className="w-4 h-4 text-slate-600" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-medium text-slate-900">Date</p>
+                  <p className="text-slate-500">{selectedAppointment && format(new Date(selectedAppointment.date), 'MMM dd, yyyy')}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 text-sm">
+                <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center shrink-0">
+                  <Clock className="w-4 h-4 text-slate-600" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-medium text-slate-900">Time</p>
+                  <p className="text-slate-500">{selectedAppointment?.time}</p>
+                </div>
+              </div>
+            </div>
+
+            <Separator />
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex items-center gap-3 text-sm">
+                <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center shrink-0">
+                  <Phone className="w-4 h-4 text-slate-600" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-medium text-slate-900">Phone</p>
+                  <p className="text-slate-500">{selectedAppointment?.customerPhone}</p>
+                </div>
+              </div>
+              {selectedAppointment?.customerEmail && (
+                <div className="flex items-center gap-3 text-sm">
+                  <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center shrink-0">
+                    <Mail className="w-4 h-4 text-slate-600" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-medium text-slate-900">Email</p>
+                    <p className="text-slate-500 truncate max-w-[120px]">{selectedAppointment?.customerEmail}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {selectedAppointment?.notes && (
+              <>
+                <Separator />
+                <div className="flex items-start gap-3 text-sm">
+                  <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center shrink-0">
+                    <Info className="w-4 h-4 text-slate-600" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-medium text-slate-900">Notes</p>
+                    <p className="text-slate-500 italic">"{selectedAppointment.notes}"</p>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
