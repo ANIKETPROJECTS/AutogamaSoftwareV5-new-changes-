@@ -55,6 +55,11 @@ export default function CustomerService() {
   const [ppfGstEnabled, setPpfGstEnabled] = useState(false);
   const [otherServicesGstEnabled, setOtherServicesGstEnabled] = useState(false);
   const [ppfWarrantyFromPreferences, setPpfWarrantyFromPreferences] = useState(false);
+  const [showAddAccessorySection, setShowAddAccessorySection] = useState(true);
+  const [selectedAccessoryCategory, setSelectedAccessoryCategory] = useState('');
+  const [selectedAccessoryId, setSelectedAccessoryId] = useState('');
+  const [accessoryQuantity, setAccessoryQuantity] = useState('1');
+  const [selectedAccessories, setSelectedAccessories] = useState<{ id: string; name: string; category: string; price: number; quantity: number }[]>([]);
 
   const [selectedOtherServices, setSelectedOtherServices] = useState<SelectedService[]>([]);
   const [otherServiceName, setOtherServiceName] = useState('');
@@ -199,6 +204,10 @@ export default function CustomerService() {
     setSelectedOtherServices([]);
     setOtherServiceName('');
     setOtherServiceVehicleType('');
+    setSelectedAccessoryCategory('');
+    setSelectedAccessoryId('');
+    setAccessoryQuantity('1');
+    setSelectedAccessories([]);
   };
 
   const selectedCustomer = (Array.isArray(customers) ? customers : []).find((c: any) => c._id === selectedCustomerId);
@@ -319,6 +328,46 @@ export default function CustomerService() {
     setSelectedOtherServices(selectedOtherServices.filter((_, i) => i !== index));
   };
 
+  const handleAddAccessory = () => {
+    if (!selectedAccessoryId) {
+      toast({ title: 'Please select an accessory', variant: 'destructive' });
+      return;
+    }
+    const item = inventory.find((inv: any) => inv._id === selectedAccessoryId);
+    if (!item) return;
+
+    const qty = parseInt(accessoryQuantity);
+    if (isNaN(qty) || qty <= 0) {
+      toast({ title: 'Please enter a valid quantity', variant: 'destructive' });
+      return;
+    }
+
+    if (qty > (item.quantity || 0)) {
+      toast({ title: `Only ${item.quantity} available in stock`, variant: 'destructive' });
+      return;
+    }
+
+    const exists = selectedAccessories.some(a => a.id === selectedAccessoryId);
+    if (exists) {
+      toast({ title: 'This accessory is already added', variant: 'destructive' });
+      return;
+    }
+
+    setSelectedAccessories([...selectedAccessories, {
+      id: selectedAccessoryId,
+      name: item.name,
+      category: item.category,
+      price: item.price || 0,
+      quantity: qty
+    }]);
+    setSelectedAccessoryId('');
+    setAccessoryQuantity('1');
+  };
+
+  const handleRemoveAccessory = (index: number) => {
+    setSelectedAccessories(selectedAccessories.filter((_, i) => i !== index));
+  };
+
   const handleAddItem = () => {
     if (!selectedItemId) {
       toast({ title: 'Please select a product', variant: 'destructive' });
@@ -368,15 +417,16 @@ export default function CustomerService() {
   const ppfDiscountAmount = parseFloat(ppfDiscount) || 0;
   const ppfAfterDiscount = Math.max(0, ppfPrice - ppfDiscountAmount);
   const otherServicesTotal = selectedOtherServices.reduce((sum, s) => sum + s.price, 0);
+  const accessoriesTotal = selectedAccessories.reduce((sum, a) => sum + (a.price * a.quantity), 0);
   const otherServicesDiscount = selectedOtherServices.reduce((sum, s) => sum + (s.discount || 0), 0);
   const otherServicesAfterDiscount = selectedOtherServices.reduce((sum, s) => sum + Math.max(0, s.price - (s.discount || 0)), 0);
   
   const parsedLaborCost = parseFloat(laborCost) || 0;
   
   const totalDiscount = ppfDiscountAmount + otherServicesDiscount;
-  const totalServiceAfterDiscount = ppfAfterDiscount + otherServicesAfterDiscount;
+  const totalServiceAfterDiscount = ppfAfterDiscount + otherServicesAfterDiscount + accessoriesTotal;
   
-  const subtotal = ppfAfterDiscount + otherServicesAfterDiscount + parsedLaborCost;
+  const subtotal = ppfAfterDiscount + otherServicesAfterDiscount + accessoriesTotal + parsedLaborCost;
   const gstValue = includeGst ? subtotal * 0.18 : 0;
   const totalCostValue = subtotal + gstValue;
 
@@ -422,6 +472,14 @@ export default function CustomerService() {
         type: 'part'
       });
     });
+    selectedAccessories.forEach(a => {
+      serviceItemsList.push({
+        name: `${a.name} (${a.quantity}x)`,
+        price: a.price * a.quantity,
+        discount: 0,
+        type: 'part'
+      });
+    });
     if (parsedLaborCost > 0) {
       serviceItemsList.push({
         name: 'Labor Charge',
@@ -430,11 +488,18 @@ export default function CustomerService() {
       });
     }
 
-    const materialsList = selectedItems.map(item => ({
-      inventoryId: item.inventoryId,
-      name: item.name,
-      quantity: item.quantity || item.metersUsed,
-    }));
+    const materialsList = [
+      ...selectedItems.map(item => ({
+        inventoryId: item.inventoryId,
+        name: item.name,
+        quantity: item.quantity || item.metersUsed,
+      })),
+      ...selectedAccessories.map(a => ({
+        inventoryId: a.id,
+        name: a.name,
+        quantity: a.quantity
+      }))
+    ];
 
     createJobMutation.mutate({
       customerId: selectedCustomerId,
@@ -712,6 +777,86 @@ export default function CustomerService() {
                     </CardContent>
                   )}
                 </Card>
+
+                <Card className="border border-red-200">
+                  <CardHeader className="py-3 cursor-pointer" onClick={() => setShowAddAccessorySection(!showAddAccessorySection)}>
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-base">Add Accessory</CardTitle>
+                      {showAddAccessorySection ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                    </div>
+                  </CardHeader>
+                  {showAddAccessorySection && (
+                    <CardContent className="space-y-3">
+                      <div className="space-y-2">
+                        <Label className="text-sm">Category</Label>
+                        <Select value={selectedAccessoryCategory} onValueChange={(val) => {
+                          setSelectedAccessoryCategory(val);
+                          setSelectedAccessoryId('');
+                        }}>
+                          <SelectTrigger data-testid="select-accessory-category">
+                            <SelectValue placeholder="Select category" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {Array.from(new Set(inventory.filter((i: any) => i.category === 'Accessories').map((i: any) => i.name))).map((name: any) => (
+                              <SelectItem key={name} value={name}>{name}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label className="text-sm">Accessory Name</Label>
+                        <Select value={selectedAccessoryId} onValueChange={setSelectedAccessoryId} disabled={!selectedAccessoryCategory}>
+                          <SelectTrigger data-testid="select-accessory-name">
+                            <SelectValue placeholder="Select accessory" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {inventory
+                              .filter((i: any) => i.category === 'Accessories' && i.name === selectedAccessoryCategory)
+                              .map((item: any) => (
+                                <SelectItem key={item._id} value={item._id}>
+                                  {item.name} - ₹{item.price?.toLocaleString('en-IN')} (Stock: {item.quantity})
+                                </SelectItem>
+                              ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label className="text-sm">Quantity</Label>
+                        <Input 
+                          type="number" 
+                          value={accessoryQuantity} 
+                          onChange={(e) => setAccessoryQuantity(e.target.value)} 
+                          min="1" 
+                        />
+                      </div>
+
+                      <Button type="button" variant="outline" onClick={handleAddAccessory} disabled={!selectedAccessoryId} className="w-full">
+                        Add Accessory
+                      </Button>
+
+                      {selectedAccessories.length > 0 && (
+                        <div className="space-y-2 mt-3">
+                          <Label className="text-sm font-semibold">Selected Accessories</Label>
+                          <div className="border rounded-lg divide-y">
+                            {selectedAccessories.map((acc, index) => (
+                              <div key={index} className="flex items-center justify-between p-3">
+                                <div>
+                                  <p className="font-medium text-sm">{acc.name}</p>
+                                  <p className="text-xs text-muted-foreground">{acc.quantity} units @ ₹{acc.price.toLocaleString('en-IN')}</p>
+                                </div>
+                                <Button type="button" variant="ghost" size="icon" onClick={() => handleRemoveAccessory(index)}>
+                                  <Trash2 className="w-4 h-4 text-red-500" />
+                                </Button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </CardContent>
+                  )}
+                </Card>
               </div>
 
               <div className="space-y-6">
@@ -838,6 +983,12 @@ export default function CustomerService() {
                       <div className="flex justify-between text-sm">
                         <span className="text-slate-500">Other Services:</span>
                         <span className="font-medium">₹{otherServicesTotal.toLocaleString('en-IN')}</span>
+                      </div>
+                    )}
+                    {selectedAccessories.length > 0 && (
+                      <div className="flex justify-between text-sm">
+                        <span className="text-slate-500">Accessories:</span>
+                        <span className="font-medium">₹{accessoriesTotal.toLocaleString('en-IN')}</span>
                       </div>
                     )}
                     {parsedLaborCost > 0 && (
