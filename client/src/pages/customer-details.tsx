@@ -218,7 +218,12 @@ export default function CustomerDetails() {
                                 {customer.service.split(' + ').filter((s: string) => {
                                   const vehicle = customer.vehicles?.[0];
                                   if (!vehicle?.otherServices) return true;
-                                  return !vehicle.otherServices.some((as: any) => as.vehicleType === "Accessory" && s.includes(as.name));
+                                  // Normalize string for comparison by removing (x1) etc and extra spaces
+                                  const normalizedS = s.replace(/\s*\(x\d+\)\s*/g, '').trim().toLowerCase();
+                                  return !vehicle.otherServices.some((as: any) => 
+                                    as.vehicleType === "Accessory" && 
+                                    (normalizedS.includes(as.name.toLowerCase()) || as.name.toLowerCase().includes(normalizedS))
+                                  );
                                 }).join(' + ')}
                               </p>
                     </div>
