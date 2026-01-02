@@ -1216,6 +1216,41 @@ export default function CustomerRegistration() {
                               </>
                             )}
                           </div>
+                          {customerData.selectedOtherServices.some(s => s.vehicleType === "Accessory") && (
+                            <div className="mt-4 p-4 bg-slate-50 rounded-lg border border-slate-200">
+                              <Label className="font-semibold text-slate-900 mb-3 block">
+                                Selected Accessories
+                              </Label>
+                              <div className="space-y-2">
+                                {customerData.selectedOtherServices
+                                  .filter(s => s.vehicleType === "Accessory")
+                                  .map((acc, idx) => (
+                                    <div
+                                      key={idx}
+                                      className="flex items-center justify-between p-2 bg-white rounded border border-slate-200"
+                                    >
+                                      <span className="text-sm font-medium">
+                                        {acc.name} - ₹{acc.price.toLocaleString("en-IN")}
+                                      </span>
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="h-7 text-red-600 hover:text-red-700 hover:bg-red-50"
+                                        onClick={() => {
+                                          const originalIndex = customerData.selectedOtherServices.findIndex(s => s === acc);
+                                          setCustomerData({
+                                            ...customerData,
+                                            selectedOtherServices: customerData.selectedOtherServices.filter((_, i) => i !== originalIndex)
+                                          });
+                                        }}
+                                      >
+                                        Remove
+                                      </Button>
+                                    </div>
+                                  ))}
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </Card>
@@ -1367,14 +1402,15 @@ export default function CustomerRegistration() {
                       </div>
                     )}
 
-                    {customerData.selectedOtherServices.length > 0 && (
+                    {customerData.selectedOtherServices.filter(s => s.vehicleType !== "Accessory").length > 0 && (
                       <div className="space-y-6 bg-slate-50 p-4 rounded-lg border border-slate-200">
                         <Label className="font-semibold text-slate-900">
                           Selected Services
                         </Label>
                         <div className="space-y-6">
-                          {customerData.selectedOtherServices.map(
-                            (svc, idx) => (
+                          {customerData.selectedOtherServices
+                            .filter(s => s.vehicleType !== "Accessory")
+                            .map((svc, idx) => (
                               <div
                                 key={idx}
                                 className="flex items-center justify-between p-3 bg-white rounded-lg border border-slate-200 hover:border-slate-300 transition-colors"
