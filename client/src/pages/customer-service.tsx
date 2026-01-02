@@ -55,7 +55,6 @@ export default function CustomerService() {
   const [ppfGstEnabled, setPpfGstEnabled] = useState(false);
   const [otherServicesGstEnabled, setOtherServicesGstEnabled] = useState(false);
   const [ppfWarrantyFromPreferences, setPpfWarrantyFromPreferences] = useState(false);
-  const [showAddAccessorySection, setShowAddAccessorySection] = useState(true);
   const [selectedAccessoryCategory, setSelectedAccessoryCategory] = useState('');
   const [selectedAccessoryId, setSelectedAccessoryId] = useState('');
   const [accessoryQuantity, setAccessoryQuantity] = useState('1');
