@@ -145,13 +145,6 @@ export default function CustomerDetails() {
                     <div key={i} className="group bg-slate-50 hover:bg-red-50/50 rounded-xl p-3 border border-slate-100 hover:border-red-200 transition-all">
                       <div className="flex items-center justify-between gap-3">
                         <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 rounded-lg bg-white shadow-sm border border-slate-100 overflow-hidden flex items-center justify-center">
-                            {vehicle.image ? (
-                              <img src={vehicle.image} alt="Vehicle" className="w-full h-full object-cover" />
-                            ) : (
-                              <Car className="w-5 h-5 text-slate-600 group-hover:text-red-600 transition-colors" />
-                            )}
-                          </div>
                           <div>
                             <p className="text-sm font-bold text-slate-900">{vehicle.make} {vehicle.model}</p>
                             <div className="flex items-center gap-2 mt-0.5">
@@ -163,14 +156,35 @@ export default function CustomerDetails() {
                               {vehicle.year && <span className="text-[10px] text-slate-400 font-medium">{vehicle.year}</span>}
                             </div>
                             {vehicle.otherServices && vehicle.otherServices.length > 0 && (
-                              <div className="mt-2 flex flex-wrap gap-1">
-                                {vehicle.otherServices
-                                  .filter((s: any) => s.vehicleType !== "Accessory")
-                                  .map((service: any, idx: number) => (
-                                    <Badge key={idx} variant="outline" className="text-[9px] bg-blue-50 text-blue-700 border-blue-100 py-0 h-4">
-                                      {service.name}
-                                    </Badge>
-                                  ))}
+                              <div className="mt-2 space-y-2">
+                                {vehicle.otherServices.some((s: any) => s.vehicleType !== "Accessory") && (
+                                  <div>
+                                    <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-1">Services</p>
+                                    <div className="flex flex-wrap gap-1">
+                                      {vehicle.otherServices
+                                        .filter((s: any) => s.vehicleType !== "Accessory")
+                                        .map((service: any, idx: number) => (
+                                          <Badge key={idx} variant="outline" className="text-[9px] bg-blue-50 text-blue-700 border-blue-100 py-0 h-4">
+                                            {service.name}
+                                          </Badge>
+                                        ))}
+                                    </div>
+                                  </div>
+                                )}
+                                {vehicle.otherServices.some((s: any) => s.vehicleType === "Accessory") && (
+                                  <div>
+                                    <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-1">Accessories</p>
+                                    <div className="flex flex-wrap gap-1">
+                                      {vehicle.otherServices
+                                        .filter((s: any) => s.vehicleType === "Accessory")
+                                        .map((acc: any, idx: number) => (
+                                          <Badge key={idx} variant="outline" className="text-[9px] bg-emerald-50 text-emerald-700 border-emerald-100 py-0 h-4">
+                                            {acc.name}
+                                          </Badge>
+                                        ))}
+                                    </div>
+                                  </div>
+                                )}
                               </div>
                             )}
                           </div>
