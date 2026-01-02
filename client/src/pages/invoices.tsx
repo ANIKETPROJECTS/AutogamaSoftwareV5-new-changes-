@@ -551,7 +551,7 @@ export default function Invoices() {
                     {fromDate ? format(fromDate, "LLL dd, y") : <span>Select date</span>}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
+                <PopoverContent className="w-auto p-0 scale-110 origin-top-left" align="start">
                   <Calendar
                     mode="single"
                     selected={fromDate}
@@ -579,7 +579,7 @@ export default function Invoices() {
                     {toDate ? format(toDate, "LLL dd, y") : <span>Select date</span>}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
+                <PopoverContent className="w-auto p-0 scale-110 origin-top-left" align="start">
                   <Calendar
                     mode="single"
                     selected={toDate}
