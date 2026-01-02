@@ -415,12 +415,14 @@ export class MongoStorage implements IStorage {
       }
 
       // Mark as finished if depleted
-      if ((roll.remaining_meters || 0) <= 0 && (roll.remaining_sqft || 0) <= 0) {
+      if ((roll.remaining_meters || 0) <= 0.01 && (roll.remaining_sqft || 0) <= 0.01) {
         console.log(`[Storage] Archiving roll in FIFO: ${roll.name}`);
         // Use toObject() to get a clean data object if it's a mongoose document
         const rollObj = (roll as any).toObject ? (roll as any).toObject() : { ...roll };
         const finishedRoll = {
           ...rollObj,
+          remaining_meters: 0,
+          remaining_sqft: 0,
           status: 'Finished' as const,
           finishedAt: new Date()
         };
@@ -439,6 +441,7 @@ export class MongoStorage implements IStorage {
       return { success: false, consumedRolls: [] };
     }
 
+    // Since we used atomic updates for archiving, we only save if there were partial updates
     await item.save();
     return { success: true, consumedRolls };
   }
@@ -453,38 +456,33 @@ export class MongoStorage implements IStorage {
     const roll = item.rolls[rollIndex];
     
     // Handle deduction based on what we have available
-    // If remaining_sqft is set (non-zero), deduct from that, otherwise from meters
     const hasSquareFeet = roll.remaining_sqft && roll.remaining_sqft > 0;
     
     if (hasSquareFeet) {
-      // Deduct from square feet
       roll.remaining_sqft = Math.max(0, roll.remaining_sqft - metersUsed);
-      // Sync meters proportionally if both exist
       if (roll.squareFeet > 0 && roll.meters > 0) {
         roll.remaining_meters = (roll.remaining_sqft / roll.squareFeet) * roll.meters;
       }
     } else {
-      // Deduct from meters (default)
       roll.remaining_meters = Math.max(0, roll.remaining_meters - metersUsed);
-      // Sync sqft proportionally if both exist
       if (roll.meters > 0) {
         roll.remaining_sqft = (roll.remaining_meters / roll.meters) * roll.squareFeet;
       }
     }
     
-    // Mark as Finished if depleted
-    if (roll.remaining_meters <= 0 && (roll.remaining_sqft || 0) <= 0) {
+    // Mark as Finished if depleted (using small epsilon for floating point)
+    if ((roll.remaining_meters || 0) <= 0.01 && (roll.remaining_sqft || 0) <= 0.01) {
       console.log(`[Storage] Archiving roll in deductRoll: ${roll.name}`);
       
-      // Use toObject() to get a clean data object if it's a mongoose document
       const rollObj = (roll as any).toObject ? (roll as any).toObject() : { ...roll };
       const finishedRoll = {
         ...rollObj,
+        remaining_meters: 0,
+        remaining_sqft: 0,
         status: 'Finished' as const,
         finishedAt: new Date()
       };
       
-      // Use atomic update to ensure persistence
       await Inventory.findByIdAndUpdate(item._id, {
         $push: { finishedRolls: finishedRoll },
         $pull: { rolls: { _id: roll._id } }
