@@ -342,8 +342,8 @@ export default function Inventory() {
                         <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                           <Button 
                             variant="ghost" 
-                            size="icon" 
-                            className="h-8 w-8"
+                            size="sm" 
+                            className="h-8"
                             onClick={() => {
                               setEditingAccessory(item);
                               setAccName(item.name);
@@ -353,7 +353,8 @@ export default function Inventory() {
                               setAccessoryDialogOpen(true);
                             }}
                           >
-                            <Package className="w-4 h-4" />
+                            <Package className="w-4 h-4 mr-1" />
+                            Edit
                           </Button>
                           <Button 
                             variant="ghost" 
@@ -372,11 +373,13 @@ export default function Inventory() {
                     </CardHeader>
                     <CardContent>
                       <div className="flex items-baseline justify-between">
-                        <span className="text-3xl font-display font-bold">{item.quantity}</span>
+                        <div>
+                          <span className="text-3xl font-display font-bold block">{item.quantity}</span>
+                          <span className="text-sm text-muted-foreground block -mt-1">Quantity</span>
+                        </div>
                         <div className="text-right">
-                          <span className="text-sm text-muted-foreground block">qty</span>
                           {item.price && (
-                            <span className="text-xs font-medium text-primary">₹{item.price}</span>
+                            <span className="text-xl font-display font-bold text-primary block">₹{item.price}</span>
                           )}
                         </div>
                       </div>
