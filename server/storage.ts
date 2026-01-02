@@ -32,6 +32,7 @@ export interface IStorage {
   getInventoryItem(id: string): Promise<IInventoryItem | null>;
   createInventoryItem(data: Partial<IInventoryItem>): Promise<IInventoryItem>;
   updateInventoryItem(id: string, data: Partial<IInventoryItem>): Promise<IInventoryItem | null>;
+  deleteInventoryItem(id: string): Promise<void>;
   adjustInventory(id: string, quantity: number): Promise<IInventoryItem | null>;
   getLowStockItems(): Promise<IInventoryItem[]>;
   getAccessorySales(): Promise<IAccessorySale[]>;
@@ -327,6 +328,11 @@ export class MongoStorage implements IStorage {
     return Inventory.findByIdAndUpdate(id, { $inc: { quantity } }, { new: true });
   }
 
+  async deleteInventoryItem(id: string): Promise<void> {
+    if (!mongoose.Types.ObjectId.isValid(id)) return;
+    await Inventory.findByIdAndDelete(id);
+  }
+
   async getLowStockItems(): Promise<IInventoryItem[]> {
     return Inventory.find({
       $expr: { $lte: ['$quantity', '$minStock'] }
@@ -413,7 +419,7 @@ export class MongoStorage implements IStorage {
         roll.status = 'Finished';
         // Move to finishedRolls
         if (!item.finishedRolls) item.finishedRolls = [];
-        item.finishedRolls.push({...roll, finishedAt: new Date()});
+        item.finishedRolls.push(roll);
         item.rolls = item.rolls.filter(r => r._id?.toString() !== roll._id?.toString());
       }
     }
@@ -459,7 +465,7 @@ export class MongoStorage implements IStorage {
     if (roll.remaining_meters <= 0 && roll.remaining_sqft <= 0) {
       roll.status = 'Finished';
       if (!item.finishedRolls) item.finishedRolls = [];
-      item.finishedRolls.push({...roll.toObject(), finishedAt: new Date()});
+      item.finishedRolls.push(roll);
       item.rolls.splice(rollIndex, 1);
     }
     

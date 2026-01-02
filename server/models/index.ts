@@ -127,6 +127,7 @@ export interface IInventoryItem extends Document {
   unit: string;
   minStock: number;
   rolls: IRoll[];
+  finishedRolls: IRoll[];
   price?: number;
   createdAt: Date;
 }
@@ -330,6 +331,7 @@ const InventorySchema = new Schema<IInventoryItem>({
   unit: { type: String, required: true },
   minStock: { type: Number, required: true, default: 0 },
   rolls: [RollSchema],
+  finishedRolls: [RollSchema],
   price: { type: Number },
   createdAt: { type: Date, default: Date.now }
 });
