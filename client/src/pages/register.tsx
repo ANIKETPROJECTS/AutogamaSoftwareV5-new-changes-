@@ -640,6 +640,34 @@ export default function CustomerRegistration() {
                           </Select>
                         </div>
 
+                        {customerData.ppfCategory && (
+                          <div className="space-y-2">
+                            <Label>Vehicle Type</Label>
+                            <Select
+                              value={customerData.ppfVehicleType}
+                              onValueChange={(value) =>
+                                setCustomerData({
+                                  ...customerData,
+                                  ppfVehicleType: value,
+                                  ppfWarranty: "",
+                                  ppfPrice: 0,
+                                })
+                              }
+                            >
+                              <SelectTrigger className="border-slate-300" data-testid="select-ppf-vehicle">
+                                <SelectValue placeholder="Select vehicle type" />
+                              </SelectTrigger>
+                              <SelectContent position="popper" className="max-h-60 w-[var(--radix-select-trigger-width)]">
+                                {Object.keys(PPF_CATEGORIES[customerData.ppfCategory as keyof typeof PPF_CATEGORIES]).map((type) => (
+                                  <SelectItem key={type} value={type}>
+                                    {type}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        )}
+
                         <div className="space-y-4 pt-2 border-t border-slate-100">
                           <h3 className="font-semibold text-sm text-primary flex items-center gap-2">
                             <Zap className="w-4 h-4" />
@@ -714,34 +742,6 @@ export default function CustomerRegistration() {
                             )}
                           </div>
                         </div>
-
-                        {customerData.ppfCategory && (
-                          <div className="space-y-2">
-                            <Label>Vehicle Type</Label>
-                            <Select
-                              value={customerData.ppfVehicleType}
-                              onValueChange={(value) =>
-                                setCustomerData({
-                                  ...customerData,
-                                  ppfVehicleType: value,
-                                  ppfWarranty: "",
-                                  ppfPrice: 0,
-                                })
-                              }
-                            >
-                              <SelectTrigger className="border-slate-300" data-testid="select-ppf-vehicle">
-                                <SelectValue placeholder="Select vehicle type" />
-                              </SelectTrigger>
-                              <SelectContent position="popper" className="max-h-60 w-[var(--radix-select-trigger-width)]">
-                                {Object.keys(PPF_CATEGORIES[customerData.ppfCategory as keyof typeof PPF_CATEGORIES]).map((type) => (
-                                  <SelectItem key={type} value={type}>
-                                    {type}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                        )}
 
                         {customerData.ppfVehicleType && (
                           <div className="space-y-2">
