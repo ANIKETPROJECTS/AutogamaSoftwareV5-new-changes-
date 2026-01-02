@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -319,6 +319,18 @@ export default function CustomerRegistration() {
   });
 
   const [vehicleImagePreview, setVehicleImagePreview] = useState<string>("");
+
+  const { data: inventory = [] } = useQuery<any[]>({
+    queryKey: ["/api/inventory"],
+  });
+
+  const accessoryInventory = inventory.filter(item => item.category === 'Accessories');
+  
+  const accessoryCategories = Array.from(new Set(accessoryInventory.map(item => item.unit))).filter(Boolean);
+  
+  const filteredAccessories = accessoryInventory.filter(item => 
+    !customerData.tempAccessoryCategory || item.unit === customerData.tempAccessoryCategory
+  );
 
   const createCustomerMutation = useMutation({
     mutationFn: api.customers.create,
@@ -650,10 +662,9 @@ export default function CustomerRegistration() {
                                   <SelectValue placeholder="Select category" />
                                 </SelectTrigger>
                                 <SelectContent position="popper" className="max-h-60 w-[var(--radix-select-trigger-width)]">
-                                  <SelectItem value="Exterior">Exterior</SelectItem>
-                                  <SelectItem value="Interior">Interior</SelectItem>
-                                  <SelectItem value="Electronics">Electronics</SelectItem>
-                                  <SelectItem value="Other">Other</SelectItem>
+                                  {accessoryCategories.map(cat => (
+                                    <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                                  ))}
                                 </SelectContent>
                               </Select>
                             </div>
@@ -661,23 +672,24 @@ export default function CustomerRegistration() {
                               <Label>Accessory Name</Label>
                               <Select
                                 value={customerData.tempAccessoryName}
-                                onValueChange={(value) =>
+                                onValueChange={(value) => {
+                                  const item = accessoryInventory.find(i => i.name === value);
                                   setCustomerData({
                                     ...customerData,
                                     tempAccessoryName: value,
-                                  })
-                                }
-                                disabled={!customerData.tempAccessoryCategory}
+                                    tempAccessoryCategory: item?.unit || customerData.tempAccessoryCategory
+                                  });
+                                }}
                               >
                                 <SelectTrigger className="border-slate-300">
                                   <SelectValue placeholder="Select accessory" />
                                 </SelectTrigger>
                                 <SelectContent position="popper" className="max-h-60 w-[var(--radix-select-trigger-width)]">
-                                  {/* This would ideally be populated from inventory or a constant */}
-                                  <SelectItem value="Car Mat">Car Mat</SelectItem>
-                                  <SelectItem value="Seat Cover">Seat Cover</SelectItem>
-                                  <SelectItem value="Dash Cam">Dash Cam</SelectItem>
-                                  <SelectItem value="Perfume">Perfume</SelectItem>
+                                  {filteredAccessories.map(item => (
+                                    <SelectItem key={item._id} value={item.name}>
+                                      {item.name} ({item.quantity} in stock)
+                                    </SelectItem>
+                                  ))}
                                 </SelectContent>
                               </Select>
                             </div>
