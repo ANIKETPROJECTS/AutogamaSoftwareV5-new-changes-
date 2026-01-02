@@ -162,6 +162,15 @@ export default function CustomerDetails() {
                               )}
                               {vehicle.year && <span className="text-[10px] text-slate-400 font-medium">{vehicle.year}</span>}
                             </div>
+                            {vehicle.otherServices && vehicle.otherServices.length > 0 && (
+                              <div className="mt-2 flex flex-wrap gap-1">
+                                {vehicle.otherServices.map((service: any, idx: number) => (
+                                  <Badge key={idx} variant="outline" className="text-[9px] bg-blue-50 text-blue-700 border-blue-100 py-0 h-4">
+                                    {service.name}
+                                  </Badge>
+                                ))}
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>
