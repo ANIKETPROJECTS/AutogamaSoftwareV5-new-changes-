@@ -263,6 +263,13 @@ export default function CustomerService() {
               .map((svc: any) => {
                 const serviceData = OTHER_SERVICES[svc.name as keyof typeof OTHER_SERVICES];
                 let price = svc.price || 0;
+                
+                // If it's a legacy accessory like 'TEST', try to find its price in inventory if catalog fails
+                if (svc.name === 'TEST' && price === 0) {
+                  const invItem = inventory.find((i: any) => i.name === 'TEST');
+                  if (invItem) price = invItem.price || 0;
+                }
+
                 if (price === 0 && serviceData) {
                   price = (serviceData as any)[vType] || 0;
                 }
