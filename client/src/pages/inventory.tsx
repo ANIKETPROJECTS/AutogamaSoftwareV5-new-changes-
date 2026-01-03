@@ -256,13 +256,13 @@ export default function Inventory() {
   }, [inventory]);
 
   const existingNames = useMemo(() => {
-    // Also filter out PPF names if needed, but the user specifically mentioned category
-    const ppfCategories = new Set(PPF_ITEMS.map(item => item.category));
-    return Array.from(new Set(inventory
-      .filter((inv: any) => !ppfCategories.has(inv.category))
-      .map((inv: any) => inv.name)
-    ));
-  }, [inventory]);
+    // Filter by selected category if one is chosen
+    const filtered = accCategory 
+      ? inventory.filter((item: any) => item.category === accCategory)
+      : inventory.filter((item: any) => !PPF_ITEMS.some(ppf => ppf.category === item.category));
+    
+    return Array.from(new Set(filtered.map((item: any) => item.name)));
+  }, [inventory, accCategory]);
 
   const addRollMutation = useMutation({
     mutationFn: (data: { id: string; roll: any }) => api.inventory.addRoll(data.id, data.roll),
