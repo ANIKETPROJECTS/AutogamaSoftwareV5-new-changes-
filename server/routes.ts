@@ -703,9 +703,9 @@ export async function registerRoutes(
 
       if (id.startsWith('temp-')) {
         const category = id.replace('temp-', '');
-        let item = await Inventory.findOne({ category });
+        let item = await (storage as any).Inventory.findOne({ category });
         if (!item) {
-          item = await Inventory.create({
+          item = await (storage as any).Inventory.create({
             name: category,
             category: category,
             quantity: 0,

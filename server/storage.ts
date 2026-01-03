@@ -74,6 +74,8 @@ export interface IStorage {
 }
 
 export class MongoStorage implements IStorage {
+  public Inventory = Inventory;
+  
   async getCustomers(options: { page?: number; limit?: number; search?: string } = {}): Promise<{ customers: ICustomer[]; total: number }> {
     const { page = 1, limit = 10, search } = options;
     const skip = (page - 1) * limit;
