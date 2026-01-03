@@ -405,10 +405,10 @@ export default function CustomerService() {
     }
 
     setSelectedItems([...selectedItems, {
-      inventoryId: selectedItemId,
+      inventoryId: item._id || item.id,
       quantity: val,
-      name: item.category,
-      unit: 'Square Feet'
+      name: item.name,
+      unit: item.unit || 'Units'
     }]);
     setSelectedItemId('');
     setMetersUsed('1');
