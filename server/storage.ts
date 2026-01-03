@@ -260,6 +260,8 @@ export class MongoStorage implements IStorage {
       
       if (serviceNames.length > 0) {
         customer.service = serviceNames.join(' + ');
+      } else {
+        customer.service = '';
       }
     }
     

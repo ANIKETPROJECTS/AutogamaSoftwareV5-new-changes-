@@ -223,7 +223,7 @@ export default function CustomerDetails() {
                                   
                                   // ROBUST FIX: Accessories should NOT be in the "Selected Services" display
                                   const isAccessory = vehicle.otherServices.some((as: any) => 
-                                    (as.vehicleType?.toLowerCase() === "accessory" || (as as any).category === "Accessories") && 
+                                    (as.vehicleType?.toLowerCase() === "accessory" || (as as any).category === "Accessories" || as.name?.toLowerCase().includes('(x')) && 
                                     (normalizedS === as.name.replace(/\s*\(x\d+\)\s*/g, '').trim().toLowerCase())
                                   );
                                   return !isAccessory;
