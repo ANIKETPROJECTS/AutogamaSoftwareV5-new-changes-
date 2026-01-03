@@ -231,6 +231,16 @@ export default function CustomerService() {
           setPpfVehicleType(vehicleType);
           setPpfWarranty(warranty);
           
+          // Auto-select product from inventory with matching name when loading preferences
+          if (category) {
+            const matchingItem = (Array.isArray(inventory) ? inventory : []).find(
+              (item: any) => item.name.toLowerCase() === category.toLowerCase() && item.category !== 'Accessories'
+            );
+            if (matchingItem) {
+              setSelectedItemId(matchingItem._id || matchingItem.id);
+            }
+          }
+          
           let price = prefs.ppfPrice || 0;
           if (price === 0 && category && vehicleType && warranty) {
             const categoryData = PPF_CATEGORIES[category as keyof typeof PPF_CATEGORIES];
