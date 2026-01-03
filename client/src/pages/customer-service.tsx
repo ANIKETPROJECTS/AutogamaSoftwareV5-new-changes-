@@ -262,12 +262,24 @@ export default function CustomerService() {
             // Handle accessories from preferences
             const accessories = prefs.otherServices
               .filter((svc: any) => {
-                const name = svc.name || "";
-                return svc.category === 'Accessories' || name === 'TEST' || name.toLowerCase().includes('helmet');
+                const name = (svc.name || "").toLowerCase();
+                const isAccessoryCategory = svc.category === 'Accessories';
+                const isSpecialAccessory = name === 'test' || name.includes('helmet') || name.includes('test2');
+                
+                // Dynamic check against inventory accessory items
+                const isInventoryAccessory = inventory.some((inv: any) => 
+                  inv.category === 'Accessories' && 
+                  (name.includes(inv.name.toLowerCase()) || inv.name.toLowerCase().includes(name))
+                );
+
+                return isAccessoryCategory || isSpecialAccessory || isInventoryAccessory;
               })
               .map((svc: any) => {
                 const name = svc.name || "";
-                const invItem = inventory.find((i: any) => i.name === name || name.includes(i.name));
+                const invItem = inventory.find((i: any) => 
+                  name.toLowerCase().includes(i.name.toLowerCase()) || 
+                  i.name.toLowerCase().includes(name.toLowerCase())
+                );
                 return {
                   id: invItem?._id || invItem?.id || svc.id || Math.random().toString(),
                   name: name,
@@ -287,8 +299,16 @@ export default function CustomerService() {
 
             const servicesWithPrices = prefs.otherServices
               .filter((svc: any) => {
-                const name = svc.name || "";
-                const shouldExclude = name === 'Labor Charge' || svc.category === 'Accessories' || name === 'TEST' || name.toLowerCase().includes('helmet');
+                const name = (svc.name || "").toLowerCase();
+                const isAccessoryCategory = svc.category === 'Accessories';
+                const isSpecialAccessory = name === 'test' || name.includes('helmet') || name.includes('test2');
+                
+                const isInventoryAccessory = inventory.some((inv: any) => 
+                  inv.category === 'Accessories' && 
+                  (name.includes(inv.name.toLowerCase()) || inv.name.toLowerCase().includes(name))
+                );
+
+                const shouldExclude = name === 'labor charge' || isAccessoryCategory || isSpecialAccessory || isInventoryAccessory;
                 return !shouldExclude;
               })
               .map((svc: any) => {
