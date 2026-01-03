@@ -7,10 +7,17 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { ShoppingBag, Plus, Save, History, ArrowLeft, TrendingUp } from 'lucide-react';
+import { ShoppingBag, Plus, Save, History, ArrowLeft, TrendingUp, Package } from 'lucide-react';
 import { usePageContext } from '@/contexts/page-context';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
 import { format } from 'date-fns';
+
+const PPF_ITEMS = [
+  { name: 'Elite', category: 'Elite' },
+  { name: 'Garware Plus', category: 'Garware Plus' },
+  { name: 'Garware Premium', category: 'Garware Premium' },
+  { name: 'Garware Matt', category: 'Garware Matt' }
+];
 
 export default function Accessories() {
   const [category, setCategory] = useState('');
@@ -48,37 +55,29 @@ export default function Accessories() {
     enabled: showHistory
   });
 
-  const categories = Array.from(new Set(
-    inventory
-      .filter((item: any) => item.category === 'Accessories')
-      .map((item: any) => item.unit) // Reusing 'unit' or name as category in previous impl
-  ));
-
   // Better grouping for categories and names
-  const accessoryInventory = inventory.filter((item: any) => item.category === 'Accessories');
-  const uniqueCategories = Array.from(new Set(accessoryInventory.map((item: any) => item.unit))); // I used 'unit' field as the sub-category in previous logic potentially, or let's just use a clean logic now
-  
-  // Let's refine the inventory structure for accessories:
-  // name = accessory name
-  // unit = category (e.g. Helmet, Light)
-  
+  const accessoryInventory = inventory.filter((item: any) => !PPF_ITEMS.some(ppf => ppf.category === item.category));
+  const uniqueCategories = Array.from(new Set(accessoryInventory.map((item: any) => item.category)));
+
+  const categories = uniqueCategories;
+
   const filteredNames = accessoryInventory
-    .filter((item: any) => item.unit === category)
+    .filter((item: any) => item.category === category)
     .map((item: any) => item.name);
 
   const sellMutation = useMutation({
     mutationFn: async (data: any) => {
       // 1. Ensure Inventory Item exists
       let existingItem = inventory.find(
-        (item: any) => item.category === 'Accessories' && item.name === data.name && item.unit === data.category
+        (item: any) => item.name === data.name && item.category === data.category
       );
 
       if (!existingItem) {
         existingItem = await api.inventory.create({
           name: data.name,
-          category: 'Accessories',
+          category: data.category,
           quantity: 0,
-          unit: data.category, // We're using unit as the category/grouping
+          unit: 'Piece',
           minStock: 5,
           price: data.price
         });
@@ -327,7 +326,7 @@ export default function Accessories() {
                     setIsAddingNewName(true);
                   } else {
                     setName(value);
-                    const item = accessoryInventory.find((i: any) => i.name === value && i.unit === category);
+                    const item = accessoryInventory.find((i: any) => i.name === value && i.category === category);
                     if (item?.price) setPrice(item.price.toString());
                   }
                 }} disabled={!category && !isAddingNewCategory}>
