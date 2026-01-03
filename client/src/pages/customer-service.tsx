@@ -268,6 +268,10 @@ export default function CustomerService() {
                 // If it's explicitly an accessory category
                 if (category === 'Accessories') return true;
                 
+                // Logical solution: Check if name contains quantity pattern (xN)
+                // This indicates it was formatted as an accessory in the past
+                if (name.includes('(x')) return true;
+
                 // If it matches a known accessory in inventory
                 const isInventoryAccessory = inventory.some((inv: any) => 
                   inv.category === 'Accessories' && 
@@ -280,7 +284,15 @@ export default function CustomerService() {
                 return isSpecialAccessory;
               })
               .map((svc: any) => {
-                const name = svc.name || "";
+                const rawName = svc.name || "";
+                // Extract clean name if it has (xN) pattern
+                const nameMatch = rawName.match(/^(.*?)\s*\(x\d+\)$/);
+                const name = nameMatch ? nameMatch[1] : rawName;
+                
+                // Extract quantity if it has (xN) pattern
+                const qtyMatch = rawName.match(/\(x(\d+)\)$/);
+                const quantity = qtyMatch ? parseInt(qtyMatch[1], 10) : (svc.quantity || 1);
+
                 const invItem = inventory.find((i: any) => 
                   name.toLowerCase().includes(i.name.toLowerCase()) || 
                   i.name.toLowerCase().includes(name.toLowerCase())
@@ -290,7 +302,7 @@ export default function CustomerService() {
                   name: name,
                   category: svc.category || 'Accessories',
                   price: svc.price || invItem?.price || 0,
-                  quantity: svc.quantity || 1
+                  quantity: quantity
                 };
               });
 
@@ -311,13 +323,16 @@ export default function CustomerService() {
                 
                 // Check if it's an accessory to exclude from services
                 const isAccessoryCategory = category === 'Accessories';
+                // Logical check for (xN) pattern
+                const hasQuantityPattern = name.includes('(x');
+                
                 const isInventoryAccessory = inventory.some((inv: any) => 
                   inv.category === 'Accessories' && 
                   (name.includes(inv.name.toLowerCase()) || inv.name.toLowerCase().includes(name))
                 );
                 const isSpecialAccessory = name === 'test' || name.includes('helmet') || name.includes('test2');
 
-                return !(isAccessoryCategory || isInventoryAccessory || isSpecialAccessory);
+                return !(isAccessoryCategory || hasQuantityPattern || isInventoryAccessory || isSpecialAccessory);
               })
               .map((svc: any) => {
                 const serviceData = OTHER_SERVICES[svc.name as keyof typeof OTHER_SERVICES];
