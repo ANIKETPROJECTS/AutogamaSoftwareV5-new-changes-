@@ -428,11 +428,13 @@ export default function CustomerService() {
     return sum + (price * (item.quantity || 0));
   }, 0);
 
+  const accessoryTotal = selectedAccessories.reduce((sum, a) => sum + (a.price * a.quantity), 0);
+
   const otherServicesAfterDiscount = selectedOtherServices.reduce((sum, s) => sum + Math.max(0, s.price - (s.discount || 0)), 0);
   
   const parsedLaborCost = parseFloat(laborCost) || 0;
   
-  const subtotal = ppfAfterDiscount + otherServicesAfterDiscount + inventoryTotal + parsedLaborCost;
+  const subtotal = ppfAfterDiscount + otherServicesAfterDiscount + inventoryTotal + accessoryTotal + parsedLaborCost;
   const includeGstValue = includeGst ? subtotal * 0.18 : 0;
   const totalCostValue = subtotal + includeGstValue;
 
