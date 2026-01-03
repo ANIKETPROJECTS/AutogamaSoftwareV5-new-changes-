@@ -260,18 +260,19 @@ export default function CustomerService() {
           }
           
           // Auto-populate Other Services using ppfVehicleType for consistent pricing
-          if (Array.isArray(prefs.otherServices) && prefs.otherServices.length > 0 && vehicleType) {
+          if (Array.isArray(prefs.otherServices) && prefs.otherServices.length > 0 && (vehicleType || ppfVehicleType)) {
+            const vType = vehicleType || ppfVehicleType;
             const servicesWithPrices = prefs.otherServices
               .filter((svc: any) => svc.name !== 'Labor Charge')
               .map((svc: any) => {
                 const serviceData = OTHER_SERVICES[svc.name as keyof typeof OTHER_SERVICES];
-                let price = 0;
-                if (serviceData) {
-                  price = (serviceData as any)[vehicleType] || 0;
+                let price = svc.price || 0;
+                if (price === 0 && serviceData) {
+                  price = (serviceData as any)[vType] || 0;
                 }
                 return {
                   name: svc.name,
-                  vehicleType: vehicleType,
+                  vehicleType: vType,
                   price: price,
                   discount: svc.discount || 0
                 };
@@ -341,7 +342,7 @@ export default function CustomerService() {
       toast({ title: 'Please select an accessory', variant: 'destructive' });
       return;
     }
-    const item = inventory.find((inv: any) => inv._id === selectedAccessoryId);
+    const item = inventory.find((inv: any) => inv._id === selectedAccessoryId || inv.id === selectedAccessoryId);
     if (!item) return;
 
     const qty = parseInt(accessoryQuantity);
@@ -350,19 +351,20 @@ export default function CustomerService() {
       return;
     }
 
-    if (qty > (item.quantity || 0)) {
-      toast({ title: `Only ${item.quantity} available in stock`, variant: 'destructive' });
+    const availableQty = item.quantity || 0;
+    if (qty > availableQty) {
+      toast({ title: `Only ${availableQty} available in stock`, variant: 'destructive' });
       return;
     }
 
-    const exists = selectedAccessories.some(a => a.id === selectedAccessoryId);
+    const exists = selectedAccessories.some(a => a.id === (item._id || item.id));
     if (exists) {
       toast({ title: 'This accessory is already added', variant: 'destructive' });
       return;
     }
 
     setSelectedAccessories([...selectedAccessories, {
-      id: selectedAccessoryId,
+      id: item._id || item.id,
       name: item.name,
       category: item.category,
       price: item.price || 0,
@@ -477,15 +479,19 @@ export default function CustomerService() {
         name: s.name,
         price: s.price,
         discount: s.discount || 0,
-        type: 'part'
+        type: 'part',
+        vehicleType: s.vehicleType
       });
     });
     selectedAccessories.forEach(a => {
       serviceItemsList.push({
         name: `${a.name} (${a.quantity}x)`,
         price: a.price * a.quantity,
+        unitPrice: a.price,
+        quantity: a.quantity,
         discount: 0,
-        type: 'part'
+        type: 'part',
+        category: a.category
       });
     });
     if (parsedLaborCost > 0) {
@@ -843,7 +849,7 @@ export default function CustomerService() {
                               <div className="bg-gray-50 p-2 rounded-md border border-gray-200">
                                 <div className="flex justify-between items-center mb-2">
                                   <Label className="text-sm font-medium">Service Price</Label>
-                                  <span className="text-lg font-bold text-primary">₹{service.price.toLocaleString('en-IN')}</span>
+                                  <span className="text-lg font-bold text-primary">₹{(service.price || 0).toLocaleString('en-IN')}</span>
                                 </div>
                                 <div className="w-full">
                                   <Label className="text-xs">Discount</Label>
