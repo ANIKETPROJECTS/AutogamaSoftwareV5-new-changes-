@@ -1,5 +1,13 @@
 import { connectDB } from "./db";
 import { Inventory } from "./models/index";
+import dotenv from "dotenv";
+
+dotenv.config();
+
+// Fallback for VPS environments where env might not be loaded in shell
+if (!process.env.MONGODB_URI) {
+  process.env.MONGODB_URI = "mongodb://localhost:27017/autogarage";
+}
 
 const PPF_CATEGORIES = {
   "Elite": { "car": { "5yr": 55000, "7yr": 65000 }, "bike": { "5yr": 12000, "7yr": 15000 } },
