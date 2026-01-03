@@ -640,6 +640,7 @@ export default function CustomerService() {
                         className="h-6 text-xs text-red-500 hover:text-red-700 hover:bg-red-50"
                         onClick={() => {
                           setPpfCategory('');
+                          setPpfVehicleType('');
                           setPpfWarranty('');
                           setPpfPrice(0);
                         }}
