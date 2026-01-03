@@ -1113,7 +1113,15 @@ export default function CustomerService() {
                               <div className="bg-blue-50 p-2 rounded-md border border-blue-200">
                                 <div className="flex justify-between items-center">
                                   <span className="text-xs font-medium text-blue-700">Available Stock</span>
-                                  <span className="text-sm font-bold text-blue-800">{totalAvailable} sq ft</span>
+                                  <span className="text-sm font-bold text-blue-800">
+                                    {(() => {
+                                      const pending = selectedItems
+                                        .filter(i => i.inventoryId === item._id || i.id === item.inventoryId)
+                                        .reduce((sum, i) => sum + (i.quantity || 0), 0);
+                                      const remaining = Math.max(0, totalAvailable - pending);
+                                      return `${remaining.toLocaleString()} sq ft`;
+                                    })()}
+                                  </span>
                                 </div>
                               </div>
 
@@ -1218,11 +1226,17 @@ export default function CustomerService() {
                                 </div>
                                 {inventory
                                   .filter((item: any) => item.category === selectedAccessoryCategory)
-                                  .map((item: any) => (
-                                    <SelectItem key={item._id || item.id} value={item._id || item.id}>
-                                      {item.name} - ₹{item.price} ({item.quantity} in stock)
-                                    </SelectItem>
-                                  ))}
+                                  .map((item: any) => {
+                                    const pending = selectedAccessories
+                                      .filter(a => a.id === (item._id || item.id))
+                                      .reduce((sum, a) => sum + a.quantity, 0);
+                                    const remaining = Math.max(0, (item.quantity || 0) - pending);
+                                    return (
+                                      <SelectItem key={item._id || item.id} value={item._id || item.id}>
+                                        {item.name} - ₹{item.price} ({remaining} in stock)
+                                      </SelectItem>
+                                    );
+                                  })}
                               </SelectContent>
                             </Select>
                           </div>
