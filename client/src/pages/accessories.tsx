@@ -39,7 +39,7 @@ export default function Accessories() {
   const { setPageTitle } = usePageContext();
 
   useEffect(() => {
-    setPageTitle("Accessories", "Manage and sell accessories");
+    setPageTitle("Accessories", "");
   }, [setPageTitle]);
 
   const { data: inventory = [] } = useQuery({
