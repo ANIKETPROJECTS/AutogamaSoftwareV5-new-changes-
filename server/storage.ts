@@ -358,7 +358,7 @@ export class MongoStorage implements IStorage {
       remaining_meters: roll.meters,
       remaining_sqft: roll.squareFeet,
       status: 'Available',
-      unit: roll.unit || 'Meters',
+      unit: (roll.unit === 'Square Feet' || roll.unit === 'Meters' || roll.unit === 'Square KM') ? roll.unit : 'Meters',
       createdAt: new Date()
     };
     return Inventory.findByIdAndUpdate(inventoryId, { $push: { rolls: newRoll } }, { new: true });
