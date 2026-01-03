@@ -1,5 +1,6 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useLocation } from 'wouter';
 import { api } from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { Package, AlertTriangle, Search, Plus, Trash2, ArrowLeft, Check, ChevronsUpDown } from 'lucide-react';
+import { Package, AlertTriangle, Search, Plus, Trash2, ArrowLeft, Check, ChevronsUpDown, History as HistoryIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   Command,
@@ -171,6 +172,7 @@ function SearchableSelect({
 }
 
 export default function Inventory() {
+  const [, setLocation] = useLocation();
   const [rollDialogOpen, setRollDialogOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [adjustType] = useState<'in' | 'out'>('in');
@@ -192,8 +194,6 @@ export default function Inventory() {
   const [accCategory, setAccCategory] = useState('');
   const [accPrice, setAccPrice] = useState('');
 
-  const [historyDialogOpen, setHistoryDialogOpen] = useState(false);
-  const [selectedHistoryItem, setSelectedHistoryItem] = useState<any>(null);
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -521,14 +521,22 @@ export default function Inventory() {
                         }}
                       >
                         <CardHeader className="pb-2">
-                          <div className="flex items-start justify-between">
-                            <div>
-                              <CardTitle className="text-base">{displayItem.category}</CardTitle>
-                              <Badge className={cn("mt-1", CATEGORY_COLORS[displayItem.category])}>
-                                {displayItem.category}
-                              </Badge>
-                            </div>
-                            {isSelected && <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />}
+                          <div className="flex items-center gap-2">
+                            <Badge className={cn(CATEGORY_COLORS[displayItem.category])}>
+                              {displayItem.category}
+                            </Badge>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 px-2 text-xs"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setLocation(`/roll-history/${displayItem._id || displayItem.id}`);
+                              }}
+                            >
+                              <HistoryIcon className="w-3 h-3 mr-1" />
+                              History
+                            </Button>
                           </div>
                         </CardHeader>
                         <CardContent className="space-y-3">
@@ -644,16 +652,6 @@ export default function Inventory() {
                   </h2>
                   <p className="text-sm text-muted-foreground">Detailed Roll Inventory</p>
                 </div>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => {
-                    setSelectedHistoryItem(selectedItemForDetail);
-                    setHistoryDialogOpen(true);
-                  }}
-                >
-                  History
-                </Button>
               </div>
               
               <CardContent className="p-0">
@@ -870,53 +868,6 @@ export default function Inventory() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={historyDialogOpen} onOpenChange={setHistoryDialogOpen}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden flex flex-col">
-          <DialogHeader>
-            <DialogTitle>Stock History - {selectedHistoryItem?.category || selectedHistoryItem?.name}</DialogTitle>
-          </DialogHeader>
-          <div className="flex-1 overflow-y-auto mt-4">
-            <table className="w-full text-sm">
-              <thead className="bg-muted sticky top-0 z-10">
-                <tr>
-                  <th className="px-4 py-2 text-left">Date</th>
-                  <th className="px-4 py-2 text-left">Type</th>
-                  <th className="px-4 py-2 text-left">Description</th>
-                  <th className="px-4 py-2 text-right">Amount</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y">
-                {selectedHistoryItem?.history?.length > 0 ? (
-                  [...selectedHistoryItem.history].reverse().map((entry: any, i: number) => (
-                    <tr key={i} className="hover:bg-accent/50 transition-colors">
-                      <td className="px-4 py-2">{new Date(entry.date || entry.timestamp).toLocaleString()}</td>
-                      <td className="px-4 py-2">
-                        <Badge 
-                          variant={entry.type === 'Stock In' || entry.type === 'in' ? 'default' : 'destructive'} 
-                          className="text-[10px] uppercase font-bold"
-                        >
-                          {entry.type === 'in' ? 'Stock In' : entry.type === 'out' ? 'Stock Out' : entry.type}
-                        </Badge>
-                      </td>
-                      <td className="px-4 py-2">{entry.description}</td>
-                      <td className={cn(
-                        "px-4 py-2 text-right font-bold",
-                        entry.type === 'Stock In' || entry.type === 'in' ? "text-green-600" : "text-red-600"
-                      )}>
-                        {entry.type === 'Stock In' || entry.type === 'in' ? '+' : ''}{entry.amount}
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={4} className="px-4 py-8 text-center text-muted-foreground italic">No history available</td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
