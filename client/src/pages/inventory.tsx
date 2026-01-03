@@ -130,8 +130,7 @@ function SearchableSelect({
                 <div
                   key={option}
                   className={cn(
-                    "flex items-center gap-2 px-2 py-1.5 text-sm rounded-sm cursor-pointer hover:bg-accent hover:text-accent-foreground",
-                    value === option && "bg-accent/50"
+                    "flex items-center gap-2 px-2 py-1.5 text-sm rounded-sm cursor-pointer hover:bg-accent hover:text-accent-foreground"
                   )}
                   onClick={() => {
                     onValueChange(option)
