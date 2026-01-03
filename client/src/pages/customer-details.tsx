@@ -220,16 +220,19 @@ export default function CustomerDetails() {
                                   if (!vehicle?.otherServices) return true;
                                   // Normalize string for comparison by removing (x1) etc and extra spaces
                                   const normalizedS = s.replace(/\s*\(x\d+\)\s*/g, '').trim().toLowerCase();
-                                  return !vehicle.otherServices.some((as: any) => 
-                                    as.vehicleType === "Accessory" && 
+                                  
+                                  // CRITICAL FIX: Accessories should NOT be in the "Selected Services" display
+                                  const isAccessory = vehicle.otherServices.some((as: any) => 
+                                    (as.vehicleType?.toLowerCase() === "accessory" || (as as any).category === "Accessories") && 
                                     (normalizedS === as.name.replace(/\s*\(x\d+\)\s*/g, '').trim().toLowerCase())
                                   );
+                                  return !isAccessory;
                                 }).join(' + ')}
                               </p>
                     </div>
                   </div>
 
-                  {customer.vehicles?.[0]?.otherServices?.some((s: any) => s.vehicleType === "Accessory") && (
+                  {customer.vehicles?.[0]?.otherServices?.some((s: any) => s.vehicleType?.toLowerCase() === "accessory" || s.category === "Accessories") && (
                     <div className="flex items-start gap-3 pt-3 border-t border-red-200/60">
                       <div className="mt-0.5 p-1.5 bg-white rounded-md shadow-sm border border-slate-100">
                         <Package className="w-3 h-3 text-blue-600" />
@@ -238,7 +241,7 @@ export default function CustomerDetails() {
                         <p className="text-[10px] text-slate-400 font-medium uppercase mb-0.5">Selected Accessories</p>
                         <div className="flex flex-wrap gap-1 mt-1">
                           {customer.vehicles[0].otherServices
-                            .filter((s: any) => s.vehicleType === "Accessory")
+                            .filter((s: any) => s.vehicleType?.toLowerCase() === "accessory" || s.category === "Accessories")
                             .map((acc: any, idx: number) => (
                               <Badge key={idx} variant="outline" className="text-[10px] bg-blue-50 text-blue-700 border-blue-100">
                                 {acc.name}
@@ -376,31 +379,56 @@ export default function CustomerDetails() {
                   {/* Service Items */}
                   {job.serviceItems && job.serviceItems.length > 0 && (
                     <div className="border-t border-slate-100 pt-3">
-                      <p className="text-slate-400 font-bold uppercase tracking-wider text-[10px] mb-2">Services</p>
-                      <div className="space-y-1">
-                        {job.serviceItems.map((item: any, idx: number) => {
-                          const itemTotal = (item.price || 0) - (item.discount || 0);
-                          return (
-                            <div key={idx} className="bg-slate-50 p-2 rounded-lg border border-slate-100 space-y-1">
-                              <div className="flex items-center justify-between text-xs">
-                                <span className="font-medium text-slate-700 truncate">{item.description || item.name || 'Service'}</span>
-                                <span className="font-bold text-slate-900 whitespace-nowrap ml-2">₹{item.price?.toLocaleString('en-IN') || '0'}</span>
-                              </div>
-                              {item.discount > 0 && (
-                                <div className="flex items-center justify-between text-[10px] text-red-600 font-medium">
-                                  <span>Discount Applied</span>
-                                  <span>-₹{item.discount.toLocaleString('en-IN')}</span>
-                                </div>
-                              )}
-                              {item.discount > 0 && (
-                                <div className="flex items-center justify-between text-[10px] text-slate-500 border-t border-slate-200/50 pt-1">
-                                  <span>Item Total</span>
-                                  <span className="font-bold">₹{itemTotal.toLocaleString('en-IN')}</span>
-                                </div>
-                              )}
+                      <div className="flex flex-col gap-4">
+                        {/* Filtered Services */}
+                        {job.serviceItems.some((item: any) => !(item.name?.toLowerCase().includes('(x') || item.category === 'Accessories')) && (
+                          <div>
+                            <p className="text-slate-400 font-bold uppercase tracking-wider text-[10px] mb-2">Services</p>
+                            <div className="space-y-1">
+                              {job.serviceItems
+                                .filter((item: any) => !(item.name?.toLowerCase().includes('(x') || item.category === 'Accessories'))
+                                .map((item: any, idx: number) => {
+                                  const itemTotal = (item.price || 0) - (item.discount || 0);
+                                  return (
+                                    <div key={idx} className="bg-slate-50 p-2 rounded-lg border border-slate-100 space-y-1">
+                                      <div className="flex items-center justify-between text-xs">
+                                        <span className="font-medium text-slate-700 truncate">{item.description || item.name || 'Service'}</span>
+                                        <span className="font-bold text-slate-900 whitespace-nowrap ml-2">₹{item.price?.toLocaleString('en-IN') || '0'}</span>
+                                      </div>
+                                      {item.discount > 0 && (
+                                        <div className="flex items-center justify-between text-[10px] text-red-600 font-medium">
+                                          <span>Discount Applied</span>
+                                          <span>-₹{item.discount.toLocaleString('en-IN')}</span>
+                                        </div>
+                                      )}
+                                    </div>
+                                  );
+                                })}
                             </div>
-                          );
-                        })}
+                          </div>
+                        )}
+
+                        {/* Filtered Accessories */}
+                        {job.serviceItems.some((item: any) => (item.name?.toLowerCase().includes('(x') || item.category === 'Accessories')) && (
+                          <div>
+                            <p className="text-slate-400 font-bold uppercase tracking-wider text-[10px] mb-2">Accessories</p>
+                            <div className="space-y-1">
+                              {job.serviceItems
+                                .filter((item: any) => (item.name?.toLowerCase().includes('(x') || item.category === 'Accessories'))
+                                .map((item: any, idx: number) => {
+                                  const itemTotal = (item.price || 0) - (item.discount || 0);
+                                  return (
+                                    <div key={idx} className="bg-emerald-50/30 p-2 rounded-lg border border-emerald-100 space-y-1">
+                                      <div className="flex items-center justify-between text-xs">
+                                        <span className="font-medium text-emerald-700 truncate">{item.description || item.name || 'Accessory'}</span>
+                                        <span className="font-bold text-slate-900 whitespace-nowrap ml-2">₹{item.price?.toLocaleString('en-IN') || '0'}</span>
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}
