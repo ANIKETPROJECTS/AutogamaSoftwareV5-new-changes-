@@ -873,37 +873,43 @@ export default function CustomerService() {
                           <Label className="text-sm font-semibold">Selected Services</Label>
                         </div>
                         <div className="border rounded-lg divide-y">
-                          {selectedOtherServices.filter(s => s.name !== 'TEST').map((service, index) => (
-                            <div key={index} className="space-y-2 p-3">
-                              <div className="flex items-center justify-between">
-                                <div>
-                                  <p className="font-medium text-sm">{service.name}</p>
-                                  <p className="text-xs text-muted-foreground">{service.vehicleType}</p>
+                          {selectedOtherServices
+                            .filter(s => s.name !== 'TEST' && s.name !== 'test')
+                            .map((service, index) => {
+                              // Find the actual index in the original array
+                              const originalIndex = selectedOtherServices.findIndex(origS => origS === service);
+                              return (
+                                <div key={originalIndex} className="space-y-2 p-3">
+                                  <div className="flex items-center justify-between">
+                                    <div>
+                                      <p className="font-medium text-sm">{service.name}</p>
+                                      <p className="text-xs text-muted-foreground">{service.vehicleType}</p>
+                                    </div>
+                                    <Button type="button" variant="ghost" size="icon" onClick={() => handleRemoveOtherService(originalIndex)}>
+                                      <Trash2 className="w-4 h-4 text-red-500" />
+                                    </Button>
+                                  </div>
+                                  <div className="bg-gray-50 p-2 rounded-md border border-gray-200">
+                                    <div className="flex justify-between items-center mb-2">
+                                      <Label className="text-sm font-medium">Service Price</Label>
+                                      <span className="text-lg font-bold text-primary">₹{(service.price || 0).toLocaleString('en-IN')}</span>
+                                    </div>
+                                    <div className="w-full">
+                                      <Label className="text-xs">Discount</Label>
+                                      <Input 
+                                        type="number" 
+                                        value={service.discount || ''} 
+                                        onChange={(e) => {
+                                          const newServices = [...selectedOtherServices];
+                                          newServices[originalIndex].discount = parseFloat(e.target.value) || 0;
+                                          setSelectedOtherServices(newServices);
+                                        }} 
+                                      />
+                                    </div>
+                                  </div>
                                 </div>
-                                <Button type="button" variant="ghost" size="icon" onClick={() => handleRemoveOtherService(index)}>
-                                  <Trash2 className="w-4 h-4 text-red-500" />
-                                </Button>
-                              </div>
-                              <div className="bg-gray-50 p-2 rounded-md border border-gray-200">
-                                <div className="flex justify-between items-center mb-2">
-                                  <Label className="text-sm font-medium">Service Price</Label>
-                                  <span className="text-lg font-bold text-primary">₹{(service.price || 0).toLocaleString('en-IN')}</span>
-                                </div>
-                                <div className="w-full">
-                                  <Label className="text-xs">Discount</Label>
-                                  <Input 
-                                    type="number" 
-                                    value={service.discount || ''} 
-                                    onChange={(e) => {
-                                      const newServices = [...selectedOtherServices];
-                                      newServices[index].discount = parseFloat(e.target.value) || 0;
-                                      setSelectedOtherServices(newServices);
-                                    }} 
-                                  />
-                                </div>
-                              </div>
-                            </div>
-                          ))}
+                              );
+                            })}
                         </div>
                       </div>
                     )}
@@ -913,23 +919,28 @@ export default function CustomerService() {
 
               <div className="space-y-6">
                 {/* Legacy/Specific Accessory Check (TEST) */}
-                {selectedOtherServices.some(s => s.name === 'TEST') && (
+                {selectedOtherServices.some(s => s.name.toLowerCase() === 'test') && (
                   <Card className="border border-blue-200 bg-blue-50/30">
                     <CardHeader className="py-2">
                       <CardTitle className="text-sm font-semibold text-blue-800">Legacy Accessories</CardTitle>
                     </CardHeader>
                     <CardContent className="pb-3">
-                      {selectedOtherServices.filter(s => s.name === 'TEST').map((service, index) => (
-                        <div key={index} className="flex justify-between items-center">
-                          <span className="text-sm font-medium">{service.name}</span>
-                          <div className="flex items-center gap-4">
-                            <span className="text-sm font-bold">₹{(service.price || 0).toLocaleString('en-IN')}</span>
-                            <Button type="button" variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleRemoveOtherService(selectedOtherServices.indexOf(service))}>
-                              <X className="w-3 h-3 text-red-500" />
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
+                      {selectedOtherServices
+                        .filter(s => s.name.toLowerCase() === 'test')
+                        .map((service, index) => {
+                          const originalIndex = selectedOtherServices.findIndex(origS => origS === service);
+                          return (
+                            <div key={originalIndex} className="flex justify-between items-center py-1">
+                              <span className="text-sm font-medium">{service.name}</span>
+                              <div className="flex items-center gap-4">
+                                <span className="text-sm font-bold">₹{(service.price || 0).toLocaleString('en-IN')}</span>
+                                <Button type="button" variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleRemoveOtherService(originalIndex)}>
+                                  <X className="w-3 h-3 text-red-500" />
+                                </Button>
+                              </div>
+                            </div>
+                          );
+                        })}
                     </CardContent>
                   </Card>
                 )}
