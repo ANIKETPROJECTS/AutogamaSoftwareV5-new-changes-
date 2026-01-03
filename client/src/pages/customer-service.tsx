@@ -1092,18 +1092,37 @@ export default function CustomerService() {
                             <SelectValue placeholder="Select Category" />
                           </SelectTrigger>
                           <SelectContent>
-                            {Array.from(new Set(inventory
-                              .filter((item: any) => {
-                                const ppfCategories = ['Elite', 'Garware Plus', 'Garware Premium', 'Garware Matt'];
-                                // Explicitly exclude generic 'Accessories' category if it's appearing as a label
-                                return !ppfCategories.includes(item.category) && item.category !== 'Accessories';
-                              })
-                              .map((item: any) => item.category)))
-                              .sort()
-                              .map((category: any) => (
+                            {(() => {
+                              // Handle inventory data properly
+                              const invList = Array.isArray(inventory) ? inventory : [];
+                              
+                              // Categories to exclude (Main PPF services)
+                              const ppfCategories = ['Elite', 'Garware Plus', 'Garware Premium', 'Garware Matt'];
+                              
+                              // Extract ALL unique categories that are NOT service-related
+                              // We use all unique categories from inventory except the service ones
+                              const categorySet = new Set(
+                                invList
+                                  .map((item: any) => item.category)
+                                  .filter((cat: any) => cat && !ppfCategories.includes(cat))
+                              );
+                              
+                              const finalCategories = Array.from(categorySet).sort();
+                              
+                              // Log to browser console so user can see what's being fetched
+                              console.log('--- Accessory Categories Debug ---');
+                              console.log('Total items in inventory:', invList.length);
+                              console.log('All categories found in DB:', Array.from(new Set(invList.map(i => i.category))));
+                              console.log('Categories showing in dropdown:', finalCategories);
+
+                              if (finalCategories.length === 0) {
+                                return <div className="p-2 text-sm text-slate-500">No accessory categories found</div>;
+                              }
+
+                              return finalCategories.map((category: any) => (
                                 <SelectItem key={category} value={category}>{category}</SelectItem>
-                              ))
-                            }
+                              ));
+                            })()}
                           </SelectContent>
                         </Select>
                       </div>
