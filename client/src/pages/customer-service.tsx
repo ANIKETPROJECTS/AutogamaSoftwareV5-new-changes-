@@ -999,6 +999,103 @@ export default function CustomerService() {
                       </div>
                     )}
                   </div>
+
+                  {/* Accessories Section */}
+                  <div className="space-y-4 border border-gray-200 p-4 rounded-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="font-semibold text-sm">Add Accessory</h3>
+                      <Button 
+                        type="button" 
+                        variant="ghost" 
+                        size="sm" 
+                        className="h-6 text-xs text-red-500 hover:text-red-700 hover:bg-red-50"
+                        onClick={() => {
+                          setSelectedAccessoryCategory('');
+                          setSelectedAccessoryId('');
+                          setAccessoryQuantity('1');
+                        }}
+                      >
+                        Clear
+                      </Button>
+                    </div>
+                    
+                    <div className="space-y-3">
+                      <div className="space-y-2">
+                        <Label className="text-sm">Category</Label>
+                        <Select value={selectedAccessoryCategory} onValueChange={setSelectedAccessoryCategory}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select Category" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Accessories">Accessories</SelectItem>
+                            <SelectItem value="Car Care">Car Care</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      {selectedAccessoryCategory && (
+                        <div className="space-y-3 pt-2 border-t border-slate-100">
+                          <div className="space-y-2">
+                            <Label className="text-sm">Select Item</Label>
+                            <Select value={selectedAccessoryId} onValueChange={setSelectedAccessoryId}>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select Item" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {inventory
+                                  .filter((item: any) => item.category === selectedAccessoryCategory)
+                                  .map((item: any) => (
+                                    <SelectItem key={item._id || item.id} value={item._id || item.id}>
+                                      {item.name} - ₹{item.price} ({item.quantity} in stock)
+                                    </SelectItem>
+                                  ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label className="text-sm">Quantity</Label>
+                            <Input 
+                              type="number" 
+                              value={accessoryQuantity} 
+                              onChange={(e) => setAccessoryQuantity(e.target.value)} 
+                              min="1" 
+                            />
+                          </div>
+
+                          <Button type="button" variant="outline" onClick={handleAddAccessory} className="w-full">
+                            <Plus className="w-4 h-4 mr-2" />
+                            Add Accessory
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+
+                    {selectedAccessories.length > 0 && (
+                      <div className="mt-4 space-y-2">
+                        <Label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Added Accessories</Label>
+                        <div className="grid grid-cols-1 gap-2">
+                          {selectedAccessories.map((a, idx) => (
+                            <div key={idx} className="flex justify-between items-center p-2 bg-slate-50 rounded-md border border-slate-100">
+                              <div className="text-sm">
+                                <span className="font-medium">{a.name}</span>
+                                <span className="text-slate-500 ml-2">({a.quantity}x ₹{a.price})</span>
+                              </div>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleRemoveAccessory(idx)}
+                                className="h-6 w-6 p-0 text-slate-400 hover:text-red-600"
+                              >
+                                <X className="w-3 h-3" />
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 {selectedItems.length > 0 && (
@@ -1055,6 +1152,10 @@ export default function CustomerService() {
                       <div className="flex justify-between text-sm">
                         <span className="text-slate-500 font-medium">Inventory Items:</span>
                         <span className="font-semibold">₹{inventoryTotal.toLocaleString('en-IN')}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-slate-500 font-medium">Accessories:</span>
+                        <span className="font-semibold">₹{accessoryTotal.toLocaleString('en-IN')}</span>
                       </div>
                       <div className="flex justify-between text-sm">
                         <span className="text-slate-500 font-medium">Labor:</span>
