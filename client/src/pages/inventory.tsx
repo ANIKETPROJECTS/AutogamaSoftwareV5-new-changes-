@@ -47,7 +47,7 @@ export default function Inventory() {
   const [accName, setAccName] = useState('');
   const [accQuantity, setAccQuantity] = useState('');
   const [accUnit, setAccUnit] = useState('');
-  const [accPrice, setAccPrice] = useState('');
+  const [accCategory, setAccCategory] = useState('');
 
   const [historyDialogOpen, setHistoryDialogOpen] = useState(false);
   const [selectedHistoryItem, setSelectedHistoryItem] = useState<any>(null);
@@ -90,8 +90,11 @@ export default function Inventory() {
   }, [inventory, searchQuery, filterCategory, sortBy]);
 
   const accessoryItems = useMemo(() => {
+    if (activeTab === 'accessories') {
+      return inventory.filter((inv: any) => !PPF_ITEMS.some(ppf => ppf.category === inv.category));
+    }
     return inventory.filter((inv: any) => inv.category === 'Accessories');
-  }, [inventory]);
+  }, [inventory, activeTab]);
 
   const selectedItemForDetail = useMemo(() => {
     if (!selectedProductId) return null;
@@ -130,7 +133,10 @@ export default function Inventory() {
       if (data._id) {
         return api.inventory.update(data._id, data);
       }
-      return api.inventory.create({ ...data, category: 'Accessories' });
+      return api.inventory.create({
+        ...data,
+        category: accCategory // Use the user-provided category
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['inventory'] });
@@ -193,6 +199,7 @@ export default function Inventory() {
               onClick={() => {
                 setEditingAccessory(null);
                 setAccName('');
+                setAccCategory('');
                 setAccQuantity('');
                 setAccUnit('');
                 setAccPrice('');
@@ -375,6 +382,7 @@ export default function Inventory() {
                         onClick={() => {
                           setEditingAccessory(item);
                           setAccName(item.name);
+                          setAccCategory(item.category);
                           setAccQuantity(item.quantity.toString());
                           setAccUnit(item.unit);
                           setAccPrice(item.price?.toString() || '');
