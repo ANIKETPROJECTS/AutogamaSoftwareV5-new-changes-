@@ -509,8 +509,7 @@ export default function Invoices() {
                 <SelectItem value="all">All Methods</SelectItem>
                 <SelectItem value="Cash">Cash</SelectItem>
                 <SelectItem value="UPI">UPI</SelectItem>
-                <SelectItem value="Credit Card">Credit Card</SelectItem>
-                <SelectItem value="Debit Card">Debit Card</SelectItem>
+                <SelectItem value="Card">Card</SelectItem>
                 <SelectItem value="Bank Transfer">Bank Transfer</SelectItem>
                 <SelectItem value="Cheque">Cheque</SelectItem>
                 <SelectItem value="Other">Other</SelectItem>
