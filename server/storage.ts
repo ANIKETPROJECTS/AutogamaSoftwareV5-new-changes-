@@ -447,7 +447,14 @@ export class MongoStorage implements IStorage {
         // Find the original roll in the item.rolls array to preserve ALL fields
         const rollIdStr = (roll as any)._id?.toString();
         const originalRoll = item.rolls.find((r: any) => r._id?.toString() === rollIdStr);
-        const rollData = originalRoll ? (originalRoll as any).toObject() : roll;
+        
+        // Ensure we capture a clean object with the correct name
+        let rollData;
+        if (originalRoll && typeof (originalRoll as any).toObject === 'function') {
+          rollData = (originalRoll as any).toObject();
+        } else {
+          rollData = JSON.parse(JSON.stringify(roll));
+        }
 
         const finishedRoll = {
           ...rollData,
@@ -462,7 +469,7 @@ export class MongoStorage implements IStorage {
           $pull: { rolls: { _id: (roll as any)._id } }
         });
         
-        console.log(`[Storage] Roll archived via atomic update for: ${finishedRoll.name}`);
+        console.log(`[Storage] Roll archived via atomic update for: ${finishedRoll.name || 'Unknown'}`);
       }
     }
 
