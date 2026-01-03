@@ -481,7 +481,8 @@ export default function CustomerRegistration() {
   const [vehicleImagePreview, setVehicleImagePreview] = useState<string>("");
 
   const { data: inventory = [] } = useQuery<any[]>({
-    queryKey: ["/api/inventory"],
+    queryKey: ["inventory"],
+    queryFn: api.inventory.list,
   });
 
   const accessoryInventory = useMemo(() => {
