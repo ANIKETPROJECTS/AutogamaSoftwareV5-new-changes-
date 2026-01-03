@@ -493,7 +493,7 @@ export default function Invoices() {
           data-testid="input-search-billing"
         />
         
-        <div className="flex items-center gap-3 flex-wrap">
+        <div className="flex gap-3 flex-wrap">
           <div className="flex items-center gap-2">
             <Filter className="w-4 h-4 text-slate-600" />
             <Select value={filterStatus} onValueChange={(value: any) => setFilterStatus(value)}>
@@ -576,32 +576,29 @@ export default function Invoices() {
             </Select>
           </div>
 
-          <div className="flex items-center gap-2 ml-auto">
+          <div className="flex items-center gap-4 flex-wrap">
             <div className="flex items-center gap-2">
-              <span className="text-xs font-medium text-slate-500 whitespace-nowrap">From:</span>
+              <span className="text-sm font-medium text-slate-600">From:</span>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
                     variant={"outline"}
                     size="sm"
                     className={cn(
-                      "w-[140px] justify-start text-left font-normal h-9 border-slate-300",
+                      "w-[160px] justify-start text-left font-normal h-9 border-slate-300",
                       !fromDate && "text-muted-foreground"
                     )}
                     data-testid="button-from-date-filter"
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {fromDate ? format(fromDate, "dd MMM yyyy") : <span>Select date</span>}
+                    {fromDate ? format(fromDate, "LLL dd, y") : <span>Select date</span>}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
                   <Calendar
                     mode="single"
                     selected={fromDate}
-                    onSelect={(date) => {
-                      setFromDate(date);
-                      setTimeFilter("all");
-                    }}
+                    onSelect={setFromDate}
                     initialFocus
                   />
                 </PopoverContent>
@@ -609,30 +606,27 @@ export default function Invoices() {
             </div>
 
             <div className="flex items-center gap-2">
-              <span className="text-xs font-medium text-slate-500 whitespace-nowrap">To:</span>
+              <span className="text-sm font-medium text-slate-600">To:</span>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
                     variant={"outline"}
                     size="sm"
                     className={cn(
-                      "w-[140px] justify-start text-left font-normal h-9 border-slate-300",
+                      "w-[160px] justify-start text-left font-normal h-9 border-slate-300",
                       !toDate && "text-muted-foreground"
                     )}
                     data-testid="button-to-date-filter"
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {toDate ? format(toDate, "dd MMM yyyy") : <span>Select date</span>}
+                    {toDate ? format(toDate, "LLL dd, y") : <span>Select date</span>}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
                   <Calendar
                     mode="single"
                     selected={toDate}
-                    onSelect={(date) => {
-                      setToDate(date);
-                      setTimeFilter("all");
-                    }}
+                    onSelect={setToDate}
                     initialFocus
                   />
                 </PopoverContent>
@@ -649,7 +643,7 @@ export default function Invoices() {
                 }}
                 className="text-xs h-9 text-slate-500 hover:text-red-500"
               >
-                Clear
+                Clear Filters
               </Button>
             )}
           </div>
