@@ -470,7 +470,7 @@ export default function CustomerService() {
         sizeUsed: ppfMaterialItem ? (ppfMaterialItem.quantity || ppfMaterialItem.metersUsed)?.toString() : undefined
       });
     }
-    selectedOtherServices.forEach(s => {
+    selectedOtherServices.filter(s => s.name !== 'TEST').forEach(s => {
       serviceItemsList.push({
         name: s.name,
         price: s.price,
@@ -479,6 +479,7 @@ export default function CustomerService() {
         vehicleType: s.vehicleType
       });
     });
+    // Add Accessories explicitly
     selectedAccessories.forEach(a => {
       serviceItemsList.push({
         name: `${a.name} (${a.quantity}x)`,
@@ -488,6 +489,16 @@ export default function CustomerService() {
         discount: 0,
         type: 'part',
         category: a.category
+      });
+    });
+    // Add 'TEST' as an accessory if it exists in other services (legacy support or special case)
+    selectedOtherServices.filter(s => s.name === 'TEST').forEach(s => {
+      serviceItemsList.push({
+        name: `${s.name} (Accessory)`,
+        price: s.price,
+        discount: s.discount || 0,
+        type: 'part',
+        category: 'Accessories'
       });
     });
     if (parsedLaborCost > 0) {
@@ -855,7 +866,7 @@ export default function CustomerService() {
                           <Label className="text-sm font-semibold">Selected Services</Label>
                         </div>
                         <div className="border rounded-lg divide-y">
-                          {selectedOtherServices.map((service, index) => (
+                          {selectedOtherServices.filter(s => s.name !== 'TEST').map((service, index) => (
                             <div key={index} className="space-y-2 p-3">
                               <div className="flex items-center justify-between">
                                 <div>
@@ -894,6 +905,27 @@ export default function CustomerService() {
               </div>
 
               <div className="space-y-6">
+                {/* Legacy/Specific Accessory Check (TEST) */}
+                {selectedOtherServices.some(s => s.name === 'TEST') && (
+                  <Card className="border border-blue-200 bg-blue-50/30">
+                    <CardHeader className="py-2">
+                      <CardTitle className="text-sm font-semibold text-blue-800">Legacy Accessories</CardTitle>
+                    </CardHeader>
+                    <CardContent className="pb-3">
+                      {selectedOtherServices.filter(s => s.name === 'TEST').map((service, index) => (
+                        <div key={index} className="flex justify-between items-center">
+                          <span className="text-sm font-medium">{service.name}</span>
+                          <div className="flex items-center gap-4">
+                            <span className="text-sm font-bold">₹{(service.price || 0).toLocaleString('en-IN')}</span>
+                            <Button type="button" variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleRemoveOtherService(selectedOtherServices.indexOf(service))}>
+                              <X className="w-3 h-3 text-red-500" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </CardContent>
+                  </Card>
+                )}
                 <div className="space-y-2">
                   <Label>Service Notes</Label>
                   <Textarea value={serviceNotes} onChange={(e) => setServiceNotes(e.target.value)} placeholder="Additional notes..." rows={3} />
