@@ -316,7 +316,7 @@ const TechnicianSchema = new Schema<ITechnician>({
 });
 
 const RollSchema = new Schema<IRoll>({
-  name: { type: String, required: true },
+  name: { type: String, required: true, default: 'Unnamed Roll' },
   meters: { type: Number, required: true, default: 0 },
   squareFeet: { type: Number, required: true, default: 0 },
   remaining_meters: { type: Number, required: true, default: 0 },

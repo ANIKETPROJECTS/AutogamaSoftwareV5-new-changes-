@@ -79,7 +79,7 @@ export const technicianSchema = z.object({
 });
 
 export const rollSchema = z.object({
-  name: z.string().min(1),
+  name: z.string().min(1).default('Unnamed Roll'),
   meters: z.number().min(0),
   squareFeet: z.number().min(0),
   remaining_meters: z.number().min(0),
