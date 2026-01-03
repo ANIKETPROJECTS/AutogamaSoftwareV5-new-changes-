@@ -27,14 +27,53 @@ async function seed() {
         await Inventory.create({
           name,
           category: 'PPF',
-          quantity: 0,
+          quantity: 1, // Initial roll count
           unit: 'rolls',
           price: 0,
-          minStock: 1
+          minStock: 1,
+          rolls: [{
+            name: `${name} Roll 1`,
+            meters: 15,
+            squareFeet: 150,
+            remaining_meters: 15,
+            remaining_sqft: 150,
+            status: 'Available',
+            unit: 'Meters'
+          }],
+          history: [{
+            date: new Date(),
+            type: 'Stock In',
+            description: 'Initial stock seeding',
+            amount: 1,
+            remainingStock: 1
+          }]
         });
-        console.log(`Created PPF Category: ${name}`);
+        console.log(`Created PPF Category with roll: ${name}`);
       } else {
-        console.log(`PPF Category already exists: ${name}`);
+        // If it exists but has no rolls, add one
+        if (exists.rolls.length === 0) {
+          exists.rolls.push({
+            name: `${name} Roll 1`,
+            meters: 15,
+            squareFeet: 150,
+            remaining_meters: 15,
+            remaining_sqft: 150,
+            status: 'Available',
+            unit: 'Meters'
+          });
+          exists.quantity = 1;
+          exists.history.push({
+            date: new Date(),
+            type: 'Stock In',
+            description: 'Seeded initial roll',
+            amount: 1,
+            remainingStock: 1
+          });
+          await exists.save();
+          console.log(`Added initial roll to existing category: ${name}`);
+        } else {
+          console.log(`PPF Category already has rolls: ${name}`);
+        }
       }
     }
 
