@@ -258,27 +258,9 @@ export default function CustomerService() {
           
           if (Array.isArray(prefs.otherServices) && prefs.otherServices.length > 0 && (vehicleType || ppfVehicleType)) {
             const vType = vehicleType || ppfVehicleType;
-            const servicesWithPrices = prefs.otherServices
-              .filter((svc: any) => svc.name !== 'Labor Charge' && svc.category !== 'Accessories' && svc.name !== 'TEST')
-              .map((svc: any) => {
-                const serviceData = OTHER_SERVICES[svc.name as keyof typeof OTHER_SERVICES];
-                let price = svc.price || 0;
-                
-                if (price === 0 && serviceData) {
-                  price = (serviceData as any)[vType] || 0;
-                }
-                return {
-                  name: svc.name,
-                  vehicleType: vType,
-                  price: price,
-                  discount: svc.discount || 0
-                };
-              });
-            setSelectedOtherServices(servicesWithPrices);
-
             // Handle accessories from preferences
             const accessories = prefs.otherServices
-              .filter((svc: any) => svc.category === 'Accessories' || svc.name === 'TEST')
+              .filter((svc: any) => svc.category === 'Accessories' || svc.name === 'TEST' || svc.name === 'Helmet')
               .map((svc: any) => {
                 const invItem = inventory.find((i: any) => i.name === svc.name);
                 return {
@@ -296,6 +278,10 @@ export default function CustomerService() {
                 return [...prev, ...newAccessories];
               });
             }
+
+            const servicesWithPrices = prefs.otherServices
+              .filter((svc: any) => svc.name !== 'Labor Charge' && svc.category !== 'Accessories' && svc.name !== 'TEST' && svc.name !== 'Helmet')
+              .map((svc: any) => {
           }
         }
       } catch (error) {
