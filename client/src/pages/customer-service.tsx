@@ -1329,7 +1329,7 @@ export default function CustomerService() {
                       </div>
                       <Button 
                         type="submit" 
-                        className="w-full h-12 text-lg font-bold bg-red-600 hover:bg-red-700 text-white shadow-lg shadow-red-200 transition-all active:scale-[0.98]" 
+                        className="w-full h-10 text-base font-bold bg-red-600 hover:bg-red-700 text-white shadow-lg shadow-red-200 transition-all active:scale-[0.98]" 
                         disabled={createJobMutation.isPending}
                       >
                         {createJobMutation.isPending ? 'Creating...' : 'Create Service'}
