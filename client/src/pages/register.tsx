@@ -1230,7 +1230,7 @@ export default function CustomerRegistration() {
                                         !customerData.tempAccessoryName ||
                                         (() => {
                                           const item = accessoryInventory.find(
-                                            (i) =>
+                                            (i: any) =>
                                               i.name ===
                                               customerData.tempAccessoryName,
                                           );
@@ -1244,7 +1244,7 @@ export default function CustomerRegistration() {
                                       onClick={() => {
                                         if (customerData.tempAccessoryName) {
                                           const item = accessoryInventory.find(
-                                            (i) =>
+                                            (i: any) =>
                                               i.name ===
                                               customerData.tempAccessoryName,
                                           );
@@ -1284,8 +1284,6 @@ export default function CustomerRegistration() {
                                     </Button>
                                   </div>
                                 </div>
-                              </>
-                            )}
                           </div>
                           {customerData.selectedOtherServices.some(
                             (s) => s.vehicleType === "Accessory",
