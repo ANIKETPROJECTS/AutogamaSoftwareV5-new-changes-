@@ -405,6 +405,12 @@ export class MongoStorage implements IStorage {
         console.log(`[Inventory DEBUG] Found item by name fallback: ${fallbackItem.name}`);
         return this.consumeRollsWithFIFO(fallbackItem._id.toString(), quantityNeeded);
       }
+      // Second fallback: try to find by category (Elite, Garware Plus, etc.)
+      const categoryFallback = await Inventory.findOne({ category: inventoryId });
+      if (categoryFallback) {
+        console.log(`[Inventory DEBUG] Found item by category fallback: ${categoryFallback.name}`);
+        return this.consumeRollsWithFIFO(categoryFallback._id.toString(), quantityNeeded);
+      }
       return { success: false, consumedRolls: [] };
     }
     
