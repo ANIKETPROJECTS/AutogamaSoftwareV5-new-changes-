@@ -1102,7 +1102,10 @@ export default function CustomerService() {
                             />
                           </div>
                           {(Array.isArray(inventory) ? inventory : [])
-                            .filter((item: any) => item.category !== 'Accessories')
+                            .filter((item: any) => {
+                              const isAccessory = item.category === 'Accessories' || item.name?.toLowerCase().includes('(accessory)');
+                              return !isAccessory;
+                            })
                             .map((item: any) => (
                               <SelectItem key={item._id} value={item._id}>
                                 {item.name}
