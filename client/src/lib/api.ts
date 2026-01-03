@@ -86,6 +86,7 @@ export const api = {
     addRoll: (id: string, roll: any) => request<any>(`/inventory/${id}/rolls`, { method: 'POST', body: JSON.stringify(roll) }),
     deleteRoll: (id: string, rollId: string) => request<any>(`/inventory/${id}/rolls/${rollId}`, { method: 'DELETE' }),
     deductRoll: (id: string, rollId: string, metersUsed: number) => request<any>(`/inventory/${id}/rolls/${rollId}/deduct`, { method: 'PATCH', body: JSON.stringify({ metersUsed }) }),
+    consumeRolls: (id: string, quantity: number) => request<any>(`/inventory/${id}/consume`, { method: 'POST', body: JSON.stringify({ quantity }) }),
     consumeRollsWithFIFO: (id: string, quantity: number) => request<any>(`/inventory/${id}/consume-fifo`, { method: 'PATCH', body: JSON.stringify({ quantity }) }),
   },
   

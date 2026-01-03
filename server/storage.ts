@@ -392,9 +392,11 @@ export class MongoStorage implements IStorage {
   }
 
   async consumeRollsWithFIFO(inventoryId: string, quantityNeeded: number): Promise<{ success: boolean; consumedRolls: { rollId: string; quantityUsed: number }[] }> {
+    console.log(`[Inventory DEBUG] consumeRollsWithFIFO called for inventoryId: ${inventoryId}, quantityNeeded: ${quantityNeeded}`);
     if (!mongoose.Types.ObjectId.isValid(inventoryId)) return { success: false, consumedRolls: [] };
     const item = await Inventory.findById(inventoryId);
     if (!item || !item.rolls || item.rolls.length === 0) {
+      console.log(`[Inventory DEBUG] Item not found or has no rolls: ${inventoryId}`);
       return { success: false, consumedRolls: [] };
     }
 
@@ -408,84 +410,55 @@ export class MongoStorage implements IStorage {
       return dateA - dateB;
     });
 
+    console.log(`[Inventory DEBUG] Available rolls: ${item.rolls.length}, active rolls: ${sortedRolls.filter(r => r.status !== 'Finished').length}`);
+
     for (const roll of sortedRolls) {
       if (remaining <= 0) break;
-      if (!roll._id) continue;
+      if (!roll._id || roll.status === 'Finished') continue;
 
-      // Use the unit field to determine which quantity to use, or fallback to sqft conversion
-      let availableQty = roll.unit === 'Square Feet' ? (roll.remaining_sqft || 0) : (roll.remaining_meters || 0);
-      
-      // If we are looking for sqft but roll is in meters, convert on the fly if needed
-      // Actually, the storage system seems to keep both in sync, but let's be safe
-      if (roll.unit === 'Meters' && (roll.remaining_sqft === undefined || roll.remaining_sqft === 0) && roll.remaining_meters > 0) {
-        availableQty = roll.remaining_meters * 10;
-      } else if (roll.remaining_sqft !== undefined && roll.remaining_sqft !== null) {
-        availableQty = Number(roll.remaining_sqft);
-      }
+      let availableQty = roll.remaining_sqft || 0;
+      console.log(`[Inventory DEBUG] Checking roll: ${roll.name}, availableQty: ${availableQty}, remaining needed: ${remaining}`);
 
       if (availableQty <= 0) continue;
 
       const toConsume = Math.min(remaining, availableQty);
       consumedRolls.push({ rollId: roll._id.toString(), quantityUsed: toConsume });
-      remaining -= Number(toConsume.toFixed(2));
+      remaining = Number((remaining - toConsume).toFixed(2));
 
-      // Update roll quantities
-      const newRemainingSqft = Math.max(0, (roll.remaining_sqft || 0) - Number(toConsume));
+      // Update roll quantities directly in the item object
+      const newRemainingSqft = Math.max(0, (roll.remaining_sqft || 0) - toConsume);
       roll.remaining_sqft = Number(newRemainingSqft.toFixed(2));
       
-      // Sync meters proportionally
       if (roll.squareFeet > 0 && roll.meters > 0) {
         roll.remaining_meters = Number(((roll.remaining_sqft / roll.squareFeet) * roll.meters).toFixed(2));
-      } else if (roll.unit === 'Meters') {
-        roll.remaining_meters = Number((roll.remaining_sqft / 10).toFixed(2));
       }
 
-      // Mark as finished if depleted
-      if (roll.remaining_sqft <= 0.01) {
-        console.log(`[Storage] Archiving roll in FIFO: ${roll.name}`);
-        
-        // Find the original roll in the item.rolls array to preserve ALL fields
-        const rollIdStr = (roll as any)._id?.toString();
-        const originalRoll = item.rolls.find((r: any) => r._id?.toString() === rollIdStr);
-        
-        // CRITICAL: Capture a clean deep copy of the original roll data BEFORE it gets modified
-        let rollData;
-        if (originalRoll) {
-          rollData = JSON.parse(JSON.stringify(originalRoll));
-        } else {
-          rollData = JSON.parse(JSON.stringify(roll));
-        }
+      console.log(`[Inventory DEBUG] Roll ${roll.name} updated: new remaining_sqft: ${roll.remaining_sqft}`);
 
-        // Ensure we preserve the name if it exists in the data
-        const finishedRoll = {
-          ...rollData,
-          remaining_meters: 0,
-          remaining_sqft: 0,
-          status: 'Finished' as const,
-          finishedAt: new Date()
-        };
+      if (roll.remaining_sqft <= 0.01) {
+        console.log(`[Inventory DEBUG] Roll ${roll.name} finished, archiving.`);
+        roll.status = 'Finished';
+        (roll as any).finishedAt = new Date();
         
-        await Inventory.findByIdAndUpdate(item._id, {
-          $push: { finishedRolls: finishedRoll },
-          $pull: { rolls: { _id: (roll as any)._id } }
-        });
-        
-        console.log(`[Storage] Roll archived via atomic update for: ${finishedRoll.name || 'Unknown'}`);
+        // Push to finishedRolls and remove from rolls
+        item.finishedRolls.push(roll);
+        // We'll filter them out of rolls after the loop to avoid mutation issues during iteration
       }
     }
 
+    // Filter out finished rolls from the active rolls array
+    item.rolls = item.rolls.filter(r => r.status !== 'Finished');
+
     if (remaining > 0.01) {
-      console.error(`[Storage FIFO] Insufficient stock. Still need ${remaining} sqft for ${item.name}`);
+      console.error(`[Inventory DEBUG] Insufficient stock. Still need ${remaining} sqft for ${item.name}`);
       return { success: false, consumedRolls: [] };
     }
 
-    // Update main quantity field to match rolls
-    const finalItem = await Inventory.findById(inventoryId);
-    if (finalItem) {
-      const totalRemaining = finalItem.rolls.reduce((sum: number, r: any) => sum + (r.remaining_sqft || 0), 0);
-      await Inventory.findByIdAndUpdate(inventoryId, { quantity: totalRemaining });
-    }
-
+    // Update main quantity field
+    const totalRemaining = item.rolls.reduce((sum, r) => sum + (r.remaining_sqft || 0), 0);
+    item.quantity = Number(totalRemaining.toFixed(2));
+    
+    console.log(`[Inventory DEBUG] Final item quantity: ${item.quantity}`);
     await item.save();
     return { success: true, consumedRolls };
   }

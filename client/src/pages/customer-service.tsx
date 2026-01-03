@@ -535,8 +535,9 @@ export default function CustomerService() {
   const includeGstValue = includeGst ? subtotal * 0.18 : 0;
   const totalCostValue = subtotal + includeGstValue;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('[Inventory DEBUG] Form submission started');
     if (!selectedCustomerId || !selectedVehicleIndex) {
       toast({ title: 'Please select a customer and vehicle', variant: 'destructive' });
       return;
@@ -545,6 +546,41 @@ export default function CustomerService() {
       toast({ title: 'Please select at least one service or enter labor cost', variant: 'destructive' });
       return;
     }
+
+    // Map PPF category to inventory ID
+    const ppfInventoryItem = (Array.isArray(inventory) ? inventory : []).find(
+      (item: any) => item.name.toLowerCase() === ppfCategory.toLowerCase() && item.category !== 'Accessories'
+    );
+
+    console.log('[Inventory DEBUG] PPF category:', ppfCategory, 'Inventory item found:', ppfInventoryItem?._id);
+
+    // DEDUCT PPF STOCK (Rolls)
+    if (ppfInventoryItem && ppfPrice > 0) {
+      const amountToDeduct = parseFloat(metersUsed) || 0;
+      if (amountToDeduct > 0) {
+        console.log(`[Inventory DEBUG] Deducting ${amountToDeduct} sqft from ${ppfInventoryItem.name}`);
+        try {
+          // Use consumeRollsWithFIFO to match the storage implementation
+          await api.inventory.consumeRollsWithFIFO(ppfInventoryItem._id, amountToDeduct);
+          console.log('[Inventory DEBUG] Roll deduction successful');
+        } catch (err: any) {
+          console.error('[Inventory DEBUG] Roll deduction failed:', err);
+          toast({ title: 'Failed to deduct roll stock: ' + err.message, variant: 'destructive' });
+          return;
+        }
+      }
+    }
+
+    // DEDUCT ACCESSORIES
+    for (const acc of selectedAccessories) {
+      console.log(`[Inventory DEBUG] Deducting accessory: ${acc.name}, qty: ${acc.quantity}`);
+      try {
+        await api.inventory.adjust(acc.id, -acc.quantity);
+      } catch (err: any) {
+        console.error('[Inventory DEBUG] Accessory deduction failed:', err);
+      }
+    }
+
     const customer = customers.find((c: any) => c._id === selectedCustomerId);
     if (!customer) return;
     const vehicleIdx = parseInt(selectedVehicleIndex, 10);
@@ -553,7 +589,6 @@ export default function CustomerService() {
 
     const serviceItemsList: any[] = [];
     if (ppfPrice > 0) {
-      const ppfMaterialItem = selectedItems.find(item => item.rollId);
       serviceItemsList.push({
         name: `PPF ${ppfCategory} - ${ppfWarranty}`,
         price: ppfPrice,
@@ -562,9 +597,7 @@ export default function CustomerService() {
         category: ppfCategory,
         vehicleType: ppfVehicleType,
         warranty: ppfWarranty,
-        rollId: ppfMaterialItem?.rollId,
-        rollName: ppfMaterialItem?.name,
-        sizeUsed: ppfMaterialItem ? (ppfMaterialItem.quantity || ppfMaterialItem.metersUsed)?.toString() : undefined
+        sizeUsed: metersUsed
       });
     }
     selectedOtherServices.filter(s => s.name !== 'TEST').forEach(s => {

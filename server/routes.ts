@@ -638,6 +638,21 @@ export async function registerRoutes(
     }
   });
 
+  app.patch("/api/inventory/:id/consume-fifo", async (req, res) => {
+    try {
+      const { quantity } = req.body;
+      console.log(`[Inventory DEBUG] FIFO Consumption request for ${req.params.id}, qty: ${quantity}`);
+      const result = await storage.consumeRollsWithFIFO(req.params.id, quantity);
+      if (!result.success) {
+        return res.status(400).json({ message: "Insufficient stock across available rolls" });
+      }
+      res.json(result);
+    } catch (error) {
+      console.error("[Inventory DEBUG] FIFO Consumption error:", error);
+      res.status(500).json({ message: "Failed to process stock consumption" });
+    }
+  });
+
   app.post("/api/inventory", async (req, res) => {
     try {
       const item = await storage.createInventoryItem(req.body);
