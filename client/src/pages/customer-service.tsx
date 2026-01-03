@@ -1287,10 +1287,6 @@ export default function CustomerService() {
                         <span className="font-semibold">₹{otherServicesAfterDiscount.toLocaleString('en-IN')}</span>
                       </div>
                       <div className="flex justify-between text-sm">
-                        <span className="text-slate-500 font-medium">Inventory Items:</span>
-                        <span className="font-semibold">₹{inventoryTotal.toLocaleString('en-IN')}</span>
-                      </div>
-                      <div className="flex justify-between text-sm">
                         <span className="text-slate-500 font-medium">Accessories:</span>
                         <span className="font-semibold">₹{accessoryTotal.toLocaleString('en-IN')}</span>
                       </div>
