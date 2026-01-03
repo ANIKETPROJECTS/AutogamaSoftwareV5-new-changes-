@@ -975,28 +975,6 @@ export default function CustomerService() {
                                 </div>
                               </div>
 
-                              {item.rolls && item.rolls.length > 0 && (
-                                <div className="space-y-2 mt-3">
-                                  <Label className="text-xs font-semibold text-gray-600">Roll Details</Label>
-                                  <div className="space-y-1.5 max-h-40 overflow-y-auto pr-1">
-                                    {item.rolls
-                                      .filter((roll: any) => roll.status !== 'Finished' && roll.remaining_sqft > 0)
-                                      .map((roll: any, idx: number) => (
-                                        <div key={idx} className="text-[11px] p-2 rounded border border-gray-100 bg-white shadow-sm flex justify-between items-center">
-                                          <div>
-                                            <span className="font-bold text-gray-700">Batch: {roll.batch_no || roll.roll_no || 'N/A'}</span>
-                                            <div className="text-gray-500 mt-0.5">Size: {roll.width}" x {roll.length}'</div>
-                                          </div>
-                                          <div className="text-right">
-                                            <div className="font-bold text-blue-600">{roll.remaining_sqft} sq ft</div>
-                                            <div className="text-[9px] text-gray-400">Remaining</div>
-                                          </div>
-                                        </div>
-                                      ))}
-                                  </div>
-                                </div>
-                              )}
-
                               <div className="space-y-2">
                                 <Label className="text-sm">Quantity/Amount (sq ft)</Label>
                                 <Input type="number" value={metersUsed} onChange={(e) => setMetersUsed(e.target.value)} min="1" step="0.1" />
