@@ -26,7 +26,7 @@ type SelectedService = {
 export default function CustomerService() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [location] = useLocation();
+  const [, setLocation] = useLocation();
   
   const [selectedCustomerId, setSelectedCustomerId] = useState<string>('');
   const [selectedVehicleIndex, setSelectedVehicleIndex] = useState<string>('');
@@ -530,6 +530,10 @@ export default function CustomerService() {
       paidAmount: 0,
       paymentStatus: 'Pending',
       requiresGST: includeGst
+    }, {
+      onSuccess: () => {
+        setLocation('/jobs');
+      }
     });
   };
 
