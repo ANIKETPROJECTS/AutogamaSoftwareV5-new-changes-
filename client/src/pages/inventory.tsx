@@ -63,6 +63,11 @@ function SearchableSelect({
   const [open, setOpen] = useState(false)
   const [inputValue, setInputValue] = useState("")
 
+  const filteredOptions = useMemo(() => {
+    if (!inputValue) return options;
+    return options.filter(opt => opt.toLowerCase().includes(inputValue.toLowerCase()));
+  }, [options, inputValue]);
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -76,61 +81,66 @@ function SearchableSelect({
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
-        <Command filter={(value, search) => {
-          if (value.includes(search)) return 1
-          if (value === "custom-add-new-option") return 1
-          return 0
-        }}>
-          <CommandInput 
-            placeholder={`Search ${placeholder.toLowerCase()}...`} 
-            value={inputValue}
-            onValueChange={setInputValue}
-          />
-          <CommandList>
-            <CommandGroup>
-              {options.map((option) => (
-                <CommandItem
+      <PopoverContent className="w-[--radix-popover-trigger-width] p-0" onPointerDownOutside={(e) => e.preventDefault()}>
+        <div className="flex flex-col">
+          <div className="p-2 border-b">
+            <div className="flex items-center bg-muted/50 rounded-md px-2 py-1">
+              <Search className="w-4 h-4 text-muted-foreground mr-2" />
+              <input
+                className="flex-1 bg-transparent border-none outline-none text-sm placeholder:text-muted-foreground"
+                placeholder={`Search ${placeholder.toLowerCase()}...`}
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+              />
+            </div>
+          </div>
+          <div className="max-h-[300px] overflow-y-auto p-1">
+            {filteredOptions.length === 0 && !inputValue && (
+              <div className="p-2 text-sm text-center text-muted-foreground">{emptyMessage}</div>
+            )}
+            <div className="space-y-1">
+              {filteredOptions.map((option) => (
+                <div
                   key={option}
-                  value={option}
-                  onSelect={(currentValue) => {
-                    onValueChange(currentValue)
+                  className={cn(
+                    "flex items-center gap-2 px-2 py-1.5 text-sm rounded-sm cursor-pointer hover:bg-accent hover:text-accent-foreground",
+                    value === option && "bg-accent/50"
+                  )}
+                  onClick={() => {
+                    onValueChange(option)
                     setOpen(false)
                     setInputValue("")
                   }}
                 >
                   <Check
                     className={cn(
-                      "mr-2 h-4 w-4",
+                      "h-4 w-4",
                       value === option ? "opacity-100" : "opacity-0"
                     )}
                   />
                   {option}
-                </CommandItem>
+                </div>
               ))}
-            </CommandGroup>
+            </div>
             {allowCustom && (
-              <div className="border-t mt-1 p-1">
-                <CommandItem
-                  value="custom-add-new-option"
-                  onSelect={() => {
+              <div className="border-t mt-1 pt-1">
+                <div
+                  className="flex items-center gap-2 cursor-pointer py-1.5 px-2 text-sm text-[#E11D48] hover:bg-[#E11D48]/10 transition-colors rounded-sm font-medium"
+                  onClick={() => {
                     if (inputValue) {
                       onValueChange(inputValue)
-                      setOpen(false)
-                      setInputValue("")
                     }
+                    setOpen(false)
+                    setInputValue("")
                   }}
-                  className={cn(
-                    "flex items-center gap-2 cursor-pointer py-2 px-2 text-[#E11D48] hover:bg-[#E11D48]/10 transition-colors rounded-md font-medium"
-                  )}
                 >
                   <Plus className="h-4 w-4" />
                   {customLabel}{inputValue ? `: ${inputValue}` : ""}
-                </CommandItem>
+                </div>
               </div>
             )}
-          </CommandList>
-        </Command>
+          </div>
+        </div>
       </PopoverContent>
     </Popover>
   )
