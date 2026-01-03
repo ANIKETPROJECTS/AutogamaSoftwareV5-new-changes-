@@ -392,7 +392,6 @@ export class MongoStorage implements IStorage {
   }
 
   async consumeRollsWithFIFO(inventoryId: string, quantityNeeded: number): Promise<{ success: boolean; consumedRolls: { rollId: string; quantityUsed: number }[] }> {
-    console.log(`[Inventory DEBUG] consumeRollsWithFIFO called for inventoryId: ${inventoryId}, quantityNeeded: ${quantityNeeded}`);
     if (!mongoose.Types.ObjectId.isValid(inventoryId)) return { success: false, consumedRolls: [] };
     const item = await Inventory.findById(inventoryId);
     
@@ -424,14 +423,11 @@ export class MongoStorage implements IStorage {
       return dateA - dateB;
     });
 
-    console.log(`[Inventory DEBUG] Available rolls: ${item.rolls.length}, active rolls: ${sortedRolls.filter(r => r.status !== 'Finished').length}`);
-
     for (const roll of sortedRolls) {
       if (remaining <= 0) break;
       if (!roll._id || roll.status === 'Finished') continue;
 
       let availableQty = roll.remaining_sqft || 0;
-      console.log(`[Inventory DEBUG] Checking roll: ${roll.name}, availableQty: ${availableQty}, remaining needed: ${remaining}`);
 
       if (availableQty <= 0) continue;
 
@@ -447,16 +443,10 @@ export class MongoStorage implements IStorage {
         roll.remaining_meters = Number(((roll.remaining_sqft / roll.squareFeet) * roll.meters).toFixed(2));
       }
 
-      console.log(`[Inventory DEBUG] Roll ${roll.name} updated: new remaining_sqft: ${roll.remaining_sqft}`);
-
       if (roll.remaining_sqft <= 0.01) {
-        console.log(`[Inventory DEBUG] Roll ${roll.name} finished, archiving.`);
         roll.status = 'Finished';
         (roll as any).finishedAt = new Date();
-        
-        // Push to finishedRolls and remove from rolls
         item.finishedRolls.push(roll);
-        // We'll filter them out of rolls after the loop to avoid mutation issues during iteration
       }
     }
 
@@ -464,7 +454,6 @@ export class MongoStorage implements IStorage {
     item.rolls = item.rolls.filter(r => r.status !== 'Finished');
 
     if (remaining > 0.01) {
-      console.error(`[Inventory DEBUG] Insufficient stock. Still need ${remaining} sqft for ${item.name}`);
       return { success: false, consumedRolls: [] };
     }
 
@@ -472,7 +461,6 @@ export class MongoStorage implements IStorage {
     const totalRemaining = item.rolls.reduce((sum, r) => sum + (r.remaining_sqft || 0), 0);
     item.quantity = Number(totalRemaining.toFixed(2));
     
-    console.log(`[Inventory DEBUG] Final item quantity: ${item.quantity}`);
     await item.save();
     return { success: true, consumedRolls };
   }

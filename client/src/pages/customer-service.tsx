@@ -552,25 +552,6 @@ export default function CustomerService() {
       (item: any) => item.name.toLowerCase() === ppfCategory.toLowerCase() && item.category !== 'Accessories'
     );
 
-    console.log('[Inventory DEBUG] PPF category:', ppfCategory, 'Inventory item found:', ppfInventoryItem?._id);
-
-    // DEDUCT PPF STOCK (Rolls)
-    if (ppfInventoryItem && ppfPrice > 0) {
-      const amountToDeduct = parseFloat(metersUsed) || 0;
-      if (amountToDeduct > 0) {
-        try {
-          await api.inventory.consumeRollsWithFIFO(ppfInventoryItem._id, amountToDeduct);
-        } catch (err: any) {
-          console.error('Roll deduction failed:', err);
-          toast({ 
-            title: 'Inventory Warning', 
-            description: 'Failed to deduct roll stock: ' + err.message + '. Please check inventory levels manually.', 
-            variant: 'destructive' 
-          });
-        }
-      }
-    }
-
     // DEDUCT ACCESSORIES
     for (const acc of selectedAccessories) {
       console.log(`[Inventory DEBUG] Deducting accessory: ${acc.name}, qty: ${acc.quantity}`);
