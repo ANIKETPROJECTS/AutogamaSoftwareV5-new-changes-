@@ -443,8 +443,9 @@ export class MongoStorage implements IStorage {
         console.log(`[Storage] Archiving roll in FIFO: ${roll.name}`);
         
         // Find the original roll in the item.rolls array to preserve ALL fields
-        const originalRoll = item.rolls.find(r => r._id?.toString() === roll._id.toString());
-        const rollData = originalRoll ? originalRoll.toObject() : roll;
+        const rollIdStr = (roll as any)._id?.toString();
+        const originalRoll = item.rolls.find((r: any) => r._id?.toString() === rollIdStr);
+        const rollData = originalRoll ? (originalRoll as any).toObject() : roll;
 
         const finishedRoll = {
           ...rollData,
@@ -456,7 +457,7 @@ export class MongoStorage implements IStorage {
         
         await Inventory.findByIdAndUpdate(item._id, {
           $push: { finishedRolls: finishedRoll },
-          $pull: { rolls: { _id: roll._id } }
+          $pull: { rolls: { _id: (roll as any)._id } }
         });
         
         console.log(`[Storage] Roll archived via atomic update for: ${finishedRoll.name}`);
