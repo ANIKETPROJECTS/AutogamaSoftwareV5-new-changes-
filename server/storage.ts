@@ -361,12 +361,32 @@ export class MongoStorage implements IStorage {
       unit: (roll.unit === 'Square Feet' || roll.unit === 'Meters' || roll.unit === 'Square KM') ? roll.unit : 'Meters',
       createdAt: new Date()
     };
-    return Inventory.findByIdAndUpdate(inventoryId, { $push: { rolls: newRoll } }, { new: true });
+    
+    const item = await Inventory.findById(inventoryId);
+    if (!item) return null;
+    
+    item.rolls.push(newRoll);
+    // Update total quantity based on unit
+    const qtyToAdd = roll.unit === 'Square Feet' ? roll.squareFeet : roll.meters;
+    item.quantity = (item.quantity || 0) + qtyToAdd;
+    
+    return await item.save();
   }
 
   async deleteRoll(inventoryId: string, rollId: string): Promise<IInventoryItem | null> {
     if (!mongoose.Types.ObjectId.isValid(inventoryId)) return null;
-    return Inventory.findByIdAndUpdate(inventoryId, { $pull: { rolls: { _id: rollId } } }, { new: true });
+    const item = await Inventory.findById(inventoryId);
+    if (!item) return null;
+    
+    const rollIndex = item.rolls.findIndex(r => r._id?.toString() === rollId);
+    if (rollIndex !== -1) {
+      const roll = item.rolls[rollIndex];
+      const qtyToRemove = roll.unit === 'Square Feet' ? roll.remaining_sqft : roll.remaining_meters;
+      item.quantity = Math.max(0, (item.quantity || 0) - qtyToRemove);
+      item.rolls.splice(rollIndex, 1);
+      return await item.save();
+    }
+    return item;
   }
 
   async consumeRollsWithFIFO(inventoryId: string, quantityNeeded: number): Promise<{ success: boolean; consumedRolls: { rollId: string; quantityUsed: number }[] }> {
