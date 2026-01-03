@@ -448,14 +448,15 @@ export class MongoStorage implements IStorage {
         const rollIdStr = (roll as any)._id?.toString();
         const originalRoll = item.rolls.find((r: any) => r._id?.toString() === rollIdStr);
         
-        // Ensure we capture a clean object with the correct name
+        // CRITICAL: Capture a clean deep copy of the original roll data BEFORE it gets modified
         let rollData;
-        if (originalRoll && typeof (originalRoll as any).toObject === 'function') {
-          rollData = (originalRoll as any).toObject();
+        if (originalRoll) {
+          rollData = JSON.parse(JSON.stringify(originalRoll));
         } else {
           rollData = JSON.parse(JSON.stringify(roll));
         }
 
+        // Ensure we preserve the name if it exists in the data
         const finishedRoll = {
           ...rollData,
           remaining_meters: 0,
