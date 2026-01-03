@@ -250,7 +250,7 @@ export class MongoStorage implements IStorage {
       
       // Also update the customer-level service string to only include actual services
       const serviceNames = preferences.otherServices
-        .filter((s: any) => s.vehicleType?.toLowerCase() !== 'accessory')
+        .filter((s: any) => s.vehicleType?.toLowerCase() !== 'accessory' && !s.name?.toLowerCase().includes('(x'))
         .map((s: any) => s.name);
       
       // If there's a PPF service in preferences, add it too

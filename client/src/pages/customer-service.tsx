@@ -593,13 +593,14 @@ export default function CustomerService() {
     // Add Accessories explicitly
     selectedAccessories.forEach(a => {
       serviceItemsList.push({
-        name: `${a.name} (${a.quantity}x)`,
+        name: `${a.name} (x${a.quantity})`,
         price: a.price * a.quantity,
         unitPrice: a.price,
         quantity: a.quantity,
         discount: 0,
         type: 'part',
-        category: a.category
+        category: 'Accessories',
+        vehicleType: 'accessory'
       });
     });
     // Add 'TEST' as an accessory if it exists in other services (legacy support or special case)
