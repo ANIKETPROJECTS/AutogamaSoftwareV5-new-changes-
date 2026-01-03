@@ -90,7 +90,7 @@ export const rollSchema = z.object({
 
 export const inventorySchema = z.object({
   name: z.string().min(1),
-  category: z.enum(['Elite', 'Garware Plus', 'Garware Premium', 'Garware Matt', 'Accessories']),
+  category: z.string().min(1),
   quantity: z.number().min(0).default(0),
   unit: z.string().min(1),
   minStock: z.number().min(0).default(0),

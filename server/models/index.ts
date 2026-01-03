@@ -328,7 +328,7 @@ const RollSchema = new Schema<IRoll>({
 
 const InventorySchema = new Schema<IInventoryItem>({
   name: { type: String, required: true },
-  category: { type: String, enum: ['Elite', 'Garware Plus', 'Garware Premium', 'Garware Matt', 'Accessories'], required: true },
+  category: { type: String, required: true },
   quantity: { type: Number, required: true, default: 0 },
   unit: { type: String, required: true },
   minStock: { type: Number, required: true, default: 0 },

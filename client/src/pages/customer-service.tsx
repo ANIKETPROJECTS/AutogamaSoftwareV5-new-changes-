@@ -1099,8 +1099,8 @@ export default function CustomerService() {
                               // Handle inventory data properly
                               const invList = Array.isArray(inventory) ? inventory : [];
                               
-                              // Just filter out the PPF service categories
-                              // We will include EVERYTHING else as it exists in MongoDB
+                              // Extract ALL unique categories directly from inventory
+                              // Filtering out ONLY the specific PPF service categories
                               const categorySet = new Set(
                                 invList
                                   .map((item: any) => item.category)
@@ -1110,6 +1110,7 @@ export default function CustomerService() {
                               const finalCategories = Array.from(categorySet).sort();
                               
                               console.log('--- Final Accessory Categories from DB ---', finalCategories);
+                              console.log('All raw items found:', invList.map(i => ({ name: i.name, category: i.category })));
 
                               if (finalCategories.length === 0) {
                                 return <div className="p-2 text-sm text-slate-500">No categories found</div>;
