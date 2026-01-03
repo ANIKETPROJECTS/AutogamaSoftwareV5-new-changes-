@@ -208,7 +208,17 @@ export default function Inventory() {
   const filteredAndSortedItems = useMemo(() => {
     let items = PPF_ITEMS.map((ppfItem) => {
       const item = inventory.find((inv: any) => inv.category === ppfItem.category);
-      return item || { name: ppfItem.name, category: ppfItem.category, quantity: 0, unit: DEFAULT_UNIT, minStock: MIN_STOCK, _id: null };
+      if (item) return item;
+      return { 
+        name: ppfItem.name, 
+        category: ppfItem.category, 
+        quantity: 0, 
+        unit: DEFAULT_UNIT, 
+        minStock: MIN_STOCK, 
+        _id: `temp-${ppfItem.category}`, // Ensure a temporary ID exists for interaction
+        rolls: [],
+        history: []
+      };
     });
 
     if (searchQuery.trim()) {
