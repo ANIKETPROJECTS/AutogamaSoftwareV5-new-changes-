@@ -1093,14 +1093,14 @@ export default function CustomerService() {
                           </SelectTrigger>
                           <SelectContent>
                             {(() => {
+                              // Service categories to exclude
+                              const ppfCategories = ['Elite', 'Garware Plus', 'Garware Premium', 'Garware Matt'];
+                              
                               // Handle inventory data properly
                               const invList = Array.isArray(inventory) ? inventory : [];
                               
-                              // Categories to exclude (Main PPF services)
-                              const ppfCategories = ['Elite', 'Garware Plus', 'Garware Premium', 'Garware Matt'];
-                              
-                              // Extract ALL unique categories that are NOT service-related
-                              // We use all unique categories from inventory except the service ones
+                              // Just filter out the PPF service categories
+                              // We will include EVERYTHING else as it exists in MongoDB
                               const categorySet = new Set(
                                 invList
                                   .map((item: any) => item.category)
@@ -1109,14 +1109,10 @@ export default function CustomerService() {
                               
                               const finalCategories = Array.from(categorySet).sort();
                               
-                              // Log to browser console so user can see what's being fetched
-                              console.log('--- Accessory Categories Debug ---');
-                              console.log('Total items in inventory:', invList.length);
-                              console.log('All categories found in DB:', Array.from(new Set(invList.map(i => i.category))));
-                              console.log('Categories showing in dropdown:', finalCategories);
+                              console.log('--- Final Accessory Categories from DB ---', finalCategories);
 
                               if (finalCategories.length === 0) {
-                                return <div className="p-2 text-sm text-slate-500">No accessory categories found</div>;
+                                return <div className="p-2 text-sm text-slate-500">No categories found</div>;
                               }
 
                               return finalCategories.map((category: any) => (
