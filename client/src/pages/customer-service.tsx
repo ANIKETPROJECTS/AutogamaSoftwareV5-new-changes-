@@ -306,11 +306,11 @@ export default function CustomerService() {
       return;
     }
     const serviceData = OTHER_SERVICES[otherServiceName as keyof typeof OTHER_SERVICES];
-    if (!serviceData || !(serviceData as any)[otherServiceVehicleType]) {
+    if (!serviceData) {
       toast({ title: 'Invalid service selection', variant: 'destructive' });
       return;
     }
-    const price = (serviceData as any)[otherServiceVehicleType];
+    const price = (serviceData as any)[otherServiceVehicleType] || 0;
     const exists = selectedOtherServices.some(
       s => s.name === otherServiceName && s.vehicleType === otherServiceVehicleType
     );
