@@ -1113,7 +1113,7 @@ export default function CustomerService() {
                               console.log('All raw items found:', invList.map(i => ({ name: i.name, category: i.category })));
 
                               if (finalCategories.length === 0) {
-                                return <div className="p-2 text-sm text-slate-500">No categories found</div>;
+                                return <div className="p-2 text-sm text-slate-500">No categories found in inventory</div>;
                               }
 
                               return finalCategories.map((category: any) => (
