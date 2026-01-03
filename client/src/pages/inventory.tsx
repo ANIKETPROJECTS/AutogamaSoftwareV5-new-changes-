@@ -160,7 +160,6 @@ function SearchableSelect({
                     setInputValue("");
                   }}
                 >
-                  <Plus className="h-4 w-4" />
                   {customLabel}
                 </div>
               </div>
