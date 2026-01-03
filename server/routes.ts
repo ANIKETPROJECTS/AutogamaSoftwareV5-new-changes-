@@ -868,8 +868,10 @@ export async function registerRoutes(
             }
             return sum;
           }, 0);
+          console.log(`[Materials] Item: ${item.name}, Rolls Total: ${totalAvailable}, Stored Quantity: ${item.quantity}`);
         } else {
           totalAvailable = item.quantity || 0;
+          console.log(`[Materials] Item: ${item.name}, Total available: ${totalAvailable}`);
         }
 
         if (mat.quantity > totalAvailable) {

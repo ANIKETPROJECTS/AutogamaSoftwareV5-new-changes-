@@ -485,7 +485,7 @@ export default function CustomerService() {
     let totalAvailable = 0;
     if (item.rolls && item.rolls.length > 0) {
       totalAvailable = item.rolls.reduce((sum: number, roll: any) => {
-        if (roll.status !== 'Finished' && roll.remaining_sqft > 0) {
+        if (roll.status !== 'Finished') {
           return sum + (roll.remaining_sqft || 0);
         }
         return sum;
