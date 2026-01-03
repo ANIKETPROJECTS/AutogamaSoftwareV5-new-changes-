@@ -395,8 +395,22 @@ export class MongoStorage implements IStorage {
     console.log(`[Inventory DEBUG] consumeRollsWithFIFO called for inventoryId: ${inventoryId}, quantityNeeded: ${quantityNeeded}`);
     if (!mongoose.Types.ObjectId.isValid(inventoryId)) return { success: false, consumedRolls: [] };
     const item = await Inventory.findById(inventoryId);
-    if (!item || !item.rolls || item.rolls.length === 0) {
-      console.log(`[Inventory DEBUG] Item not found or has no rolls: ${inventoryId}`);
+    console.log(`[Inventory DEBUG] Item found: ${item ? item.name : 'null'}, category: ${item?.category}, rolls length: ${item?.rolls?.length || 0}`);
+    
+    if (!item) {
+      console.log(`[Inventory DEBUG] Item not found in database: ${inventoryId}`);
+      // Fallback: try to find by name if ID fails (sometimes category name is used as ID in frontend)
+      const fallbackItem = await Inventory.findOne({ name: inventoryId });
+      if (fallbackItem) {
+        console.log(`[Inventory DEBUG] Found item by name fallback: ${fallbackItem.name}`);
+        return this.consumeRollsWithFIFO(fallbackItem._id.toString(), quantityNeeded);
+      }
+      return { success: false, consumedRolls: [] };
+    }
+    
+    if (!item.rolls || item.rolls.length === 0) {
+      console.log(`[Inventory DEBUG] Item has no rolls: ${item.name} (${inventoryId})`);
+      // If it's a PPF category but has no rolls, it's effectively out of stock
       return { success: false, consumedRolls: [] };
     }
 

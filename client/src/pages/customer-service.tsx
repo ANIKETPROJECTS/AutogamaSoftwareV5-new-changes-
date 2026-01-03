@@ -558,15 +558,13 @@ export default function CustomerService() {
     if (ppfInventoryItem && ppfPrice > 0) {
       const amountToDeduct = parseFloat(metersUsed) || 0;
       if (amountToDeduct > 0) {
-        console.log(`[Inventory DEBUG] Deducting ${amountToDeduct} sqft from ${ppfInventoryItem.name}`);
+        console.log(`[Inventory DEBUG] Attempting deduction for ${ppfCategory} (ID: ${ppfInventoryItem._id}) - Amount: ${amountToDeduct}`);
         try {
-          // Use consumeRollsWithFIFO to match the storage implementation
           await api.inventory.consumeRollsWithFIFO(ppfInventoryItem._id, amountToDeduct);
           console.log('[Inventory DEBUG] Roll deduction successful');
         } catch (err: any) {
           console.error('[Inventory DEBUG] Roll deduction failed:', err);
           toast({ title: 'Failed to deduct roll stock: ' + err.message, variant: 'destructive' });
-          return;
         }
       }
     }
