@@ -77,7 +77,11 @@ function SearchableSelect({
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
-        <Command>
+        <Command filter={(value, search) => {
+          if (value.includes(search)) return 1
+          if (value === "custom-add-new-option") return 1
+          return 0
+        }}>
           <CommandInput 
             placeholder={`Search ${placeholder.toLowerCase()}...`} 
             value={inputValue}
@@ -90,8 +94,9 @@ function SearchableSelect({
                   key={option}
                   value={option}
                   onSelect={(currentValue) => {
-                    onValueChange(currentValue === value ? "" : currentValue)
+                    onValueChange(currentValue)
                     setOpen(false)
+                    setInputValue("")
                   }}
                 >
                   <Check
@@ -105,21 +110,23 @@ function SearchableSelect({
               ))}
             </CommandGroup>
             {allowCustom && (
-              <div 
-                className={cn(
-                  "border-t mt-1 p-1 flex items-center gap-2 cursor-pointer py-2 px-2 text-[#E11D48] hover:bg-[#E11D48]/10 transition-colors rounded-md font-medium",
-                  !inputValue && "opacity-50 cursor-not-allowed"
-                )}
-                onClick={() => {
-                  if (inputValue) {
-                    onValueChange(inputValue)
-                    setOpen(false)
-                    setInputValue("")
-                  }
-                }}
-              >
-                <Plus className="h-4 w-4" />
-                {customLabel}{inputValue ? `: ${inputValue}` : ""}
+              <div className="border-t mt-1 p-1">
+                <CommandItem
+                  value="custom-add-new-option"
+                  onSelect={() => {
+                    if (inputValue) {
+                      onValueChange(inputValue)
+                      setOpen(false)
+                      setInputValue("")
+                    }
+                  }}
+                  className={cn(
+                    "flex items-center gap-2 cursor-pointer py-2 px-2 text-[#E11D48] hover:bg-[#E11D48]/10 transition-colors rounded-md font-medium"
+                  )}
+                >
+                  <Plus className="h-4 w-4" />
+                  {customLabel}{inputValue ? `: ${inputValue}` : ""}
+                </CommandItem>
               </div>
             )}
           </CommandList>
