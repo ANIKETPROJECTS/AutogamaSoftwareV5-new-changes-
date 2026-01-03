@@ -130,29 +130,29 @@ export default function RollHistory() {
           <CardTitle>Transaction Logs</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="relative overflow-x-auto">
-            <table className="w-full text-sm text-left">
+          <div className="relative overflow-x-auto border border-slate-300 rounded-lg">
+            <table className="w-full text-sm text-left border-collapse">
               <thead className="text-xs uppercase bg-muted">
-                <tr>
-                  <th className="px-4 py-3">Date & Time</th>
-                  <th className="px-4 py-3">Type</th>
-                  <th className="px-4 py-3">Roll Name</th>
+                <tr className="border-b border-slate-300">
+                  <th className="px-4 py-3 border-r border-slate-300">Date & Time</th>
+                  <th className="px-4 py-3 border-r border-slate-300">Type</th>
+                  <th className="px-4 py-3 border-r border-slate-300">Roll Name</th>
                   <th className="px-4 py-3 text-right">Quantity</th>
                 </tr>
               </thead>
-              <tbody className="divide-y">
+              <tbody className="divide-y divide-slate-300">
                 {filteredHistory.length > 0 ? (
                   filteredHistory.map((entry: any, idx: number) => (
-                    <tr key={idx} className="hover:bg-muted/50 transition-colors">
-                      <td className="px-4 py-3 whitespace-nowrap">
+                    <tr key={idx} className="hover:bg-muted/50 transition-colors border-b border-slate-300 last:border-0">
+                      <td className="px-4 py-3 whitespace-nowrap border-r border-slate-300">
                         {format(new Date(entry.timestamp || entry.date), 'dd/MM/yyyy, hh:mm:ss a')}
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-3 border-r border-slate-300">
                         <Badge variant={entry.type === 'IN' || entry.type === 'STOCK IN' ? 'default' : 'destructive'} className="text-[10px] px-1 py-0 h-4">
                           {entry.type}
                         </Badge>
                       </td>
-                      <td className="px-4 py-3 font-medium">
+                      <td className="px-4 py-3 font-medium border-r border-slate-300">
                         {entry.description || entry.rollName || '-'}
                       </td>
                       <td className={`px-4 py-3 text-right font-bold ${entry.type === 'IN' || entry.type === 'STOCK IN' ? 'text-green-600' : 'text-red-600'}`}>
