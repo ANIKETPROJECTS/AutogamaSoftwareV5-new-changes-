@@ -134,7 +134,7 @@ export default function RollHistory() {
             <table className="w-full text-sm text-left">
               <thead className="text-xs uppercase bg-muted">
                 <tr>
-                  <th className="px-4 py-3">Date</th>
+                  <th className="px-4 py-3">Date & Time</th>
                   <th className="px-4 py-3">Type</th>
                   <th className="px-4 py-3">Roll Name</th>
                   <th className="px-4 py-3 text-right">Quantity</th>
