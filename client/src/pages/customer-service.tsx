@@ -272,12 +272,14 @@ export default function CustomerService() {
                 // This indicates it was formatted as an accessory in the past
                 if (name.includes('(x')) return true;
 
-                // If it matches a known accessory in inventory
-                const isInventoryAccessory = inventory.some((inv: any) => 
-                  inv.category === 'Accessories' && 
-                  (name.includes(inv.name.toLowerCase()) || inv.name.toLowerCase().includes(name))
+                // Robust solution: Check if the item exists in inventory as an accessory
+                const invItem = inventory.find((i: any) => 
+                  i.category === 'Accessories' && 
+                  (name === i.name.toLowerCase() || 
+                   name.startsWith(i.name.toLowerCase()) || 
+                   i.name.toLowerCase().startsWith(name))
                 );
-                if (isInventoryAccessory) return true;
+                if (invItem) return true;
 
                 // Special case for legacy or specific known items
                 const isSpecialAccessory = name === 'test' || name.includes('helmet') || name.includes('test2');
@@ -294,13 +296,15 @@ export default function CustomerService() {
                 const quantity = qtyMatch ? parseInt(qtyMatch[1], 10) : (svc.quantity || 1);
 
                 const invItem = inventory.find((i: any) => 
-                  name.toLowerCase().includes(i.name.toLowerCase()) || 
-                  i.name.toLowerCase().includes(name.toLowerCase())
+                  i.category === 'Accessories' && 
+                  (name.toLowerCase() === i.name.toLowerCase() || 
+                   name.toLowerCase().startsWith(i.name.toLowerCase()) || 
+                   i.name.toLowerCase().startsWith(name.toLowerCase()))
                 );
                 return {
                   id: invItem?._id || invItem?.id || svc.id || Math.random().toString(),
-                  name: name,
-                  category: svc.category || 'Accessories',
+                  name: invItem?.name || name,
+                  category: 'Accessories',
                   price: svc.price || invItem?.price || 0,
                   quantity: quantity
                 };
@@ -308,8 +312,8 @@ export default function CustomerService() {
 
             if (accessories.length > 0) {
               setSelectedAccessories(prev => {
-                const existingNames = new Set(prev.map(a => a.name));
-                const newAccessories = accessories.filter((a: any) => !existingNames.has(a.name));
+                const existingNames = new Set(prev.map(a => a.name.toLowerCase()));
+                const newAccessories = accessories.filter((a: any) => !existingNames.has(a.name.toLowerCase()));
                 return [...prev, ...newAccessories];
               });
             }
@@ -326,13 +330,16 @@ export default function CustomerService() {
                 // Logical check for (xN) pattern
                 const hasQuantityPattern = name.includes('(x');
                 
-                const isInventoryAccessory = inventory.some((inv: any) => 
+                const invItem = inventory.find((inv: any) => 
                   inv.category === 'Accessories' && 
-                  (name.includes(inv.name.toLowerCase()) || inv.name.toLowerCase().includes(name))
+                  (name === inv.name.toLowerCase() || 
+                   name.startsWith(inv.name.toLowerCase()) || 
+                   inv.name.toLowerCase().startsWith(name))
                 );
+                
                 const isSpecialAccessory = name === 'test' || name.includes('helmet') || name.includes('test2');
 
-                return !(isAccessoryCategory || hasQuantityPattern || isInventoryAccessory || isSpecialAccessory);
+                return !(isAccessoryCategory || hasQuantityPattern || invItem || isSpecialAccessory);
               })
               .map((svc: any) => {
                 const serviceData = OTHER_SERVICES[svc.name as keyof typeof OTHER_SERVICES];
