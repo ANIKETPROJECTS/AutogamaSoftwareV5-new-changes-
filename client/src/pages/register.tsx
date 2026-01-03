@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { User, Car, Check, ChevronRight, ChevronLeft, Zap } from "lucide-react";
+import { User, Car, Check, ChevronRight, ChevronLeft, Zap, X } from "lucide-react";
 import { useLocation } from "wouter";
 
 const REFERRAL_SOURCES = [
