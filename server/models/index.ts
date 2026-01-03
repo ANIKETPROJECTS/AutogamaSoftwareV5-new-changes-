@@ -261,7 +261,7 @@ const ServiceItemSchema = new Schema<IServiceItem>({
 
 const PaymentSchema = new Schema<IPayment>({
   amount: { type: Number, required: true },
-  mode: { type: String, enum: ['Cash', 'UPI', 'Card', 'Bank Transfer', 'Credit Card', 'Debit Card', 'Cheque', 'Other'], required: true },
+  mode: { type: String, enum: ['Cash', 'UPI', 'Card', 'Bank Transfer', 'Cheque', 'Other'], required: true },
   date: { type: Date, default: Date.now },
   otherPaymentDetails: { type: String },
   notes: { type: String }
