@@ -1176,7 +1176,7 @@ export default function CustomerRegistration() {
                                           key={item._id}
                                           value={item.name}
                                         >
-                                          {item.name} ({item.quantity} in stock)
+                                          {item.name} {item.quantity > 0 ? "" : "(out of stock)"}
                                         </SelectItem>
                                       ))}
                                     </SelectContent>
