@@ -215,19 +215,19 @@ export default function CustomerDetails() {
                     <div>
                       <p className="text-[10px] text-slate-400 font-medium uppercase mb-0.5">Selected Services</p>
                             <p className="text-sm font-semibold text-slate-900 leading-snug">
-                                {customer.service.split(' + ').filter((s: string) => {
+                                {customer.service?.split(' + ').filter((s: string) => {
                                   const vehicle = customer.vehicles?.[0];
                                   if (!vehicle?.otherServices) return true;
                                   // Normalize string for comparison by removing (x1) etc and extra spaces
                                   const normalizedS = s.replace(/\s*\(x\d+\)\s*/g, '').trim().toLowerCase();
                                   
-                                  // CRITICAL FIX: Accessories should NOT be in the "Selected Services" display
+                                  // ROBUST FIX: Accessories should NOT be in the "Selected Services" display
                                   const isAccessory = vehicle.otherServices.some((as: any) => 
                                     (as.vehicleType?.toLowerCase() === "accessory" || (as as any).category === "Accessories") && 
                                     (normalizedS === as.name.replace(/\s*\(x\d+\)\s*/g, '').trim().toLowerCase())
                                   );
                                   return !isAccessory;
-                                }).join(' + ')}
+                                }).join(' + ') || 'None'}
                               </p>
                     </div>
                   </div>

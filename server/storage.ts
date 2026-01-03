@@ -245,7 +245,23 @@ export class MongoStorage implements IStorage {
     if (preferences.ppfWarranty) vehicle.ppfWarranty = preferences.ppfWarranty;
     if (typeof preferences.ppfPrice === 'number') vehicle.ppfPrice = preferences.ppfPrice;
     if (typeof preferences.laborCost === 'number') vehicle.laborCost = preferences.laborCost;
-    if (Array.isArray(preferences.otherServices)) vehicle.otherServices = preferences.otherServices;
+    if (Array.isArray(preferences.otherServices)) {
+      vehicle.otherServices = preferences.otherServices;
+      
+      // Also update the customer-level service string to only include actual services
+      const serviceNames = preferences.otherServices
+        .filter((s: any) => s.vehicleType?.toLowerCase() !== 'accessory')
+        .map((s: any) => s.name);
+      
+      // If there's a PPF service in preferences, add it too
+      if (preferences.ppfCategory) {
+        serviceNames.unshift(preferences.ppfCategory);
+      }
+      
+      if (serviceNames.length > 0) {
+        customer.service = serviceNames.join(' + ');
+      }
+    }
     
     await customer.save();
     return customer;

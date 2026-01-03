@@ -419,7 +419,8 @@ export async function registerRoutes(
         const ppfService = jobData.serviceItems?.find((item: any) => item.name?.startsWith('PPF'));
         const otherServices = jobData.serviceItems?.filter((item: any) => !item.name?.startsWith('PPF')).map((item: any) => ({
           name: item.name,
-          vehicleType: item.vehicleType || ''
+          vehicleType: (item.vehicleType || item.category === 'Accessories') ? (item.vehicleType || 'accessory') : 'service',
+          price: item.price
         })) || [];
         
         const preferences: any = {};
