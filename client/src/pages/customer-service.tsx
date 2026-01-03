@@ -1095,7 +1095,8 @@ export default function CustomerService() {
                             {Array.from(new Set(inventory
                               .filter((item: any) => {
                                 const ppfCategories = ['Elite', 'Garware Plus', 'Garware Premium', 'Garware Matt'];
-                                return !ppfCategories.includes(item.category);
+                                // Explicitly exclude generic 'Accessories' category if it's appearing as a label
+                                return !ppfCategories.includes(item.category) && item.category !== 'Accessories';
                               })
                               .map((item: any) => item.category)))
                               .sort()
