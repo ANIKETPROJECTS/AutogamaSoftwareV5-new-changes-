@@ -101,11 +101,11 @@ export default function RollHistory() {
             placeholder="Search by Roll Name..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
+            className="pl-10 bg-white"
           />
         </div>
         <Select value={filterType} onValueChange={setFilterType}>
-          <SelectTrigger className="w-full md:w-40">
+          <SelectTrigger className="w-full md:w-40 bg-white">
             <SelectValue placeholder="All Types" />
           </SelectTrigger>
           <SelectContent>
@@ -115,7 +115,7 @@ export default function RollHistory() {
           </SelectContent>
         </Select>
         <Select value={sortBy} onValueChange={setSortBy}>
-          <SelectTrigger className="w-full md:w-40">
+          <SelectTrigger className="w-full md:w-40 bg-white">
             <SelectValue placeholder="Sort by" />
           </SelectTrigger>
           <SelectContent>
