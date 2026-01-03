@@ -579,6 +579,7 @@ export default function Inventory() {
             upsertAccessoryMutation.mutate({
               _id: editingAccessory?._id,
               name: accName,
+              category: accCategory,
               quantity: parseFloat(accQuantity),
               unit: accUnit,
               price: parseFloat(accPrice) || 0,
@@ -595,14 +596,18 @@ export default function Inventory() {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
+                <Label>Unit</Label>
+                <Input placeholder="e.g., Piece, Set" value={accUnit} onChange={(e) => setAccUnit(e.target.value)} required />
+              </div>
+              <div className="space-y-2">
                 <Label>Quantity</Label>
                 <Input type="number" placeholder="0" value={accQuantity} onChange={(e) => setAccQuantity(e.target.value)} required />
               </div>
+            </div>
               <div className="space-y-2">
                 <Label>Price (₹)</Label>
                 <Input type="number" placeholder="0" value={accPrice} onChange={(e) => setAccPrice(e.target.value)} required />
               </div>
-            </div>
             <Button type="submit" className="w-full bg-primary" disabled={upsertAccessoryMutation.isPending}>
               {upsertAccessoryMutation.isPending ? 'Saving...' : 'Save Accessory'}
             </Button>
