@@ -258,9 +258,15 @@ export default function CustomerService() {
           
           if (Array.isArray(prefs.otherServices) && prefs.otherServices.length > 0 && (vehicleType || ppfVehicleType)) {
             const vType = vehicleType || ppfVehicleType;
+            console.log('Original preferences otherServices:', prefs.otherServices);
+            
             // Handle accessories from preferences
             const accessories = prefs.otherServices
-              .filter((svc: any) => svc.category === 'Accessories' || svc.name === 'TEST' || svc.name === 'Helmet')
+              .filter((svc: any) => {
+                const isAcc = svc.category === 'Accessories' || svc.name === 'TEST' || svc.name === 'Helmet';
+                console.log(`Checking if ${svc.name} is accessory: ${isAcc}`);
+                return isAcc;
+              })
               .map((svc: any) => {
                 const invItem = inventory.find((i: any) => i.name === svc.name);
                 return {
@@ -271,6 +277,9 @@ export default function CustomerService() {
                   quantity: svc.quantity || 1
                 };
               });
+              
+            console.log('Filtered accessories:', accessories);
+
             if (accessories.length > 0) {
               setSelectedAccessories(prev => {
                 const existingNames = new Set(prev.map(a => a.name));
@@ -280,7 +289,11 @@ export default function CustomerService() {
             }
 
             const servicesWithPrices = prefs.otherServices
-              .filter((svc: any) => svc.name !== 'Labor Charge' && svc.category !== 'Accessories' && svc.name !== 'TEST' && svc.name !== 'Helmet')
+              .filter((svc: any) => {
+                const shouldExclude = svc.name === 'Labor Charge' || svc.category === 'Accessories' || svc.name === 'TEST' || svc.name === 'Helmet';
+                console.log(`Checking if ${svc.name} should be excluded from otherServices: ${shouldExclude}`);
+                return !shouldExclude;
+              })
               .map((svc: any) => {
                 const serviceData = OTHER_SERVICES[svc.name as keyof typeof OTHER_SERVICES];
                 let price = svc.price || 0;
@@ -295,6 +308,8 @@ export default function CustomerService() {
                   discount: svc.discount || 0
                 };
               });
+            
+            console.log('Final otherServices with prices:', servicesWithPrices);
             setSelectedOtherServices(servicesWithPrices);
           }
         }
