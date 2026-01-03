@@ -484,19 +484,21 @@ export default function CustomerRegistration() {
     queryKey: ["/api/inventory"],
   });
 
-  const accessoryInventory = inventory.filter(
-    (item) => item.category === "Accessories",
-  );
+  const accessoryInventory = useMemo(() => 
+    inventory.filter((item) => item.category === "Accessories"),
+  [inventory]);
 
-  const accessoryCategories = Array.from(
-    new Set(accessoryInventory.map((item) => item.unit)),
-  ).filter(Boolean);
+  const accessoryCategories = useMemo(() => 
+    Array.from(new Set(accessoryInventory.map((item) => item.unit))).filter(Boolean),
+  [accessoryInventory]);
 
-  const filteredAccessories = accessoryInventory.filter(
-    (item) =>
-      !customerData.tempAccessoryCategory ||
-      item.unit === customerData.tempAccessoryCategory,
-  );
+  const filteredAccessories = useMemo(() => 
+    accessoryInventory.filter(
+      (item) =>
+        !customerData.tempAccessoryCategory ||
+        item.unit === customerData.tempAccessoryCategory,
+    ),
+  [accessoryInventory, customerData.tempAccessoryCategory]);
 
   const createCustomerMutation = useMutation({
     mutationFn: api.customers.create,
@@ -1138,74 +1140,72 @@ export default function CustomerRegistration() {
                                 </SelectContent>
                               </Select>
                             </div>
-                            {customerData.tempAccessoryCategory && (
-                              <>
-                                <div className="space-y-2">
-                                  <Label>Accessory Name</Label>
-                                  <Select
-                                    value={customerData.tempAccessoryName}
-                                    onValueChange={(value) => {
-                                      const item = accessoryInventory.find(
-                                        (i) => i.name === value,
-                                      );
-                                      setCustomerData({
-                                        ...customerData,
-                                        tempAccessoryName: value,
-                                        tempAccessoryCategory:
-                                          item?.unit ||
-                                          customerData.tempAccessoryCategory,
-                                      });
-                                    }}
-                                  >
-                                    <SelectTrigger className="border-slate-300">
-                                      <SelectValue placeholder="Select accessory" />
-                                    </SelectTrigger>
-                                    <SelectContent
-                                      position="popper"
-                                      className="max-h-60 w-[var(--radix-select-trigger-width)]"
+                            <div className="space-y-2">
+                              <Label>Accessory Name</Label>
+                              <Select
+                                value={customerData.tempAccessoryName}
+                                onValueChange={(value) => {
+                                  const item = accessoryInventory.find(
+                                    (i) => i.name === value,
+                                  );
+                                  setCustomerData({
+                                    ...customerData,
+                                    tempAccessoryName: value,
+                                    tempAccessoryCategory:
+                                      item?.unit ||
+                                      customerData.tempAccessoryCategory,
+                                  });
+                                }}
+                              >
+                                <SelectTrigger className="border-slate-300">
+                                  <SelectValue placeholder="Select accessory" />
+                                </SelectTrigger>
+                                <SelectContent
+                                  position="popper"
+                                  className="max-h-60 w-[var(--radix-select-trigger-width)]"
+                                >
+                                  <div className="p-2 sticky top-0 bg-white z-10 border-b">
+                                    <Input
+                                      placeholder="Search..."
+                                      className="h-8 text-sm"
+                                      onChange={(e) => {
+                                        const search =
+                                          e.target.value.toLowerCase();
+                                        const items = e.target
+                                          .closest('[role="listbox"]')
+                                          ?.querySelectorAll(
+                                            '[role="option"]',
+                                          );
+                                        items?.forEach((item) => {
+                                          const text =
+                                            item.textContent?.toLowerCase() ||
+                                            "";
+                                          (
+                                            item as HTMLElement
+                                          ).style.display = text.includes(
+                                            search,
+                                          )
+                                            ? "flex"
+                                            : "none";
+                                        });
+                                      }}
+                                      onKeyDown={(e) => e.stopPropagation()}
+                                    />
+                                  </div>
+                                  {filteredAccessories.map((item) => (
+                                    <SelectItem
+                                      key={item._id}
+                                      value={item.name}
                                     >
-                                      <div className="p-2 sticky top-0 bg-white z-10 border-b">
-                                        <Input
-                                          placeholder="Search..."
-                                          className="h-8 text-sm"
-                                          onChange={(e) => {
-                                            const search =
-                                              e.target.value.toLowerCase();
-                                            const items = e.target
-                                              .closest('[role="listbox"]')
-                                              ?.querySelectorAll(
-                                                '[role="option"]',
-                                              );
-                                            items?.forEach((item) => {
-                                              const text =
-                                                item.textContent?.toLowerCase() ||
-                                                "";
-                                              (
-                                                item as HTMLElement
-                                              ).style.display = text.includes(
-                                                search,
-                                              )
-                                                ? "flex"
-                                                : "none";
-                                            });
-                                          }}
-                                          onKeyDown={(e) => e.stopPropagation()}
-                                        />
-                                      </div>
-                                      {filteredAccessories.map((item) => (
-                                        <SelectItem
-                                          key={item._id}
-                                          value={item.name}
-                                        >
-                                          {item.name}{" "}
-                                          {item.quantity > 0
-                                            ? ""
-                                            : "(out of stock)"}
-                                        </SelectItem>
-                                      ))}
-                                    </SelectContent>
-                                  </Select>
-                                </div>
+                                      {item.name}{" "}
+                                      {item.quantity > 0
+                                        ? ""
+                                        : "(out of stock)"}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
                                 <div className="space-y-2">
                                   <Label>Quantity</Label>
                                   <div className="flex gap-2">
