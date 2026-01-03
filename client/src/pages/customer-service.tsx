@@ -1092,9 +1092,14 @@ export default function CustomerService() {
                             <SelectValue placeholder="Select Category" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="Accessories">Accessories</SelectItem>
-                            <SelectItem value="Car Care">Car Care</SelectItem>
-                            <SelectItem value="Other">Other</SelectItem>
+                            {Array.from(new Set(inventory
+                              .filter((item: any) => item.category === 'Accessories' || item.category === 'Car Care' || item.category === 'Other' || 
+                                (!['Elite', 'Garware Plus', 'Garware Premium', 'Garware Matt'].includes(item.category)))
+                              .map((item: any) => item.category)))
+                              .map((category: any) => (
+                                <SelectItem key={category} value={category}>{category}</SelectItem>
+                              ))
+                            }
                           </SelectContent>
                         </Select>
                       </div>
