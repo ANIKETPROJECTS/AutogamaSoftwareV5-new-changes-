@@ -479,7 +479,7 @@ export default function CustomerService() {
 
     // Calculate currently pending deductions for this item in selectedItems
     const pendingDeduction = selectedItems
-      .filter(i => i.inventoryId === item._id || (i as any).id === item.inventoryId)
+      .filter(i => i.inventoryId === (item._id || item.id))
       .reduce((sum, i) => sum + (i.quantity || 0), 0);
 
     let totalAvailable = 0;
@@ -497,7 +497,7 @@ export default function CustomerService() {
     const actualAvailable = totalAvailable - pendingDeduction;
 
     if (val > actualAvailable) {
-      toast({ title: `Only ${actualAvailable} available for ${item.category} (after pending selections)`, variant: 'destructive' });
+      toast({ title: `Only ${actualAvailable.toFixed(2)} available for ${item.category} (after pending selections)`, variant: 'destructive' });
       return;
     }
 
@@ -1123,10 +1123,10 @@ export default function CustomerService() {
                                   <span className="text-sm font-bold text-blue-800">
                                     {(() => {
                                       const pending = selectedItems
-                                        .filter(i => i.inventoryId === item._id || (i as any).id === item.inventoryId)
+                                        .filter(i => i.inventoryId === (item._id || item.id))
                                         .reduce((sum, i) => sum + (i.quantity || 0), 0);
                                       const remaining = Math.max(0, totalAvailable - pending);
-                                      return `${remaining.toLocaleString()} sq ft`;
+                                      return `${remaining.toFixed(2)} sq ft`;
                                     })()}
                                   </span>
                                 </div>
