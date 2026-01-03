@@ -484,21 +484,38 @@ export default function CustomerRegistration() {
     queryKey: ["/api/inventory"],
   });
 
-  const accessoryInventory = useMemo(() => 
-    inventory.filter((item) => item.category === "Accessories"),
-  [inventory]);
+  const accessoryInventory = useMemo(() => {
+    return inventory.filter((item) => {
+      const cat = (item.category || "").toString().trim().toLowerCase();
+      return cat === "accessories" || cat === "accessory" || cat === "headgear";
+    });
+  }, [inventory]);
 
-  const accessoryCategories = useMemo(() => 
-    Array.from(new Set(accessoryInventory.map((item) => item.unit))).filter(Boolean),
-  [accessoryInventory]);
+  const accessoryCategories = useMemo(() => {
+    // Check if item.category is Accessory-like, then use category or unit as subcategory
+    const categories = accessoryInventory.map((item) => {
+      const cat = (item.category || "").toString().trim();
+      const unit = (item.unit || "").toString().trim();
+      // If it's specifically "Accessories", use the unit (subcategory)
+      // Otherwise use the category itself
+      if (cat.toLowerCase() === "accessories" || cat.toLowerCase() === "accessory") {
+        return unit;
+      }
+      return cat;
+    });
+    return Array.from(new Set(categories)).filter(Boolean);
+  }, [accessoryInventory]);
 
-  const filteredAccessories = useMemo(() => 
-    accessoryInventory.filter(
-      (item) =>
-        !customerData.tempAccessoryCategory ||
-        item.unit === customerData.tempAccessoryCategory,
-    ),
-  [accessoryInventory, customerData.tempAccessoryCategory]);
+  const filteredAccessories = useMemo(() => {
+    return accessoryInventory.filter(
+      (item) => {
+        if (!customerData.tempAccessoryCategory) return true;
+        const cat = (item.category || "").toString().trim();
+        const itemUnit = (item.unit || "").toString().trim();
+        return cat === customerData.tempAccessoryCategory || itemUnit === customerData.tempAccessoryCategory;
+      }
+    );
+  }, [accessoryInventory, customerData.tempAccessoryCategory]);
 
   const createCustomerMutation = useMutation({
     mutationFn: api.customers.create,
@@ -1132,11 +1149,17 @@ export default function CustomerRegistration() {
                                       onKeyDown={(e) => e.stopPropagation()}
                                     />
                                   </div>
-                                  {accessoryCategories.map((category) => (
-                                    <SelectItem key={category} value={category}>
-                                      {category}
-                                    </SelectItem>
-                                  ))}
+                              {accessoryCategories.length > 0 ? (
+                                accessoryCategories.map((category) => (
+                                  <SelectItem key={category} value={category}>
+                                    {category}
+                                  </SelectItem>
+                                ))
+                              ) : (
+                                <SelectItem value="none" disabled>
+                                  No categories available
+                                </SelectItem>
+                              )}
                                 </SelectContent>
                               </Select>
                             </div>
@@ -1192,17 +1215,23 @@ export default function CustomerRegistration() {
                                       onKeyDown={(e) => e.stopPropagation()}
                                     />
                                   </div>
-                                  {filteredAccessories.map((item) => (
-                                    <SelectItem
-                                      key={item._id}
-                                      value={item.name}
-                                    >
-                                      {item.name}{" "}
-                                      {item.quantity > 0
-                                        ? ""
-                                        : "(out of stock)"}
+                                  {filteredAccessories.length > 0 ? (
+                                    filteredAccessories.map((item) => (
+                                      <SelectItem
+                                        key={item._id}
+                                        value={item.name}
+                                      >
+                                        {item.name}{" "}
+                                        {item.quantity > 0
+                                          ? ""
+                                          : "(out of stock)"}
+                                      </SelectItem>
+                                    ))
+                                  ) : (
+                                    <SelectItem value="none" disabled>
+                                      No accessories available
                                     </SelectItem>
-                                  ))}
+                                  )}
                                 </SelectContent>
                               </Select>
                             </div>
