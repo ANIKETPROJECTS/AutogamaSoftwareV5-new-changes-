@@ -282,6 +282,20 @@ export default function CustomerService() {
             const servicesWithPrices = prefs.otherServices
               .filter((svc: any) => svc.name !== 'Labor Charge' && svc.category !== 'Accessories' && svc.name !== 'TEST' && svc.name !== 'Helmet')
               .map((svc: any) => {
+                const serviceData = OTHER_SERVICES[svc.name as keyof typeof OTHER_SERVICES];
+                let price = svc.price || 0;
+                
+                if (price === 0 && serviceData) {
+                  price = (serviceData as any)[vType] || 0;
+                }
+                return {
+                  name: svc.name,
+                  vehicleType: vType,
+                  price: price,
+                  discount: svc.discount || 0
+                };
+              });
+            setSelectedOtherServices(servicesWithPrices);
           }
         }
       } catch (error) {
