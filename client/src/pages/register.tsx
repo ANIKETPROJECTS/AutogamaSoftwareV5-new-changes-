@@ -1604,13 +1604,13 @@ export default function CustomerRegistration() {
         {/* Step 2: Vehicle Information */}
         {step === 2 && (
           <div className="space-y-6" data-testid="card-vehicle-info">
-            <p className="text-[15px] text-slate-600 mb-6">
+            <p className="text-[15px] text-slate-600 mb-8">
               Please provide your vehicle information
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
               <div className="space-y-2">
-                <Label className="text-[13px] font-medium text-slate-900">Vehicle Name *</Label>
+                <Label className="text-[14px] font-medium text-slate-900">Vehicle Name *</Label>
                 <Select
                   value={vehicleData.make}
                   onValueChange={(value) =>
@@ -1621,8 +1621,8 @@ export default function CustomerRegistration() {
                     })
                   }
                 >
-                  <SelectTrigger className="h-11 bg-white border-slate-200 rounded-lg text-slate-500">
-                    <SelectValue placeholder="Select vehicle make" />
+                  <SelectTrigger className="h-[46px] bg-white border-slate-200 rounded-lg text-slate-500 px-4">
+                    <SelectValue placeholder="BMW" />
                   </SelectTrigger>
                   <SelectContent position="popper" className="max-h-60">
                     {dynamicMakes.map((make) => (
@@ -1633,7 +1633,7 @@ export default function CustomerRegistration() {
               </div>
 
               <div className="space-y-2">
-                <Label className="text-[13px] font-medium text-slate-900">Vehicle Model *</Label>
+                <Label className="text-[14px] font-medium text-slate-900">Vehicle Model *</Label>
                 <Select
                   value={vehicleData.model}
                   onValueChange={(value) =>
@@ -1641,8 +1641,8 @@ export default function CustomerRegistration() {
                   }
                   disabled={!vehicleData.make}
                 >
-                  <SelectTrigger className="h-11 bg-white border-slate-200 rounded-lg text-slate-500">
-                    <SelectValue placeholder="Select vehicle name first" />
+                  <SelectTrigger className="h-[46px] bg-white border-slate-200 rounded-lg text-slate-500 px-4">
+                    <SelectValue placeholder="7 Series" />
                   </SelectTrigger>
                   <SelectContent position="popper" className="max-h-60">
                     {(dynamicModels[vehicleData.make] || []).map((model) => (
@@ -1654,40 +1654,40 @@ export default function CustomerRegistration() {
               </div>
 
               <div className="space-y-2">
-                <Label className="text-[13px] font-medium text-slate-900">Vehicle Type</Label>
-                <div className="h-11 px-3 flex items-center bg-white border border-slate-200 rounded-lg text-slate-900 font-medium">
+                <Label className="text-[14px] font-medium text-slate-900">Vehicle Type</Label>
+                <div className="h-[46px] px-4 flex items-center bg-white border border-slate-200 rounded-lg text-slate-900 font-medium">
                   {vehicleData.vehicleType || "Not selected"}
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label className="text-[13px] font-medium text-slate-900">Year of Manufacture</Label>
+                <Label className="text-[14px] font-medium text-slate-900">Year of Manufacture</Label>
                 <Input
                   type="text"
                   value={vehicleData.year}
                   onChange={(e) => setVehicleData({ ...vehicleData, year: e.target.value })}
                   placeholder="e.g., 2023"
-                  className="h-11 bg-white border-slate-200 rounded-lg placeholder:text-slate-400"
+                  className="h-[46px] bg-white border-slate-200 rounded-lg placeholder:text-slate-400 px-4"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label className="text-[13px] font-medium text-slate-900">Vehicle Number *</Label>
+                <Label className="text-[14px] font-medium text-slate-900">Vehicle Number *</Label>
                 <Input
                   value={vehicleData.plateNumber}
                   onChange={(e) => setVehicleData({ ...vehicleData, plateNumber: e.target.value.toUpperCase() })}
                   placeholder="e.g., MH02 AB 1234"
-                  className="h-11 bg-white border-slate-200 rounded-lg placeholder:text-slate-400"
+                  className="h-[46px] bg-white border-slate-200 rounded-lg placeholder:text-slate-400 px-4"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label className="text-[13px] font-medium text-slate-900">Color</Label>
+                <Label className="text-[14px] font-medium text-slate-900">Color</Label>
                 <Select
                   value={vehicleData.color}
                   onValueChange={(value) => setVehicleData({ ...vehicleData, color: value })}
                 >
-                  <SelectTrigger className="h-11 bg-white border-slate-200 rounded-lg text-slate-500">
+                  <SelectTrigger className="h-[46px] bg-white border-slate-200 rounded-lg text-slate-400 px-4">
                     <SelectValue placeholder="Select color" />
                   </SelectTrigger>
                   <SelectContent position="popper" className="max-h-60">
@@ -1699,11 +1699,11 @@ export default function CustomerRegistration() {
               </div>
 
               <div className="col-span-1 md:col-span-2 space-y-2">
-                <Label className="text-[13px] font-medium text-slate-900">Vehicle Image</Label>
+                <Label className="text-[14px] font-medium text-slate-900">Vehicle Image</Label>
                 <div className="relative">
                   <Input 
                     placeholder="Choose File No file chosen"
-                    className="h-11 bg-white border-slate-200 rounded-lg placeholder:text-slate-600 pr-24 cursor-pointer"
+                    className="h-[46px] bg-white border-slate-200 rounded-lg placeholder:text-slate-600 pr-24 cursor-pointer px-4"
                     readOnly
                     onClick={() => document.getElementById('vehicle-upload')?.click()}
                   />
@@ -1732,25 +1732,20 @@ export default function CustomerRegistration() {
               </div>
             </div>
 
-            <div className="flex justify-between items-center pt-8 mt-4 border-t border-slate-100">
+            <div className="flex justify-between items-center pt-12 mt-8">
               <Button
                 variant="outline"
                 onClick={() => setStep(1)}
-                className="h-10 px-8 border-slate-200 text-slate-700 hover:bg-slate-50 rounded-lg"
+                className="h-11 px-10 border-slate-200 text-slate-700 hover:bg-slate-50 rounded-lg font-medium"
               >
                 Previous
               </Button>
               <Button
                 onClick={handleSubmit}
                 disabled={!canProceedStep2 || createCustomerMutation.isPending}
-                className="h-10 px-8 bg-[#81c1a8] hover:bg-[#72b097] text-white font-medium rounded-lg shadow-sm flex items-center gap-2"
+                className="h-11 px-10 bg-[#81c1a8] hover:bg-[#72b097] text-white font-medium rounded-lg shadow-sm"
               >
-                {createCustomerMutation.isPending ? "Registering..." : (
-                  <>
-                    Complete Registration
-                    <Check className="w-4 h-4" />
-                  </>
-                )}
+                {createCustomerMutation.isPending ? "Registering..." : "Complete Registration"}
               </Button>
             </div>
           </div>
