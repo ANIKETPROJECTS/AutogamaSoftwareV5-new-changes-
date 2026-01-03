@@ -93,29 +93,9 @@ export default function Dashboard() {
   const appointments = appointmentsData?.appointments || [];
 
   const customerStatusCount = JOB_STAGES.reduce((acc: Record<string, number>, stage) => {
-    acc[stage.key] = 0;
+    acc[stage.key] = jobs.filter((j: any) => j.stage === stage.key).length;
     return acc;
   }, {});
-
-  // Group jobs by customer and get the latest job for each customer
-  const latestJobPerCustomer = new Map<string, any>();
-  jobs.forEach((job: any) => {
-    const customerId = job.customerId;
-    const existing = latestJobPerCustomer.get(customerId);
-    
-    // Keep only the most recent job for each customer
-    if (!existing || new Date(job.createdAt) > new Date(existing.createdAt)) {
-      latestJobPerCustomer.set(customerId, job);
-    }
-  });
-
-  // Count unique customers by their latest job stage
-  latestJobPerCustomer.forEach((job: any) => {
-    const stage = job.stage || "New Lead";
-    if (customerStatusCount.hasOwnProperty(stage)) {
-      customerStatusCount[stage]++;
-    }
-  });
 
   const customerStatusData = JOB_STAGES.map(stage => ({
     name: stage.label,
@@ -222,10 +202,7 @@ export default function Dashboard() {
     setPageTitle("Dashboard", `Welcome back, ${user?.name || 'Admin'}!`);
   }, [user, setPageTitle]);
 
-  const stageCounts = JOB_STAGES.reduce((acc: Record<string, number>, stage) => {
-    acc[stage.key] = jobs.filter((j: any) => j.stage === stage.key).length;
-    return acc;
-  }, {});
+  const stageCounts = customerStatusCount;
 
   return (
     <div className="space-y-8">
