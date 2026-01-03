@@ -493,7 +493,7 @@ export default function RegisteredCustomers() {
                             className="text-xs"
                             onClick={() => {
                               setSelectedCustomerForImages(customer);
-                              setUploadedImages([]);
+                              setUploadedImages(customer.serviceImages || []);
                               setImageDialogOpen(true);
                             }}
                             data-testid={`button-add-images-${customer._id}`}
