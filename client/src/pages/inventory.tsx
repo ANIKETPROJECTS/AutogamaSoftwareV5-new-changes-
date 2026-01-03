@@ -49,14 +49,16 @@ function SearchableSelect({
   onValueChange, 
   placeholder, 
   emptyMessage = "No option found.",
-  allowCustom = true 
+  allowCustom = true,
+  customLabel = "Add new"
 }: { 
   options: string[], 
   value: string, 
   onValueChange: (val: string) => void, 
   placeholder: string,
   emptyMessage?: string,
-  allowCustom?: boolean
+  allowCustom?: boolean,
+  customLabel?: string
 }) {
   const [open, setOpen] = useState(false)
   const [inputValue, setInputValue] = useState("")
@@ -90,9 +92,10 @@ function SearchableSelect({
                   onClick={() => {
                     onValueChange(inputValue)
                     setOpen(false)
+                    setInputValue("")
                   }}
                 >
-                  Add "{inputValue}"
+                  {customLabel} "{inputValue}"
                 </Button>
               ) : emptyMessage}
             </CommandEmpty>
@@ -116,6 +119,20 @@ function SearchableSelect({
                 </CommandItem>
               ))}
             </CommandGroup>
+            {allowCustom && inputValue && !options.includes(inputValue) && (
+              <CommandGroup heading="New Entry">
+                <CommandItem
+                  onSelect={() => {
+                    onValueChange(inputValue)
+                    setOpen(false)
+                    setInputValue("")
+                  }}
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  {customLabel}: {inputValue}
+                </CommandItem>
+              </CommandGroup>
+            )}
           </CommandList>
         </Command>
       </PopoverContent>
@@ -198,12 +215,22 @@ export default function Inventory() {
   const lowStockItems = useMemo(() => filteredAndSortedItems.filter(isLowStock), [filteredAndSortedItems]);
 
   const categories = useMemo(() => {
-    const cats = new Set(inventory.map((inv: any) => inv.category));
+    // Filter out PPF items from accessory categories
+    const ppfCategories = new Set(PPF_ITEMS.map(item => item.category));
+    const cats = new Set(inventory
+      .map((inv: any) => inv.category)
+      .filter((cat: string) => !ppfCategories.has(cat))
+    );
     return Array.from(cats);
   }, [inventory]);
 
   const existingNames = useMemo(() => {
-    return Array.from(new Set(inventory.map((inv: any) => inv.name)));
+    // Also filter out PPF names if needed, but the user specifically mentioned category
+    const ppfCategories = new Set(PPF_ITEMS.map(item => item.category));
+    return Array.from(new Set(inventory
+      .filter((inv: any) => !ppfCategories.has(inv.category))
+      .map((inv: any) => inv.name)
+    ));
   }, [inventory]);
 
   const addRollMutation = useMutation({
@@ -684,6 +711,7 @@ export default function Inventory() {
                 value={accCategory}
                 onValueChange={setAccCategory}
                 placeholder="Select category"
+                customLabel="Add New Category"
               />
             </div>
             <div className="space-y-2">
@@ -693,6 +721,7 @@ export default function Inventory() {
                 value={accName}
                 onValueChange={setAccName}
                 placeholder="Select name"
+                customLabel="Add New Accessory"
               />
             </div>
             <div className="space-y-2">
