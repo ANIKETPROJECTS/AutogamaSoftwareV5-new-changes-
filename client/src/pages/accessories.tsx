@@ -29,7 +29,9 @@ export default function Accessories() {
   const [isAddingNewName, setIsAddingNewName] = useState(false);
 
   const [price, setPrice] = useState('');
-  const [quantity, setQuantity] = useState('');
+  const [quantity, setQuantity] = useState('1');
+  const [initialStock, setInitialStock] = useState('');
+  const [currentStock, setCurrentStock] = useState<number | null>(null);
   const [showHistory, setShowHistory] = useState(false);
 
   const { toast } = useToast();
@@ -76,7 +78,7 @@ export default function Accessories() {
         existingItem = await api.inventory.create({
           name: data.name,
           category: data.category,
-          quantity: 0,
+          quantity: data.initialStock || 0,
           unit: 'Piece',
           minStock: 5,
           price: data.price
@@ -97,12 +99,16 @@ export default function Accessories() {
       });
 
       if (!saleRes.ok) throw new Error('Failed to record sale');
+
+      // 3. Deduct stock from inventory
+      await api.inventory.adjust(existingItem._id || existingItem.id, -data.quantity);
+      
       return saleRes.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['inventory'] });
       queryClient.invalidateQueries({ queryKey: ['accessory-sales'] });
-      toast({ title: 'Sale recorded successfully' });
+      toast({ title: 'Sale recorded and inventory updated' });
       
       // Reset form
       setCategory('');
@@ -112,7 +118,9 @@ export default function Accessories() {
       setNewName('');
       setIsAddingNewName(false);
       setPrice('');
-      setQuantity('');
+      setQuantity('1');
+      setInitialStock('');
+      setCurrentStock(null);
     },
     onError: () => {
       toast({ title: 'Failed to process accessory', variant: 'destructive' });
@@ -129,11 +137,18 @@ export default function Accessories() {
       return;
     }
 
+    const qtyToSell = parseInt(quantity);
+    if (currentStock !== null && qtyToSell > currentStock) {
+      toast({ title: `Insufficient stock. Only ${currentStock} available.`, variant: 'destructive' });
+      return;
+    }
+
     sellMutation.mutate({
       category: finalCategory,
       name: finalName,
       price: parseFloat(price),
-      quantity: parseInt(quantity)
+      quantity: qtyToSell,
+      initialStock: isAddingNewName ? parseInt(initialStock || '0') : 0
     });
   };
 
@@ -306,43 +321,67 @@ export default function Accessories() {
             <div className="space-y-2">
               <Label>Accessory Name</Label>
               {isAddingNewName ? (
-                <div className="flex gap-2">
-                  <Input 
-                    placeholder="Enter new accessory name" 
-                    value={newName} 
-                    onChange={(e) => setNewName(e.target.value)}
-                  />
-                  <Button 
-                    type="button" 
-                    variant="outline" 
-                    onClick={() => setIsAddingNewName(false)}
-                  >
-                    Cancel
-                  </Button>
+                <div className="space-y-4">
+                  <div className="flex gap-2">
+                    <Input 
+                      placeholder="Enter new accessory name" 
+                      value={newName} 
+                      onChange={(e) => setNewName(e.target.value)}
+                    />
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={() => {
+                        setIsAddingNewName(false);
+                        setInitialStock('');
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-xs text-muted-foreground uppercase font-bold">Initial Stock for Inventory</Label>
+                    <Input 
+                      type="number" 
+                      placeholder="Enter opening stock quantity" 
+                      value={initialStock} 
+                      onChange={(e) => setInitialStock(e.target.value)}
+                    />
+                  </div>
                 </div>
               ) : (
-                <Select value={name} onValueChange={(value) => {
-                  if (value === 'new') {
-                    setIsAddingNewName(true);
-                  } else {
-                    setName(value);
-                    const item = accessoryInventory.find((i: any) => i.name === value && i.category === category);
-                    if (item?.price) setPrice(item.price.toString());
-                  }
-                }} disabled={!category && !isAddingNewCategory}>
-                  <SelectTrigger>
-                    <SelectValue placeholder={(category || isAddingNewCategory) ? "Select an accessory" : "First select a category"} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {filteredNames.map((n: any) => (
-                      <SelectItem key={n} value={n}>{n}</SelectItem>
-                    ))}
-                    <SelectItem value="new" className="text-primary font-medium">
-                      <Plus className="w-4 h-4 mr-2 inline" />
-                      Add New Accessory
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
+                <div className="space-y-2">
+                  <Select value={name} onValueChange={(value) => {
+                    if (value === 'new') {
+                      setIsAddingNewName(true);
+                      setCurrentStock(null);
+                    } else {
+                      setName(value);
+                      const item = accessoryInventory.find((i: any) => i.name === value && i.category === category);
+                      if (item?.price) setPrice(item.price.toString());
+                      if (item) setCurrentStock(item.quantity || 0);
+                    }
+                  }} disabled={!category && !isAddingNewCategory}>
+                    <SelectTrigger>
+                      <SelectValue placeholder={(category || isAddingNewCategory) ? "Select an accessory" : "First select a category"} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {filteredNames.map((n: any) => (
+                        <SelectItem key={n} value={n}>{n}</SelectItem>
+                      ))}
+                      <SelectItem value="new" className="text-primary font-medium">
+                        <Plus className="w-4 h-4 mr-2 inline" />
+                        Add New Accessory
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {currentStock !== null && (
+                    <div className="flex items-center gap-2 text-sm text-blue-600 font-medium bg-blue-50 p-2 rounded border border-blue-100">
+                      <Package className="w-4 h-4" />
+                      Current Inventory Stock: {currentStock} available
+                    </div>
+                  )}
+                </div>
               )}
             </div>
 
