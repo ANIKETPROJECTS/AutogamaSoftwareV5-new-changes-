@@ -84,26 +84,7 @@ function SearchableSelect({
             onValueChange={setInputValue}
           />
           <CommandList>
-            <CommandGroup heading="New Entry">
-              <CommandItem
-                onSelect={() => {
-                  if (inputValue) {
-                    onValueChange(inputValue)
-                    setOpen(false)
-                    setInputValue("")
-                  }
-                }}
-                disabled={!inputValue}
-                className={cn(
-                  "flex items-center gap-2",
-                  !inputValue && "opacity-50 cursor-not-allowed"
-                )}
-              >
-                <Plus className="h-4 w-4" />
-                {customLabel}{inputValue ? `: ${inputValue}` : " (Type to add)"}
-              </CommandItem>
-            </CommandGroup>
-            <CommandGroup heading="Existing Options">
+            <CommandGroup>
               {options.map((option) => (
                 <CommandItem
                   key={option}
@@ -123,6 +104,27 @@ function SearchableSelect({
                 </CommandItem>
               ))}
             </CommandGroup>
+            {allowCustom && (
+              <div className="border-t mt-1 p-1">
+                <CommandItem
+                  onSelect={() => {
+                    if (inputValue) {
+                      onValueChange(inputValue)
+                      setOpen(false)
+                      setInputValue("")
+                    }
+                  }}
+                  disabled={!inputValue}
+                  className={cn(
+                    "flex items-center gap-2 cursor-pointer py-2 px-2 text-[#E11D48] hover:bg-[#E11D48]/10 transition-colors rounded-md font-medium",
+                    !inputValue && "opacity-50 cursor-not-allowed"
+                  )}
+                >
+                  <Plus className="h-4 w-4" />
+                  {customLabel}{inputValue ? `: ${inputValue}` : ""}
+                </CommandItem>
+              </div>
+            )}
           </CommandList>
         </Command>
       </PopoverContent>
