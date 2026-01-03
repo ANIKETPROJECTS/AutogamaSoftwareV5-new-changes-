@@ -380,10 +380,12 @@ export class MongoStorage implements IStorage {
     
     const rollIndex = item.rolls.findIndex(r => r._id?.toString() === rollId);
     if (rollIndex !== -1) {
-      const roll = item.rolls[rollIndex];
-      const qtyToRemove = roll.unit === 'Square Feet' ? roll.remaining_sqft : roll.remaining_meters;
-      item.quantity = Math.max(0, (item.quantity || 0) - qtyToRemove);
       item.rolls.splice(rollIndex, 1);
+      
+      // Calculate total remaining stock across all remaining rolls
+      const totalRemaining = item.rolls.reduce((sum, r) => sum + (r.remaining_sqft || 0), 0);
+      item.quantity = totalRemaining;
+      
       return await item.save();
     }
     return item;
