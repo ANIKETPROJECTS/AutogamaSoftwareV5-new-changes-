@@ -121,6 +121,14 @@ export interface IRoll {
   finishedAt?: Date;
 }
 
+export interface IInventoryHistory {
+  date: Date;
+  type: 'Stock In' | 'Stock Out';
+  description: string;
+  amount: number;
+  remainingStock: number;
+}
+
 export interface IInventoryItem extends Document {
   name: string;
   category: InventoryCategory;
@@ -129,6 +137,7 @@ export interface IInventoryItem extends Document {
   minStock: number;
   rolls: IRoll[];
   finishedRolls: IRoll[];
+  history: IInventoryHistory[];
   price?: number;
   createdAt: Date;
 }
@@ -334,6 +343,13 @@ const InventorySchema = new Schema<IInventoryItem>({
   minStock: { type: Number, required: true, default: 0 },
   rolls: [RollSchema],
   finishedRolls: [RollSchema],
+  history: [{
+    date: { type: Date, default: Date.now },
+    type: { type: String, enum: ['Stock In', 'Stock Out'] },
+    description: String,
+    amount: Number,
+    remainingStock: Number
+  }],
   price: { type: Number },
   createdAt: { type: Date, default: Date.now }
 });

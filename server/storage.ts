@@ -370,6 +370,16 @@ export class MongoStorage implements IStorage {
     const qtyToAdd = roll.unit === 'Square Feet' ? roll.squareFeet : roll.meters;
     item.quantity = (item.quantity || 0) + qtyToAdd;
     
+    // Add to history
+    if (!item.history) item.history = [];
+    item.history.push({
+      date: new Date(),
+      type: 'Stock In',
+      description: `New Roll Added: ${roll.name}`,
+      amount: qtyToAdd,
+      remainingStock: item.quantity
+    });
+    
     return await item.save();
   }
 
@@ -447,6 +457,16 @@ export class MongoStorage implements IStorage {
         roll.status = 'Finished';
         (roll as any).finishedAt = new Date();
         item.finishedRolls.push(roll);
+
+        // Add to history
+        if (!item.history) item.history = [];
+        item.history.push({
+          date: new Date(),
+          type: 'Stock Out',
+          description: `Roll Finished: ${roll.name}`,
+          amount: -(roll.squareFeet || 0),
+          remainingStock: 0 // Will be updated below
+        });
       }
     }
 
@@ -460,6 +480,14 @@ export class MongoStorage implements IStorage {
     // Update main quantity field
     const totalRemaining = item.rolls.reduce((sum, r) => sum + (r.remaining_sqft || 0), 0);
     item.quantity = Number(totalRemaining.toFixed(2));
+    
+    // Update remainingStock in history
+    if (item.history && item.history.length > 0) {
+      const lastHistory = item.history[item.history.length - 1];
+      if (lastHistory.description.startsWith('Roll Finished')) {
+        lastHistory.remainingStock = item.quantity;
+      }
+    }
     
     await item.save();
     return { success: true, consumedRolls };

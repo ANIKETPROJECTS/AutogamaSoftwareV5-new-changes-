@@ -848,13 +848,13 @@ export default function Inventory() {
       </Dialog>
 
       <Dialog open={historyDialogOpen} onOpenChange={setHistoryDialogOpen}>
-        <DialogContent className="max-w-4xl">
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden flex flex-col">
           <DialogHeader>
             <DialogTitle>Stock History - {selectedHistoryItem?.category || selectedHistoryItem?.name}</DialogTitle>
           </DialogHeader>
-          <div className="mt-4 max-h-[60vh] overflow-y-auto">
+          <div className="flex-1 overflow-y-auto mt-4">
             <table className="w-full text-sm">
-              <thead className="bg-muted text-muted-foreground">
+              <thead className="bg-muted sticky top-0 z-10">
                 <tr>
                   <th className="px-4 py-2 text-left">Date</th>
                   <th className="px-4 py-2 text-left">Type</th>
@@ -863,19 +863,28 @@ export default function Inventory() {
                 </tr>
               </thead>
               <tbody className="divide-y">
-                {selectedHistoryItem?.history?.map((entry: any, i: number) => (
-                  <tr key={i}>
-                    <td className="px-4 py-2">{new Date(entry.timestamp).toLocaleString()}</td>
-                    <td className="px-4 py-2 uppercase font-medium">{entry.type}</td>
-                    <td className="px-4 py-2">{entry.description}</td>
-                    <td className={cn(
-                      "px-4 py-2 text-right font-bold",
-                      entry.type === 'in' ? "text-green-600" : "text-red-600"
-                    )}>
-                      {entry.type === 'in' ? '+' : '-'}{entry.amount}
-                    </td>
-                  </tr>
-                )) || (
+                {selectedHistoryItem?.history?.length > 0 ? (
+                  [...selectedHistoryItem.history].reverse().map((entry: any, i: number) => (
+                    <tr key={i} className="hover:bg-accent/50 transition-colors">
+                      <td className="px-4 py-2">{new Date(entry.date || entry.timestamp).toLocaleString()}</td>
+                      <td className="px-4 py-2">
+                        <Badge 
+                          variant={entry.type === 'Stock In' || entry.type === 'in' ? 'default' : 'destructive'} 
+                          className="text-[10px] uppercase font-bold"
+                        >
+                          {entry.type === 'in' ? 'Stock In' : entry.type === 'out' ? 'Stock Out' : entry.type}
+                        </Badge>
+                      </td>
+                      <td className="px-4 py-2">{entry.description}</td>
+                      <td className={cn(
+                        "px-4 py-2 text-right font-bold",
+                        entry.type === 'Stock In' || entry.type === 'in' ? "text-green-600" : "text-red-600"
+                      )}>
+                        {entry.type === 'Stock In' || entry.type === 'in' ? '+' : ''}{entry.amount}
+                      </td>
+                    </tr>
+                  ))
+                ) : (
                   <tr>
                     <td colSpan={4} className="px-4 py-8 text-center text-muted-foreground italic">No history available</td>
                   </tr>
