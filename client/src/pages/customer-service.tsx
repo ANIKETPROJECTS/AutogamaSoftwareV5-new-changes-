@@ -1103,8 +1103,16 @@ export default function CustomerService() {
                           </div>
                           {(Array.isArray(inventory) ? inventory : [])
                             .filter((item: any) => {
-                              const isAccessory = item.category === 'Accessories' || item.name?.toLowerCase().includes('(accessory)');
-                              return !isAccessory;
+                              const isPPF = item.category === 'PPF' || 
+                                          ['Elite', 'Garware', 'Plus', 'Premium', 'Matt'].some(keyword => 
+                                            item.name?.toLowerCase().includes(keyword.toLowerCase())
+                                          );
+                              const isAccessory = item.category === 'Accessories' || 
+                                               item.name?.toLowerCase().includes('(accessory)') ||
+                                               ['helmet', 'helm', 'test', 'eg'].some(keyword => 
+                                                 item.name?.toLowerCase().includes(keyword.toLowerCase())
+                                               );
+                              return isPPF && !isAccessory;
                             })
                             .map((item: any) => (
                               <SelectItem key={item._id} value={item._id}>
