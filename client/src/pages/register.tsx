@@ -1736,14 +1736,14 @@ export default function CustomerRegistration() {
               <Button
                 variant="outline"
                 onClick={() => setStep(1)}
-                className="h-11 px-8 border-slate-200 text-slate-700 hover:bg-slate-50 rounded-lg"
+                className="h-10 px-8 border-slate-200 text-slate-700 hover:bg-slate-50 rounded-lg"
               >
                 Previous
               </Button>
               <Button
                 onClick={handleSubmit}
                 disabled={!canProceedStep2 || createCustomerMutation.isPending}
-                className="h-11 px-8 bg-[#81c1a8] hover:bg-[#72b097] text-white font-medium rounded-lg shadow-sm flex items-center gap-2"
+                className="h-10 px-8 bg-[#81c1a8] hover:bg-[#72b097] text-white font-medium rounded-lg shadow-sm flex items-center gap-2"
               >
                 {createCustomerMutation.isPending ? "Registering..." : (
                   <>
