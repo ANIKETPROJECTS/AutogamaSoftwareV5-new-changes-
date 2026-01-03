@@ -4,15 +4,20 @@ import { api } from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, History } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ArrowLeft, History, Search } from 'lucide-react';
 import { format } from 'date-fns';
 import { usePageContext } from '@/contexts/page-context';
-import { useEffect } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 
 export default function RollHistory() {
   const { id } = useParams<{ id: string }>();
   const [, setLocation] = useLocation();
   const { setPageTitle } = usePageContext();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterType, setFilterType] = useState('all');
+  const [sortBy, setSortBy] = useState('newest');
 
   const { data: inventory = [], isLoading } = useQuery({
     queryKey: ['inventory'],
@@ -28,6 +33,39 @@ export default function RollHistory() {
       setPageTitle("Roll History", "Detailed transaction history");
     }
   }, [item, setPageTitle]);
+
+  const filteredHistory = useMemo(() => {
+    if (!item?.history) return [];
+    
+    let history = [...item.history];
+
+    // Filter by search query (Roll Name)
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      history = history.filter(entry => 
+        (entry.description || entry.rollName || '').toLowerCase().includes(query)
+      );
+    }
+
+    // Filter by type
+    if (filterType !== 'all') {
+      history = history.filter(entry => {
+        const type = (entry.type || '').toUpperCase();
+        if (filterType === 'STOCK IN') return type === 'IN' || type === 'STOCK IN';
+        if (filterType === 'STOCK OUT') return type === 'OUT' || type === 'STOCK OUT';
+        return false;
+      });
+    }
+
+    // Sort
+    history.sort((a, b) => {
+      const dateA = new Date(a.timestamp || a.date).getTime();
+      const dateB = new Date(b.timestamp || b.date).getTime();
+      return sortBy === 'newest' ? dateB - dateA : dateA - dateB;
+    });
+
+    return history;
+  }, [item, searchQuery, filterType, sortBy]);
 
   if (isLoading) {
     return <div className="p-8 text-center text-muted-foreground">Loading history...</div>;
@@ -46,14 +84,45 @@ export default function RollHistory() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <Button variant="outline" onClick={() => setLocation('/inventory')}>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <Button variant="outline" onClick={() => setLocation('/inventory')} className="w-fit">
           <ArrowLeft className="w-4 h-4 mr-2" /> Back to Inventory
         </Button>
         <div className="flex items-center gap-2">
           <History className="w-5 h-5 text-primary" />
           <h2 className="text-xl font-bold">Category: {item.category}</h2>
         </div>
+      </div>
+
+      <div className="flex flex-col md:flex-row gap-4">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input 
+            placeholder="Search by Roll Name..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+        <Select value={filterType} onValueChange={setFilterType}>
+          <SelectTrigger className="w-full md:w-40">
+            <SelectValue placeholder="All Types" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Types</SelectItem>
+            <SelectItem value="STOCK IN">Stock In</SelectItem>
+            <SelectItem value="STOCK OUT">Stock Out</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={sortBy} onValueChange={setSortBy}>
+          <SelectTrigger className="w-full md:w-40">
+            <SelectValue placeholder="Sort by" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="newest">Newest First</SelectItem>
+            <SelectItem value="oldest">Oldest First</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <Card>
@@ -72,8 +141,8 @@ export default function RollHistory() {
                 </tr>
               </thead>
               <tbody className="divide-y">
-                {item.history && item.history.length > 0 ? (
-                  item.history.slice().reverse().map((entry: any, idx: number) => (
+                {filteredHistory.length > 0 ? (
+                  filteredHistory.map((entry: any, idx: number) => (
                     <tr key={idx} className="hover:bg-muted/50 transition-colors">
                       <td className="px-4 py-3 whitespace-nowrap">
                         {format(new Date(entry.timestamp || entry.date), 'dd/MM/yyyy, hh:mm:ss a')}
@@ -94,7 +163,7 @@ export default function RollHistory() {
                 ) : (
                   <tr>
                     <td colSpan={4} className="px-4 py-8 text-center text-muted-foreground">
-                      No history found for this category.
+                      No matching history found.
                     </td>
                   </tr>
                 )}
