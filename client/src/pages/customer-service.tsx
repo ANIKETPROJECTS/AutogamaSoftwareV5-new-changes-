@@ -667,9 +667,23 @@ export default function CustomerService() {
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-3 pt-0">
-                    <div className="space-y-2">
+                    <div className="flex items-center justify-between">
                       <Label className="text-sm">PPF Category</Label>
-                      <Select value={ppfCategory} onValueChange={(val) => {
+                      <Button 
+                        type="button" 
+                        variant="ghost" 
+                        size="sm" 
+                        className="h-6 text-xs text-red-500 hover:text-red-700 hover:bg-red-50"
+                        onClick={() => {
+                          setPpfCategory('');
+                          setPpfWarranty('');
+                          setPpfPrice(0);
+                        }}
+                      >
+                        Clear
+                      </Button>
+                    </div>
+                    <Select value={ppfCategory} onValueChange={(val) => {
                         setPpfCategory(val);
                         setPpfWarranty('');
                         setShowPpfSection(true);
@@ -788,9 +802,22 @@ export default function CustomerService() {
                     <CardTitle className="text-base">Other Services</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    <div className="space-y-2">
+                    <div className="flex items-center justify-between">
                       <Label className="text-sm">Select Service</Label>
-                      <Select value={otherServiceName} onValueChange={setOtherServiceName}>
+                      <Button 
+                        type="button" 
+                        variant="ghost" 
+                        size="sm" 
+                        className="h-6 text-xs text-red-500 hover:text-red-700 hover:bg-red-50"
+                        onClick={() => {
+                          setOtherServiceName('');
+                          setOtherServiceVehicleType('');
+                        }}
+                      >
+                        Clear
+                      </Button>
+                    </div>
+                    <Select value={otherServiceName} onValueChange={setOtherServiceName}>
                         <SelectTrigger data-testid="select-other-service">
                           <SelectValue placeholder="Choose a service" />
                         </SelectTrigger>
@@ -897,7 +924,21 @@ export default function CustomerService() {
                 </div>
 
                 <div className="space-y-4 border border-gray-200 p-4 rounded-lg">
-                  <h3 className="font-semibold text-sm">Add Item from Inventory</h3>
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="font-semibold text-sm">Add Item from Inventory</h3>
+                    <Button 
+                      type="button" 
+                      variant="ghost" 
+                      size="sm" 
+                      className="h-6 text-xs text-red-500 hover:text-red-700 hover:bg-red-50"
+                      onClick={() => {
+                        setSelectedItemId('');
+                        setMetersUsed('1');
+                      }}
+                    >
+                      Clear
+                    </Button>
+                  </div>
                   <div className="space-y-3">
                     <div className="space-y-2">
                       <Label className="text-sm">Select Product</Label>
