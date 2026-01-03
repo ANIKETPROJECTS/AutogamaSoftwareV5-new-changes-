@@ -156,7 +156,7 @@ export default function RollHistory() {
                         {entry.description || entry.rollName || '-'}
                       </td>
                       <td className={`px-4 py-3 text-right font-bold ${entry.type === 'IN' || entry.type === 'STOCK IN' ? 'text-green-600' : 'text-red-600'}`}>
-                        {entry.type === 'IN' || entry.type === 'STOCK IN' ? '+' : ''}{entry.amount || entry.quantity}
+                        {entry.type === 'IN' || entry.type === 'STOCK IN' ? '+' : ''}{entry.amount || entry.quantity} <span className="text-[10px] font-normal text-muted-foreground ml-1">sqft</span>
                       </td>
                     </tr>
                   ))
