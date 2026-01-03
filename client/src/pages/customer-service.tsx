@@ -420,12 +420,19 @@ export default function CustomerService() {
 
   const ppfDiscountAmount = parseFloat(ppfDiscount) || 0;
   const ppfAfterDiscount = Math.max(0, ppfPrice - ppfDiscountAmount);
-  const accessoriesTotal = selectedAccessories.reduce((sum, a) => sum + (a.price * a.quantity), 0);
+  
+  // Calculate inventory items total price
+  const inventoryTotal = selectedItems.reduce((sum, item) => {
+    const invItem = inventory.find((i: any) => i._id === item.inventoryId || i.id === item.inventoryId);
+    const price = invItem?.price || 0;
+    return sum + (price * (item.quantity || 0));
+  }, 0);
+
   const otherServicesAfterDiscount = selectedOtherServices.reduce((sum, s) => sum + Math.max(0, s.price - (s.discount || 0)), 0);
   
   const parsedLaborCost = parseFloat(laborCost) || 0;
   
-  const subtotal = ppfAfterDiscount + otherServicesAfterDiscount + accessoriesTotal + parsedLaborCost;
+  const subtotal = ppfAfterDiscount + otherServicesAfterDiscount + inventoryTotal + parsedLaborCost;
   const includeGstValue = includeGst ? subtotal * 0.18 : 0;
   const totalCostValue = subtotal + includeGstValue;
 
@@ -1024,8 +1031,8 @@ export default function CustomerService() {
                   </div>
                 )}
 
-                <Card className="border border-red-200 bg-red-50/30">
-                  <CardHeader className="pb-3 border-b border-red-100">
+                <Card className="border border-slate-200 shadow-sm">
+                  <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50/50">
                     <CardTitle className="text-sm font-semibold flex items-center gap-2">
                       <div className="p-1.5 bg-red-100 rounded-md">
                         <Package className="w-4 h-4 text-red-600" />
@@ -1036,46 +1043,55 @@ export default function CustomerService() {
                   <CardContent className="pt-4 space-y-4">
                     <div className="space-y-2">
                       <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">PPF Service:</span>
-                        <span className="font-medium">₹{ppfAfterDiscount.toLocaleString('en-IN')}</span>
+                        <span className="text-slate-500 font-medium">PPF Service:</span>
+                        <span className="font-semibold">₹{ppfAfterDiscount.toLocaleString('en-IN')}</span>
                       </div>
                       <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Other Services:</span>
-                        <span className="font-medium">₹{otherServicesAfterDiscount.toLocaleString('en-IN')}</span>
+                        <span className="text-slate-500 font-medium">Other Services:</span>
+                        <span className="font-semibold">₹{otherServicesAfterDiscount.toLocaleString('en-IN')}</span>
                       </div>
                       <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Accessories:</span>
-                        <span className="font-medium">₹{accessoriesTotal.toLocaleString('en-IN')}</span>
+                        <span className="text-slate-500 font-medium">Inventory Items:</span>
+                        <span className="font-semibold">₹{inventoryTotal.toLocaleString('en-IN')}</span>
                       </div>
                       <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Labor:</span>
-                        <span className="font-medium">₹{parsedLaborCost.toLocaleString('en-IN')}</span>
+                        <span className="text-slate-500 font-medium">Labor:</span>
+                        <span className="font-semibold">₹{parsedLaborCost.toLocaleString('en-IN')}</span>
                       </div>
-                      <div className="border-t pt-2 mt-2">
-                        <div className="flex justify-between text-base font-semibold">
+                      <div className="border-t border-slate-100 pt-2 mt-2">
+                        <div className="flex justify-between text-base font-bold text-slate-800">
                           <span>Subtotal:</span>
                           <span>₹{subtotal.toLocaleString('en-IN')}</span>
                         </div>
                       </div>
-                      <div className="flex items-center space-x-2 mt-2">
-                        <Checkbox id="gst" checked={includeGst} onCheckedChange={(checked) => setIncludeGst(checked as boolean)} />
-                        <label htmlFor="gst" className="text-sm font-medium leading-none cursor-pointer">
+                      <div className="flex items-center space-x-2 mt-3 pt-2">
+                        <Checkbox 
+                          id="gst" 
+                          checked={includeGst} 
+                          onCheckedChange={(checked) => setIncludeGst(checked as boolean)}
+                          className="data-[state=checked]:bg-red-600 data-[state=checked]:border-red-600"
+                        />
+                        <label htmlFor="gst" className="text-sm font-semibold text-slate-700 leading-none cursor-pointer">
                           GST (18%)
                         </label>
                         {includeGst && (
-                          <span className="ml-auto text-sm font-medium text-muted-foreground">
+                          <span className="ml-auto text-sm font-bold text-slate-600">
                             ₹{includeGstValue.toLocaleString('en-IN')}
                           </span>
                         )}
                       </div>
                     </div>
                     
-                    <div className="pt-4 border-t-2 border-red-200 border-dashed">
+                    <div className="pt-4 border-t-2 border-red-200 border-dashed mt-4">
                       <div className="flex justify-between items-center mb-6">
                         <span className="text-lg font-bold text-slate-900">Total:</span>
-                        <span className="text-2xl font-black text-red-600">₹{totalCostValue.toLocaleString('en-IN')}</span>
+                        <span className="text-3xl font-black text-red-600">₹{totalCostValue.toLocaleString('en-IN')}</span>
                       </div>
-                      <Button type="submit" className="w-full h-12 text-lg font-bold bg-red-600 hover:bg-red-700 text-white shadow-lg shadow-red-200" disabled={createJobMutation.isPending}>
+                      <Button 
+                        type="submit" 
+                        className="w-full h-12 text-lg font-bold bg-red-600 hover:bg-red-700 text-white shadow-lg shadow-red-200 transition-all active:scale-[0.98]" 
+                        disabled={createJobMutation.isPending}
+                      >
                         {createJobMutation.isPending ? 'Creating...' : 'Create Service'}
                       </Button>
                     </div>
