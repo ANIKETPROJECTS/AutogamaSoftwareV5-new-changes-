@@ -1,5 +1,5 @@
 import { connectDB } from "./db";
-import { Inventory } from "./models";
+import { Inventory } from "./models/index";
 
 const PPF_CATEGORIES = {
   "Elite": { "car": { "5yr": 55000, "7yr": 65000 }, "bike": { "5yr": 12000, "7yr": 15000 } },
@@ -18,8 +18,8 @@ async function seed() {
       if (!exists) {
         await Inventory.create({
           name,
-          category: name,
-          stock: 0,
+          category: 'PPF',
+          quantity: 0,
           unit: 'rolls',
           price: 0,
           minStock: 1
