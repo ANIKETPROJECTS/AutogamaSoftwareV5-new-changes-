@@ -92,8 +92,33 @@ export default function Dashboard() {
   });
   const appointments = appointmentsData?.appointments || [];
 
+  const { data: invoicesData = [] } = useQuery({
+    queryKey: ["invoices"],
+    queryFn: () => api.invoices.list(),
+  });
+  const invoices = Array.isArray(invoicesData) ? invoicesData : [];
+
   const customerStatusCount = JOB_STAGES.reduce((acc: Record<string, number>, stage) => {
-    acc[stage.key] = jobs.filter((j: any) => j.stage === stage.key).length;
+    acc[stage.key] = jobs.filter((job: any) => {
+      if (job.stage !== stage.key) return false;
+
+      // Filter out paid completed jobs from the counts (matching Funnel logic)
+      if (stage.key === 'Completed') {
+        const jobInvoices = invoices.filter((inv: any) => {
+          const invJobId = (inv.jobId?._id || inv.jobId || "").toString();
+          const currentJobId = (job._id?._id || job._id || "").toString();
+          return invJobId === currentJobId;
+        });
+
+        if (jobInvoices.length > 0 && jobInvoices.every((inv: any) => {
+          const status = (inv.paymentStatus || inv.status || "").toString().toLowerCase();
+          return status === 'paid';
+        })) {
+          return false;
+        }
+      }
+      return true;
+    }).length;
     return acc;
   }, {});
 
@@ -191,17 +216,7 @@ export default function Dashboard() {
     return apptDate.toDateString() === today.toDateString() && appt.status !== 'Cancelled';
   }).length;
 
-  const totalRevenue = jobs.reduce((sum: number, job: any) => sum + (job.paidAmount || 0), 0);
   const completedJobs = jobs.filter((j: any) => j.stage === "Completed").length;
-  const jobCompletion = jobs.length > 0 ? Math.round((completedJobs / jobs.length) * 100) : 0;
-
-  const { user, logout } = useAuth();
-  const { setPageTitle } = usePageContext();
-
-  useEffect(() => {
-    setPageTitle("Dashboard", `Welcome back, ${user?.name || 'Admin'}!`);
-  }, [user, setPageTitle]);
-
   const stageCounts = customerStatusCount;
 
   return (
