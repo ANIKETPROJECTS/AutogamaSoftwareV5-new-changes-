@@ -9,8 +9,21 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { Package, AlertTriangle, Search, Plus, Trash2, ArrowLeft } from 'lucide-react';
+import { Package, AlertTriangle, Search, Plus, Trash2, ArrowLeft, Check, ChevronsUpDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 
 const PPF_ITEMS = [
   { name: 'Elite', category: 'Elite' },
@@ -29,6 +42,86 @@ const CATEGORY_COLORS: Record<string, string> = {
   'Garware Matt': 'bg-green-500/20 text-green-400',
   'Accessories': 'bg-slate-500/20 text-slate-400'
 };
+
+function SearchableSelect({ 
+  options, 
+  value, 
+  onValueChange, 
+  placeholder, 
+  emptyMessage = "No option found.",
+  allowCustom = true 
+}: { 
+  options: string[], 
+  value: string, 
+  onValueChange: (val: string) => void, 
+  placeholder: string,
+  emptyMessage?: string,
+  allowCustom?: boolean
+}) {
+  const [open, setOpen] = useState(false)
+  const [inputValue, setInputValue] = useState("")
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          className="w-full justify-between"
+        >
+          {value ? value : placeholder}
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+        <Command>
+          <CommandInput 
+            placeholder={`Search ${placeholder.toLowerCase()}...`} 
+            value={inputValue}
+            onValueChange={setInputValue}
+          />
+          <CommandList>
+            <CommandEmpty>
+              {allowCustom && inputValue ? (
+                <Button 
+                  variant="ghost" 
+                  className="w-full justify-start text-xs"
+                  onClick={() => {
+                    onValueChange(inputValue)
+                    setOpen(false)
+                  }}
+                >
+                  Add "{inputValue}"
+                </Button>
+              ) : emptyMessage}
+            </CommandEmpty>
+            <CommandGroup>
+              {options.map((option) => (
+                <CommandItem
+                  key={option}
+                  value={option}
+                  onSelect={(currentValue) => {
+                    onValueChange(currentValue === value ? "" : currentValue)
+                    setOpen(false)
+                  }}
+                >
+                  <Check
+                    className={cn(
+                      "mr-2 h-4 w-4",
+                      value === option ? "opacity-100" : "opacity-0"
+                    )}
+                  />
+                  {option}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  )
+}
 
 export default function Inventory() {
   const [rollDialogOpen, setRollDialogOpen] = useState(false);
@@ -104,6 +197,15 @@ export default function Inventory() {
 
   const lowStockItems = useMemo(() => filteredAndSortedItems.filter(isLowStock), [filteredAndSortedItems]);
 
+  const categories = useMemo(() => {
+    const cats = new Set(inventory.map((inv: any) => inv.category));
+    return Array.from(cats);
+  }, [inventory]);
+
+  const existingNames = useMemo(() => {
+    return Array.from(new Set(inventory.map((inv: any) => inv.name)));
+  }, [inventory]);
+
   const addRollMutation = useMutation({
     mutationFn: (data: { id: string; roll: any }) => api.inventory.addRoll(data.id, data.roll),
     onSuccess: () => {
@@ -136,7 +238,7 @@ export default function Inventory() {
       }
       return api.inventory.create({
         ...data,
-        category: accCategory // Use the user-provided category
+        category: accCategory
       });
     },
     onSuccess: () => {
@@ -549,7 +651,7 @@ export default function Inventory() {
                     id: selectedItem._id,
                     roll: {
                       name: rollName,
-                      meters: 0, // Backend will handle if squareFeet is provided
+                      meters: 0,
                       squareFeet: parseFloat(rollQuantity),
                       unit: 'Square Feet'
                     }
@@ -574,70 +676,98 @@ export default function Inventory() {
           <DialogHeader>
             <DialogTitle>{editingAccessory ? 'Edit Accessory' : 'Add Accessory'}</DialogTitle>
           </DialogHeader>
-          <form onSubmit={(e) => {
-            e.preventDefault();
-            upsertAccessoryMutation.mutate({
-              _id: editingAccessory?._id,
-              name: accName,
-              category: accCategory,
-              quantity: parseFloat(accQuantity),
-              unit: 'Piece', // Default unit for accessories
-              price: parseFloat(accPrice) || 0,
-              minStock: 0
-            });
-          }} className="space-y-4">
-            <div className="space-y-2">
-              <Label>Accessory Name</Label>
-              <Input placeholder="e.g., Helmet" value={accName} onChange={(e) => setAccName(e.target.value)} required />
-            </div>
+          <div className="space-y-4 py-4">
             <div className="space-y-2">
               <Label>Category / Type</Label>
-              <Input placeholder="e.g., Headgear" value={accCategory} onChange={(e) => setAccCategory(e.target.value)} required />
+              <SearchableSelect 
+                options={categories}
+                value={accCategory}
+                onValueChange={setAccCategory}
+                placeholder="Select category"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Accessory Name</Label>
+              <SearchableSelect 
+                options={existingNames}
+                value={accName}
+                onValueChange={setAccName}
+                placeholder="Select name"
+              />
             </div>
             <div className="space-y-2">
               <Label>Quantity</Label>
-              <Input type="number" placeholder="0" value={accQuantity} onChange={(e) => setAccQuantity(e.target.value)} required />
+              <Input 
+                type="number"
+                placeholder="0"
+                value={accQuantity}
+                onChange={(e) => setAccQuantity(e.target.value)}
+              />
             </div>
-              <div className="space-y-2">
-                <Label>Price (₹)</Label>
-                <Input type="number" placeholder="0" value={accPrice} onChange={(e) => setAccPrice(e.target.value)} required />
-              </div>
-            <Button type="submit" className="w-full bg-primary" disabled={upsertAccessoryMutation.isPending}>
+            <div className="space-y-2">
+              <Label>Price (₹)</Label>
+              <Input 
+                type="number"
+                placeholder="0"
+                value={accPrice}
+                onChange={(e) => setAccPrice(e.target.value)}
+              />
+            </div>
+            <Button 
+              className="w-full"
+              disabled={!accName || !accQuantity || upsertAccessoryMutation.isPending}
+              onClick={() => {
+                upsertAccessoryMutation.mutate({
+                  _id: editingAccessory?._id,
+                  name: accName,
+                  quantity: parseInt(accQuantity),
+                  unit: accUnit || 'Unit',
+                  price: parseFloat(accPrice) || 0,
+                  category: accCategory
+                });
+              }}
+            >
               {upsertAccessoryMutation.isPending ? 'Saving...' : 'Save Accessory'}
             </Button>
-          </form>
+          </div>
         </DialogContent>
       </Dialog>
+
       <Dialog open={historyDialogOpen} onOpenChange={setHistoryDialogOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-4xl">
           <DialogHeader>
-            <DialogTitle>{selectedHistoryItem?.category} - Roll History</DialogTitle>
+            <DialogTitle>Stock History - {selectedHistoryItem?.category || selectedHistoryItem?.name}</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
-            {!selectedHistoryItem?.finishedRolls || selectedHistoryItem.finishedRolls.length === 0 ? (
-              <p className="text-center py-8 text-muted-foreground">No finished rolls in history.</p>
-            ) : (
-                  <div className="space-y-3">
-                    {[...(selectedHistoryItem.finishedRolls || [])]
-                      .sort((a: any, b: any) => {
-                        const dateA = a.finishedAt ? new Date(a.finishedAt).getTime() : 0;
-                        const dateB = b.finishedAt ? new Date(b.finishedAt).getTime() : 0;
-                        return dateB - dateA;
-                      })
-                      .map((roll: any, idx: number) => (
-                      <div key={idx} className="p-3 bg-muted/30 border rounded-lg flex justify-between items-center">
-                        <div>
-                          <p className="font-bold text-sm">{roll.name}</p>
-                          <div className="flex gap-4 text-[10px] text-muted-foreground">
-                            <span>Total: {roll.squareFeet?.toFixed(1)} sqft</span>
-                            <span>Finished: {roll.finishedAt ? new Date(roll.finishedAt).toLocaleDateString() : 'N/A'}</span>
-                          </div>
-                        </div>
-                        <Badge variant="outline" className="bg-orange-500/10 text-orange-600 border-orange-200">Finished</Badge>
-                      </div>
-                    ))}
-                  </div>
-            )}
+          <div className="mt-4 max-h-[60vh] overflow-y-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-muted text-muted-foreground">
+                <tr>
+                  <th className="px-4 py-2 text-left">Date</th>
+                  <th className="px-4 py-2 text-left">Type</th>
+                  <th className="px-4 py-2 text-left">Description</th>
+                  <th className="px-4 py-2 text-right">Amount</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y">
+                {selectedHistoryItem?.history?.map((entry: any, i: number) => (
+                  <tr key={i}>
+                    <td className="px-4 py-2">{new Date(entry.timestamp).toLocaleString()}</td>
+                    <td className="px-4 py-2 uppercase font-medium">{entry.type}</td>
+                    <td className="px-4 py-2">{entry.description}</td>
+                    <td className={cn(
+                      "px-4 py-2 text-right font-bold",
+                      entry.type === 'in' ? "text-green-600" : "text-red-600"
+                    )}>
+                      {entry.type === 'in' ? '+' : '-'}{entry.amount}
+                    </td>
+                  </tr>
+                )) || (
+                  <tr>
+                    <td colSpan={4} className="px-4 py-8 text-center text-muted-foreground italic">No history available</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
         </DialogContent>
       </Dialog>
