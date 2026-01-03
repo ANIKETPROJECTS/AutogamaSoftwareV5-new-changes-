@@ -658,6 +658,15 @@ export async function registerRoutes(
     }
   });
 
+  app.delete("/api/inventory/:id", async (req, res) => {
+    try {
+      await storage.deleteInventoryItem(req.params.id);
+      res.json({ message: "Inventory item deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete inventory item" });
+    }
+  });
+
   app.patch("/api/inventory/:id/adjust", async (req, res) => {
     try {
       const { quantity } = req.body;
