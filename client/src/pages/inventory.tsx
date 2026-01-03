@@ -105,24 +105,21 @@ function SearchableSelect({
               ))}
             </CommandGroup>
             {allowCustom && (
-              <div className="border-t mt-1 p-1">
-                <CommandItem
-                  onSelect={() => {
-                    if (inputValue) {
-                      onValueChange(inputValue)
-                      setOpen(false)
-                      setInputValue("")
-                    }
-                  }}
-                  disabled={!inputValue}
-                  className={cn(
-                    "flex items-center gap-2 cursor-pointer py-2 px-2 text-[#E11D48] hover:bg-[#E11D48]/10 transition-colors rounded-md font-medium",
-                    !inputValue && "opacity-50 cursor-not-allowed"
-                  )}
-                >
-                  <Plus className="h-4 w-4" />
-                  {customLabel}{inputValue ? `: ${inputValue}` : ""}
-                </CommandItem>
+              <div 
+                className={cn(
+                  "border-t mt-1 p-1 flex items-center gap-2 cursor-pointer py-2 px-2 text-[#E11D48] hover:bg-[#E11D48]/10 transition-colors rounded-md font-medium",
+                  !inputValue && "opacity-50 cursor-not-allowed"
+                )}
+                onClick={() => {
+                  if (inputValue) {
+                    onValueChange(inputValue)
+                    setOpen(false)
+                    setInputValue("")
+                  }
+                }}
+              >
+                <Plus className="h-4 w-4" />
+                {customLabel}{inputValue ? `: ${inputValue}` : ""}
               </div>
             )}
           </CommandList>
@@ -694,6 +691,9 @@ export default function Inventory() {
         <DialogContent className="max-w-sm">
           <DialogHeader>
             <DialogTitle>{editingAccessory ? 'Edit Accessory' : 'Add Accessory'}</DialogTitle>
+            <div className="sr-only">
+              <p>Form to {editingAccessory ? 'update' : 'create'} an accessory in the inventory.</p>
+            </div>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
