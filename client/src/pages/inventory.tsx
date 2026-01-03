@@ -48,6 +48,7 @@ export default function Inventory() {
   const [accQuantity, setAccQuantity] = useState('');
   const [accUnit, setAccUnit] = useState('');
   const [accCategory, setAccCategory] = useState('');
+  const [accPrice, setAccPrice] = useState('');
 
   const [historyDialogOpen, setHistoryDialogOpen] = useState(false);
   const [selectedHistoryItem, setSelectedHistoryItem] = useState<any>(null);
@@ -590,7 +591,7 @@ export default function Inventory() {
             </div>
             <div className="space-y-2">
               <Label>Category / Type</Label>
-              <Input placeholder="e.g., Headgear" value={accUnit} onChange={(e) => setAccUnit(e.target.value)} required />
+              <Input placeholder="e.g., Headgear" value={accCategory} onChange={(e) => setAccCategory(e.target.value)} required />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
