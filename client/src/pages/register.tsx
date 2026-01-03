@@ -487,23 +487,29 @@ export default function CustomerRegistration() {
   const accessoryInventory = useMemo(() => {
     return inventory.filter((item) => {
       const cat = (item.category || "").toString().trim().toLowerCase();
-      return cat === "accessories" || cat === "accessory" || cat === "headgear";
+      // Exclude items that are clearly PPF based on their category
+      const ppfBrands = ["elite", "garware plus", "garware premium", "garware matt"];
+      const isPPF = ppfBrands.some(brand => cat.includes(brand));
+      
+      // Any item that isn't a known PPF brand is considered an accessory
+      return !isPPF && cat !== "";
     });
   }, [inventory]);
 
   const accessoryCategories = useMemo(() => {
-    // Check if item.category is Accessory-like, then use category or unit as subcategory
     const categories = accessoryInventory.map((item) => {
       const cat = (item.category || "").toString().trim();
       const unit = (item.unit || "").toString().trim();
-      // If it's specifically "Accessories", use the unit (subcategory)
-      // Otherwise use the category itself
+      
+      // If the category name is generic ("Accessories" or "Accessory"), 
+      // we use the 'unit' field as the more specific category label (e.g., "test1").
+      // Otherwise, we use the category itself (e.g., "Headgear").
       if (cat.toLowerCase() === "accessories" || cat.toLowerCase() === "accessory") {
-        return unit;
+        return unit || cat;
       }
       return cat;
     });
-    return Array.from(new Set(categories)).filter(Boolean);
+    return Array.from(new Set(categories)).filter(Boolean).sort();
   }, [accessoryInventory]);
 
   const filteredAccessories = useMemo(() => {
@@ -512,6 +518,8 @@ export default function CustomerRegistration() {
         if (!customerData.tempAccessoryCategory) return true;
         const cat = (item.category || "").toString().trim();
         const itemUnit = (item.unit || "").toString().trim();
+        
+        // Item matches if its category or its specific unit matches the selected label.
         return cat === customerData.tempAccessoryCategory || itemUnit === customerData.tempAccessoryCategory;
       }
     );
