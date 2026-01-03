@@ -257,9 +257,6 @@ export default function Technicians() {
                         {jobCount}
                       </Badge>
                     </div>
-                    {jobCount > 2 && (
-                      <p className="text-xs text-orange-700 mt-2 font-medium">High workload</p>
-                    )}
                   </div>
                 </CardContent>
               </Card>
