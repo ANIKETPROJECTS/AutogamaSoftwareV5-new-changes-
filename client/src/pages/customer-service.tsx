@@ -258,27 +258,24 @@ export default function CustomerService() {
           
           if (Array.isArray(prefs.otherServices) && prefs.otherServices.length > 0 && (vehicleType || ppfVehicleType)) {
             const vType = vehicleType || ppfVehicleType;
-            console.log('Original preferences otherServices:', prefs.otherServices);
             
             // Handle accessories from preferences
             const accessories = prefs.otherServices
               .filter((svc: any) => {
-                const isAcc = svc.category === 'Accessories' || svc.name === 'TEST' || svc.name === 'Helmet';
-                console.log(`Checking if ${svc.name} is accessory: ${isAcc}`);
-                return isAcc;
+                const name = svc.name || "";
+                return svc.category === 'Accessories' || name === 'TEST' || name.toLowerCase().includes('helmet');
               })
               .map((svc: any) => {
-                const invItem = inventory.find((i: any) => i.name === svc.name);
+                const name = svc.name || "";
+                const invItem = inventory.find((i: any) => i.name === name || name.includes(i.name));
                 return {
                   id: invItem?._id || invItem?.id || svc.id || Math.random().toString(),
-                  name: svc.name,
+                  name: name,
                   category: svc.category || 'Accessories',
                   price: svc.price || invItem?.price || 0,
                   quantity: svc.quantity || 1
                 };
               });
-              
-            console.log('Filtered accessories:', accessories);
 
             if (accessories.length > 0) {
               setSelectedAccessories(prev => {
@@ -290,8 +287,8 @@ export default function CustomerService() {
 
             const servicesWithPrices = prefs.otherServices
               .filter((svc: any) => {
-                const shouldExclude = svc.name === 'Labor Charge' || svc.category === 'Accessories' || svc.name === 'TEST' || svc.name === 'Helmet';
-                console.log(`Checking if ${svc.name} should be excluded from otherServices: ${shouldExclude}`);
+                const name = svc.name || "";
+                const shouldExclude = name === 'Labor Charge' || svc.category === 'Accessories' || name === 'TEST' || name.toLowerCase().includes('helmet');
                 return !shouldExclude;
               })
               .map((svc: any) => {
@@ -309,7 +306,6 @@ export default function CustomerService() {
                 };
               });
             
-            console.log('Final otherServices with prices:', servicesWithPrices);
             setSelectedOtherServices(servicesWithPrices);
           }
         }
