@@ -357,7 +357,7 @@ export class MongoStorage implements IStorage {
       squareFeet: roll.squareFeet,
       remaining_meters: roll.meters,
       remaining_sqft: roll.squareFeet,
-      status: 'Available',
+      status: 'Available' as const,
       unit: (roll.unit === 'Square Feet' || roll.unit === 'Meters' || roll.unit === 'Square KM') ? roll.unit : 'Meters',
       createdAt: new Date()
     };
@@ -816,10 +816,14 @@ export class MongoStorage implements IStorage {
 
       // For items with rolls, validate using FIFO logic
       if (item.rolls && item.rolls.length > 0) {
+        // Use the total available from individual rolls directly from the DB record
         const totalAvailable = item.rolls.reduce((sum, r) => {
           const qty = r.unit === 'Square Feet' ? (r.remaining_sqft || 0) : (r.remaining_meters || 0);
           return sum + qty;
         }, 0);
+
+        console.log(`[Storage] Stock Check for ${item.name}: Found ${totalAvailable} sqft across rolls. Main quantity field: ${item.quantity}`);
+
         if (totalAvailable < mat.quantity) {
           throw new Error(`Insufficient stock for ${item.name}. Available: ${totalAvailable}, Requested: ${mat.quantity}`);
         }
