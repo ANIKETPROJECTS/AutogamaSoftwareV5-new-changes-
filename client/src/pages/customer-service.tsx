@@ -422,9 +422,16 @@ export default function CustomerService() {
       return;
     }
 
+    // Calculate currently pending deductions for this accessory
+    const pendingDeduction = selectedAccessories
+      .filter(a => a.id === (item._id || item.id))
+      .reduce((sum, a) => sum + a.quantity, 0);
+
     const availableQty = item.quantity || 0;
-    if (qty > availableQty) {
-      toast({ title: `Only ${availableQty} available in stock`, variant: 'destructive' });
+    const actualAvailable = availableQty - pendingDeduction;
+
+    if (qty > actualAvailable) {
+      toast({ title: `Only ${actualAvailable} available in stock (after pending selections)`, variant: 'destructive' });
       return;
     }
 
@@ -463,6 +470,11 @@ export default function CustomerService() {
       return;
     }
 
+    // Calculate currently pending deductions for this item in selectedItems
+    const pendingDeduction = selectedItems
+      .filter(i => i.inventoryId === item._id || i.id === item.inventoryId)
+      .reduce((sum, i) => sum + (i.quantity || 0), 0);
+
     let totalAvailable = 0;
     if (item.rolls && item.rolls.length > 0) {
       totalAvailable = item.rolls.reduce((sum: number, roll: any) => {
@@ -475,8 +487,10 @@ export default function CustomerService() {
       totalAvailable = item.quantity || 0;
     }
 
-    if (val > totalAvailable) {
-      toast({ title: `Only ${totalAvailable} available for ${item.category}`, variant: 'destructive' });
+    const actualAvailable = totalAvailable - pendingDeduction;
+
+    if (val > actualAvailable) {
+      toast({ title: `Only ${actualAvailable} available for ${item.category} (after pending selections)`, variant: 'destructive' });
       return;
     }
 
