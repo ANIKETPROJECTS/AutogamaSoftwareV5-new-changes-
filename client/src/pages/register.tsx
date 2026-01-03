@@ -838,9 +838,29 @@ export default function CustomerRegistration() {
                   {/* PPF Selection - Left Column */}
                   <div className="space-y-6">
                     <Card className="border-red-300 shadow-sm p-4 space-y-4">
-                      <h3 className="font-semibold text-sm text-primary flex items-center gap-2">
-                        PPF Services
-                      </h3>
+                        <div className="flex items-center justify-between">
+                          <h3 className="font-semibold text-sm text-primary flex items-center gap-2">
+                            PPF Services
+                          </h3>
+                          {(customerData.ppfCategory || customerData.ppfVehicleType || customerData.ppfWarranty) && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-7 text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
+                              onClick={() => {
+                                setCustomerData({
+                                  ...customerData,
+                                  ppfCategory: "",
+                                  ppfVehicleType: "",
+                                  ppfWarranty: "",
+                                  ppfPrice: 0,
+                                });
+                              }}
+                            >
+                              Clear PPF
+                            </Button>
+                          )}
+                        </div>
                       <div className="space-y-4">
                         <div className="space-y-2">
                           <Label>PPF Category</Label>
@@ -1023,9 +1043,29 @@ export default function CustomerRegistration() {
                         )}
 
                         <div className="space-y-4 pt-2 border-t border-slate-100">
-                          <h3 className="font-semibold text-sm text-primary flex items-center gap-2">
-                            Accessory Section
-                          </h3>
+                          <div className="flex items-center justify-between">
+                            <h3 className="font-semibold text-sm text-primary flex items-center gap-2">
+                              Accessory Section
+                            </h3>
+                            {(customerData.tempAccessoryCategory || customerData.tempAccessoryName || customerData.selectedOtherServices.some(s => s.vehicleType === "Accessory")) && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-7 text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
+                                onClick={() => {
+                                  setCustomerData({
+                                    ...customerData,
+                                    tempAccessoryCategory: "",
+                                    tempAccessoryName: "",
+                                    accessoryQuantity: 1,
+                                    selectedOtherServices: customerData.selectedOtherServices.filter(s => s.vehicleType !== "Accessory")
+                                  });
+                                }}
+                              >
+                                Clear Accessories
+                              </Button>
+                            )}
+                          </div>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="space-y-2">
                               <Label>Accessory Category</Label>
@@ -1248,9 +1288,28 @@ export default function CustomerRegistration() {
                   {/* Other Services Selection - Right Column */}
                   <div className="space-y-6">
                     <Card className="border-red-300 shadow-sm p-4 h-full">
-                      <h3 className="font-semibold text-sm text-primary flex items-center gap-2 mb-4">
-                        Other Services (Multiple)
-                      </h3>
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="font-semibold text-sm text-primary flex items-center gap-2">
+                          Other Services (Multiple)
+                        </h3>
+                        {(customerData.tempServiceName || customerData.tempServiceVehicleType || customerData.selectedOtherServices.some(s => s.vehicleType !== "Accessory")) && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
+                            onClick={() => {
+                              setCustomerData({
+                                ...customerData,
+                                tempServiceName: "",
+                                tempServiceVehicleType: "",
+                                selectedOtherServices: customerData.selectedOtherServices.filter(s => s.vehicleType === "Accessory")
+                              });
+                            }}
+                          >
+                            Clear Services
+                          </Button>
+                        )}
+                      </div>
                       <div className="space-y-4">
                         <div className="space-y-2">
                           <Label>Service</Label>
