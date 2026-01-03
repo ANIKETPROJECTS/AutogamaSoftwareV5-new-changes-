@@ -850,10 +850,39 @@ export async function registerRoutes(
   app.post("/api/jobs/:id/materials", async (req, res) => {
     try {
       const { materials } = req.body;
+      
+      if (!Array.isArray(materials)) {
+        return res.status(400).json({ message: "Materials must be an array" });
+      }
+
+      for (const mat of materials) {
+        const item = await storage.getInventoryItem(mat.inventoryId);
+        if (!item) continue;
+        
+        // Calculate total available across all rolls
+        let totalAvailable = 0;
+        if (item.rolls && item.rolls.length > 0) {
+          totalAvailable = item.rolls.reduce((sum, roll) => {
+            if (roll.status !== 'Finished') {
+              return sum + (roll.remaining_sqft || 0);
+            }
+            return sum;
+          }, 0);
+        } else {
+          totalAvailable = item.quantity || 0;
+        }
+
+        if (mat.quantity > totalAvailable) {
+          return res.status(400).json({ 
+            message: `Insufficient stock for ${item.name}. Available: ${totalAvailable}, Requested: ${mat.quantity}` 
+          });
+        }
+      }
+
       const job = await storage.addMaterialsToJob(req.params.id, materials);
       if (!job) return res.status(404).json({ message: "Job not found" });
       res.json(job);
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: error instanceof Error ? error.message : "Failed to add materials" });
     }
   });
