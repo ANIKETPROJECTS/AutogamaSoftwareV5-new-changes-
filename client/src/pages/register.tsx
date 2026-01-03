@@ -1160,12 +1160,26 @@ export default function CustomerRegistration() {
                                     />
                                     <Button
                                       type="button"
+                                      disabled={!customerData.tempAccessoryName || (() => {
+                                        const item = accessoryInventory.find(
+                                          (i) => i.name === customerData.tempAccessoryName,
+                                        );
+                                        return !item || item.quantity < customerData.accessoryQuantity;
+                                      })()}
                                       onClick={() => {
                                         if (customerData.tempAccessoryName) {
                                           const item = accessoryInventory.find(
                                             (i) => i.name === customerData.tempAccessoryName,
                                           );
                                           if (item) {
+                                            if (item.quantity < customerData.accessoryQuantity) {
+                                              toast({
+                                                title: "Insufficient Stock",
+                                                description: `Only ${item.quantity} units available in stock.`,
+                                                variant: "destructive",
+                                              });
+                                              return;
+                                            }
                                             setCustomerData({
                                               ...customerData,
                                               selectedOtherServices: [
