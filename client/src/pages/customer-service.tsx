@@ -992,53 +992,6 @@ export default function CustomerService() {
                   </div>
                 </div>
 
-                <Card className="border border-red-200">
-                  <CardHeader className="py-3">
-                    <CardTitle className="text-base">Add Accessory</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div className="space-y-2">
-                      <Label className="text-sm">Accessory Category</Label>
-                      <Select value={selectedAccessoryCategory} onValueChange={setSelectedAccessoryCategory}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select category" />
-                        </SelectTrigger>
-                        <SelectContent className="max-h-60 overflow-y-auto">
-                          {Array.from(new Set(inventory.filter((item: any) => item.category === 'Accessories').map((item: any) => item.accessory_category))).map((cat: any) => (
-                            <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label className="text-sm">Select Accessory</Label>
-                      <Select value={selectedAccessoryId} onValueChange={setSelectedAccessoryId} disabled={!selectedAccessoryCategory}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Choose an accessory" />
-                        </SelectTrigger>
-                        <SelectContent className="max-h-60 overflow-y-auto">
-                          {inventory.filter((item: any) => item.accessory_category === selectedAccessoryCategory).map((item: any) => (
-                            <SelectItem key={item._id} value={item._id}>
-                              {item.name} - ₹{item.price.toLocaleString('en-IN')} ({item.quantity} available)
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label className="text-sm">Quantity</Label>
-                      <Input type="number" value={accessoryQuantity} onChange={(e) => setAccessoryQuantity(e.target.value)} min="1" />
-                    </div>
-
-                    <Button type="button" variant="outline" onClick={handleAddAccessory} disabled={!selectedAccessoryId} className="w-full">
-                      <Plus className="w-4 h-4 mr-2" />
-                      Add Accessory
-                    </Button>
-                  </CardContent>
-                </Card>
-
                 <Card className="border border-red-200 bg-red-50/30">
                   <CardHeader className="pb-3 border-b border-red-100">
                     <CardTitle className="text-sm font-semibold flex items-center gap-2">
