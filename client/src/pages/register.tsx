@@ -1603,316 +1603,157 @@ export default function CustomerRegistration() {
 
         {/* Step 2: Vehicle Information */}
         {step === 2 && (
-          <Card
-            className="bg-gradient-to-br from-white to-slate-50 border-2 border-red-300 shadow-sm"
-            data-testid="card-vehicle-info"
-          >
-            <CardHeader className="pb-6 border-b border-slate-200 bg-gradient-to-r from-primary/5 to-transparent">
-              <CardTitle className="flex items-center gap-3 text-lg text-slate-900 font-semibold">
-                <Car className="w-5 h-5 text-primary" />
-                Vehicle Information
-              </CardTitle>
-              <p className="text-sm text-slate-600 mt-2">
-                Please provide your vehicle information
-              </p>
-            </CardHeader>
-            <CardContent className="space-y-8 pt-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <Label>Vehicle Name *</Label>
-                      <Select
-                        value={vehicleData.make}
-                        onValueChange={(value) =>
-                          setVehicleData({
-                            ...vehicleData,
-                            make: value,
-                            model: "",
-                          })
-                        }
-                      >
-                        <SelectTrigger
-                          className="border-slate-300"
-                          data-testid="select-make"
-                        >
-                          <SelectValue placeholder="Select make" />
-                        </SelectTrigger>
-                        <SelectContent
-                          position="popper"
-                          className="max-h-60 w-[var(--radix-select-trigger-width)]"
-                        >
-                          <div className="p-2 sticky top-0 bg-white z-10 border-b">
-                            <Input
-                              placeholder="Search make..."
-                              className="h-8 text-sm"
-                              onChange={(e) => {
-                                const search = e.target.value.toLowerCase();
-                                const items = e.target
-                                  .closest('[role="listbox"]')
-                                  ?.querySelectorAll('[role="option"]');
-                                items?.forEach((item) => {
-                                  const text =
-                                    item.textContent?.toLowerCase() || "";
-                                  (item as HTMLElement).style.display =
-                                    text.includes(search) ? "flex" : "none";
-                                });
-                              }}
-                              onKeyDown={(e) => e.stopPropagation()}
-                            />
-                          </div>
-                          {dynamicMakes.map((make) => (
-                            <SelectItem key={make} value={make}>
-                              {make}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
+          <div className="space-y-6" data-testid="card-vehicle-info">
+            <p className="text-[15px] text-slate-600 mb-6">
+              Please provide your vehicle information
+            </p>
 
-                    <div className="space-y-2">
-                      <Label>Vehicle Model *</Label>
-                      <Select
-                        value={vehicleData.model}
-                        onValueChange={(value) =>
-                          setVehicleData({ ...vehicleData, model: value })
-                        }
-                        disabled={!vehicleData.make}
-                      >
-                        <SelectTrigger
-                          className="border-slate-300"
-                          data-testid="select-model"
-                        >
-                          <SelectValue placeholder="Select model" />
-                        </SelectTrigger>
-                        <SelectContent
-                          position="popper"
-                          className="max-h-60 w-[var(--radix-select-trigger-width)]"
-                        >
-                          <div className="p-2 sticky top-0 bg-white z-10 border-b">
-                            <Input
-                              placeholder="Search model..."
-                              className="h-8 text-sm"
-                              onChange={(e) => {
-                                const search = e.target.value.toLowerCase();
-                                const items = e.target
-                                  .closest('[role="listbox"]')
-                                  ?.querySelectorAll('[role="option"]');
-                                items?.forEach((item) => {
-                                  const text =
-                                    item.textContent?.toLowerCase() || "";
-                                  (item as HTMLElement).style.display =
-                                    text.includes(search) ? "flex" : "none";
-                                });
-                              }}
-                              onKeyDown={(e) => e.stopPropagation()}
-                            />
-                          </div>
-                          {(dynamicModels[vehicleData.make] || []).map(
-                            (model) => (
-                              <SelectItem key={model} value={model}>
-                                {model}
-                              </SelectItem>
-                            ),
-                          )}
-                          <SelectItem value="Other">Other</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+              <div className="space-y-2">
+                <Label className="text-[13px] font-medium text-slate-900">Vehicle Name *</Label>
+                <Select
+                  value={vehicleData.make}
+                  onValueChange={(value) =>
+                    setVehicleData({
+                      ...vehicleData,
+                      make: value,
+                      model: "",
+                    })
+                  }
+                >
+                  <SelectTrigger className="h-11 bg-white border-slate-200 rounded-lg text-slate-500">
+                    <SelectValue placeholder="Select vehicle make" />
+                  </SelectTrigger>
+                  <SelectContent position="popper" className="max-h-60">
+                    {dynamicMakes.map((make) => (
+                      <SelectItem key={make} value={make}>{make}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-                    <div className="space-y-2">
-                      <Label>Enter Vehicle Name *</Label>
-                      <Input
-                        value={vehicleData.otherMake}
-                        onChange={(e) =>
-                          setVehicleData({
-                            ...vehicleData,
-                            otherMake: e.target.value,
-                          })
-                        }
-                        placeholder="Tesla"
-                        data-testid="input-other-make"
-                        className="border-slate-300"
-                      />
-                    </div>
+              <div className="space-y-2">
+                <Label className="text-[13px] font-medium text-slate-900">Vehicle Model *</Label>
+                <Select
+                  value={vehicleData.model}
+                  onValueChange={(value) =>
+                    setVehicleData({ ...vehicleData, model: value })
+                  }
+                  disabled={!vehicleData.make}
+                >
+                  <SelectTrigger className="h-11 bg-white border-slate-200 rounded-lg text-slate-500">
+                    <SelectValue placeholder="Select vehicle name first" />
+                  </SelectTrigger>
+                  <SelectContent position="popper" className="max-h-60">
+                    {(dynamicModels[vehicleData.make] || []).map((model) => (
+                      <SelectItem key={model} value={model}>{model}</SelectItem>
+                    ))}
+                    <SelectItem value="Other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
-                    <div className="space-y-2">
-                      <Label>Enter Vehicle Model *</Label>
-                      <Input
-                        value={vehicleData.otherModel}
-                        onChange={(e) =>
-                          setVehicleData({
-                            ...vehicleData,
-                            otherModel: e.target.value,
-                          })
-                        }
-                        placeholder="Model Y"
-                        data-testid="input-other-model"
-                        className="border-slate-300"
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label>Vehicle Type</Label>
-                      <Input
-                        value={vehicleData.vehicleType}
-                        onChange={(e) =>
-                          setVehicleData({ ...vehicleData, vehicleType: e.target.value })
-                        }
-                        placeholder="Hatchback / Small Sedan"
-                        className="border-slate-300"
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label>Year of Manufacture</Label>
-                      <Input
-                        type="number"
-                        value={vehicleData.year}
-                        onChange={(e) =>
-                          setVehicleData({ ...vehicleData, year: e.target.value })
-                        }
-                        placeholder="2001"
-                        data-testid="input-year"
-                        className="border-slate-300"
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label>Vehicle Number *</Label>
-                      <Input
-                        value={vehicleData.plateNumber}
-                        onChange={(e) =>
-                          setVehicleData({
-                            ...vehicleData,
-                            plateNumber: e.target.value.toUpperCase(),
-                          })
-                        }
-                        placeholder="MHa"
-                        data-testid="input-plate"
-                        className="border-slate-300"
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label>Color</Label>
-                      <Select
-                        value={vehicleData.color}
-                        onValueChange={(value) =>
-                          setVehicleData({ ...vehicleData, color: value })
-                        }
-                      >
-                        <SelectTrigger
-                          className="border-slate-300"
-                          data-testid="select-color"
-                        >
-                          <SelectValue placeholder="Grey" />
-                        </SelectTrigger>
-                        <SelectContent
-                          position="popper"
-                          className="max-h-60 w-[var(--radix-select-trigger-width)]"
-                        >
-                          <div className="p-2 sticky top-0 bg-white z-10 border-b">
-                            <Input
-                              placeholder="Search color..."
-                              className="h-8 text-sm"
-                              onChange={(e) => {
-                                const search = e.target.value.toLowerCase();
-                                const items = e.target
-                                  .closest('[role="listbox"]')
-                                  ?.querySelectorAll('[role="option"]');
-                                items?.forEach((item) => {
-                                  const text =
-                                    item.textContent?.toLowerCase() || "";
-                                  (item as HTMLElement).style.display =
-                                    text.includes(search) ? "flex" : "none";
-                                });
-                              }}
-                              onKeyDown={(e) => e.stopPropagation()}
-                            />
-                          </div>
-                          {VEHICLE_COLORS.map((color) => (
-                            <SelectItem key={color} value={color}>
-                              {color}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-6">
-                  <Label>Vehicle Image</Label>
-                  <div className="flex flex-col items-center gap-4">
-                    <Input 
-                      placeholder="Choose File Coming soon image.webp"
-                      className="border-slate-300"
-                      readOnly
-                    />
-                    {vehicleImagePreview ? (
-                      <div className="relative w-full aspect-video rounded-xl overflow-hidden border-2 border-red-300 group">
-                        <img
-                          src={vehicleImagePreview}
-                          alt="Vehicle preview"
-                          className="w-full h-full object-cover"
-                        />
-                        <button
-                          onClick={() => {
-                            setVehicleImagePreview("");
-                            setVehicleData({ ...vehicleData, image: undefined });
-                          }}
-                          className="absolute top-2 right-2 bg-red-600 text-white p-1.5 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
-                          <ChevronLeft className="w-4 h-4" />
-                        </button>
-                      </div>
-                    ) : (
-                      <label className="w-full aspect-video flex flex-col items-center justify-center border-2 border-dashed border-slate-300 rounded-xl cursor-pointer hover:border-primary hover:bg-primary/5 transition-all bg-slate-50">
-                        <Car className="w-12 h-12 text-slate-400 mb-2" />
-                        <span className="text-sm font-medium text-slate-600">
-                          Click to upload vehicle photo
-                        </span>
-                        <input
-                          type="file"
-                          className="hidden"
-                          accept="image/*"
-                          onChange={handleVehicleImageChange}
-                        />
-                      </label>
-                    )}
-                  </div>
+              <div className="space-y-2">
+                <Label className="text-[13px] font-medium text-slate-900">Vehicle Type</Label>
+                <div className="h-11 px-3 flex items-center bg-white border border-slate-200 rounded-lg text-slate-900 font-medium">
+                  {vehicleData.vehicleType || "Not selected"}
                 </div>
               </div>
 
-              <div className="flex justify-between pt-8 border-t border-slate-200">
-                <Button
-                  variant="outline"
-                  onClick={() => setStep(1)}
-                  className="px-8 border-slate-300 hover:bg-slate-50"
-                  data-testid="button-back"
-                >
-                  <ChevronLeft className="w-4 h-4 mr-2" />
-                  Back to Personal Details
-                </Button>
-                <Button
-                  onClick={handleSubmit}
-                  disabled={!canProceedStep2 || createCustomerMutation.isPending}
-                  className="px-8 bg-primary hover:bg-primary/90 text-white font-semibold shadow-lg hover:shadow-xl transition-all"
-                  data-testid="button-submit"
-                >
-                  {createCustomerMutation.isPending ? (
-                    "Registering..."
-                  ) : (
-                    <>
-                      Complete Registration
-                      <Check className="w-4 h-4 ml-2" />
-                    </>
-                  )}
-                </Button>
+              <div className="space-y-2">
+                <Label className="text-[13px] font-medium text-slate-900">Year of Manufacture</Label>
+                <Input
+                  type="text"
+                  value={vehicleData.year}
+                  onChange={(e) => setVehicleData({ ...vehicleData, year: e.target.value })}
+                  placeholder="e.g., 2023"
+                  className="h-11 bg-white border-slate-200 rounded-lg placeholder:text-slate-400"
+                />
               </div>
-            </CardContent>
-          </Card>
+
+              <div className="space-y-2">
+                <Label className="text-[13px] font-medium text-slate-900">Vehicle Number *</Label>
+                <Input
+                  value={vehicleData.plateNumber}
+                  onChange={(e) => setVehicleData({ ...vehicleData, plateNumber: e.target.value.toUpperCase() })}
+                  placeholder="e.g., MH02 AB 1234"
+                  className="h-11 bg-white border-slate-200 rounded-lg placeholder:text-slate-400"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-[13px] font-medium text-slate-900">Color</Label>
+                <Select
+                  value={vehicleData.color}
+                  onValueChange={(value) => setVehicleData({ ...vehicleData, color: value })}
+                >
+                  <SelectTrigger className="h-11 bg-white border-slate-200 rounded-lg text-slate-500">
+                    <SelectValue placeholder="Select color" />
+                  </SelectTrigger>
+                  <SelectContent position="popper" className="max-h-60">
+                    {VEHICLE_COLORS.map((color) => (
+                      <SelectItem key={color} value={color}>{color}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="col-span-1 md:col-span-2 space-y-2">
+                <Label className="text-[13px] font-medium text-slate-900">Vehicle Image</Label>
+                <div className="relative">
+                  <Input 
+                    placeholder="Choose File No file chosen"
+                    className="h-11 bg-white border-slate-200 rounded-lg placeholder:text-slate-600 pr-24 cursor-pointer"
+                    readOnly
+                    onClick={() => document.getElementById('vehicle-upload')?.click()}
+                  />
+                  <input
+                    id="vehicle-upload"
+                    type="file"
+                    className="hidden"
+                    accept="image/*"
+                    onChange={handleVehicleImageChange}
+                  />
+                </div>
+                {vehicleImagePreview && (
+                  <div className="mt-4 relative w-48 aspect-video rounded-lg overflow-hidden border border-slate-200">
+                    <img src={vehicleImagePreview} alt="Preview" className="w-full h-full object-cover" />
+                    <button
+                      onClick={() => {
+                        setVehicleImagePreview("");
+                        setVehicleData({ ...vehicleData, image: undefined });
+                      }}
+                      className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="flex justify-between items-center pt-8 mt-4 border-t border-slate-100">
+              <Button
+                variant="outline"
+                onClick={() => setStep(1)}
+                className="h-11 px-8 border-slate-200 text-slate-700 hover:bg-slate-50 rounded-lg"
+              >
+                Previous
+              </Button>
+              <Button
+                onClick={handleSubmit}
+                disabled={!canProceedStep2 || createCustomerMutation.isPending}
+                className="h-11 px-8 bg-[#81c1a8] hover:bg-[#72b097] text-white font-medium rounded-lg shadow-sm flex items-center gap-2"
+              >
+                {createCustomerMutation.isPending ? "Registering..." : (
+                  <>
+                    Complete Registration
+                    <Check className="w-4 h-4" />
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
         )}
       </div>
     </div>
