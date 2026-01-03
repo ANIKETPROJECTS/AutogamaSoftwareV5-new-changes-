@@ -992,6 +992,38 @@ export default function CustomerService() {
                   </div>
                 </div>
 
+                {selectedItems.length > 0 && (
+                  <div className="space-y-4">
+                    <Label className="text-sm font-semibold text-slate-700">Selected Inventory Items</Label>
+                    <div className="grid grid-cols-1 gap-4">
+                      {selectedItems.map((item, index) => (
+                        <Card key={index} className="border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                          <CardContent className="p-4">
+                            <div className="flex justify-between items-start">
+                              <div className="space-y-1">
+                                <h4 className="font-semibold text-slate-900">{item.name}</h4>
+                                <div className="flex items-center gap-2 text-sm text-slate-500">
+                                  <Package className="w-4 h-4" />
+                                  <span>Quantity: {item.quantity} {item.unit}</span>
+                                </div>
+                              </div>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleRemoveItem(index)}
+                                className="text-slate-400 hover:text-red-600 hover:bg-red-50 -mt-1 -mr-1"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 <Card className="border border-red-200 bg-red-50/30">
                   <CardHeader className="pb-3 border-b border-red-100">
                     <CardTitle className="text-sm font-semibold flex items-center gap-2">
