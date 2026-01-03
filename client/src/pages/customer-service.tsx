@@ -1094,6 +1094,7 @@ export default function CustomerService() {
                           <SelectContent>
                             <SelectItem value="Accessories">Accessories</SelectItem>
                             <SelectItem value="Car Care">Car Care</SelectItem>
+                            <SelectItem value="Other">Other</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -1106,7 +1107,22 @@ export default function CustomerService() {
                               <SelectTrigger>
                                 <SelectValue placeholder="Select Item" />
                               </SelectTrigger>
-                              <SelectContent>
+                              <SelectContent position="popper" className="max-h-60 w-[var(--radix-select-trigger-width)]">
+                                <div className="p-2 sticky top-0 bg-white z-10 border-b">
+                                  <Input
+                                    placeholder="Search item..."
+                                    className="h-8 text-sm"
+                                    onChange={(e) => {
+                                      const search = e.target.value.toLowerCase();
+                                      const items = e.target.closest('[role="listbox"]')?.querySelectorAll('[role="option"]');
+                                      items?.forEach((item) => {
+                                        const text = item.textContent?.toLowerCase() || "";
+                                        (item as HTMLElement).style.display = text.includes(search) ? "flex" : "none";
+                                      });
+                                    }}
+                                    onKeyDown={(e) => e.stopPropagation()}
+                                  />
+                                </div>
                                 {inventory
                                   .filter((item: any) => item.category === selectedAccessoryCategory)
                                   .map((item: any) => (
