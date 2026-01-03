@@ -521,22 +521,28 @@ export default function Inventory() {
                         }}
                       >
                         <CardHeader className="pb-2">
-                          <div className="flex items-center gap-2">
-                            <Badge className={cn(CATEGORY_COLORS[displayItem.category])}>
-                              {displayItem.category}
-                            </Badge>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-8 px-2 text-xs"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setLocation(`/roll-history/${displayItem._id || displayItem.id}`);
-                              }}
-                            >
-                              <HistoryIcon className="w-3 h-3 mr-1" />
-                              History
-                            </Button>
+                          <div className="flex items-start justify-between">
+                            <div className="flex flex-col gap-1">
+                              <CardTitle className="text-base">{displayItem.category}</CardTitle>
+                              <div className="flex items-center gap-2">
+                                <Badge className={cn(CATEGORY_COLORS[displayItem.category])}>
+                                  {displayItem.category}
+                                </Badge>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-6 px-1.5 text-[10px]"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setLocation(`/roll-history/${displayItem._id || displayItem.id}`);
+                                  }}
+                                >
+                                  <HistoryIcon className="w-3 h-3 mr-1" />
+                                  History
+                                </Button>
+                              </div>
+                            </div>
+                            {isSelected && <div className="w-2 h-2 rounded-full bg-primary animate-pulse mt-2" />}
                           </div>
                         </CardHeader>
                         <CardContent className="space-y-3">
