@@ -13,7 +13,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { User, Car, Check, ChevronRight, ChevronLeft, Zap, X } from "lucide-react";
+import {
+  User,
+  Car,
+  Check,
+  ChevronRight,
+  ChevronLeft,
+  Zap,
+  X,
+} from "lucide-react";
 import { useLocation } from "wouter";
 
 const REFERRAL_SOURCES = [
@@ -466,7 +474,7 @@ export default function CustomerRegistration() {
         if (b === "Other") return 1;
         return a.localeCompare(b);
       }),
-      models
+      models,
     };
   }, [existingCustomers]);
 
@@ -822,7 +830,10 @@ export default function CustomerRegistration() {
                               referrerPhone: value,
                             });
                             if (errors.referrerPhone)
-                              setErrors({ ...errors, referrerPhone: undefined });
+                              setErrors({
+                                ...errors,
+                                referrerPhone: undefined,
+                              });
                           }
                         }}
                         placeholder="10-digit mobile number"
@@ -839,29 +850,31 @@ export default function CustomerRegistration() {
                   {/* PPF Selection - Left Column */}
                   <div className="space-y-6">
                     <Card className="border-red-300 shadow-sm p-4 space-y-4">
-                        <div className="flex items-center justify-between">
-                          <h3 className="font-semibold text-sm text-primary flex items-center gap-2">
-                            PPF Services
-                          </h3>
-                          {(customerData.ppfCategory || customerData.ppfVehicleType || customerData.ppfWarranty) && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-7 text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
-                              onClick={() => {
-                                setCustomerData({
-                                  ...customerData,
-                                  ppfCategory: "",
-                                  ppfVehicleType: "",
-                                  ppfWarranty: "",
-                                  ppfPrice: 0,
-                                });
-                              }}
-                            >
-                              Clear PPF
-                            </Button>
-                          )}
-                        </div>
+                      <div className="flex items-center justify-between">
+                        <h3 className="font-semibold text-sm text-primary flex items-center gap-2">
+                          PPF Services
+                        </h3>
+                        {(customerData.ppfCategory ||
+                          customerData.ppfVehicleType ||
+                          customerData.ppfWarranty) && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
+                            onClick={() => {
+                              setCustomerData({
+                                ...customerData,
+                                ppfCategory: "",
+                                ppfVehicleType: "",
+                                ppfWarranty: "",
+                                ppfPrice: 0,
+                              });
+                            }}
+                          >
+                            Clear PPF
+                          </Button>
+                        )}
+                      </div>
                       <div className="space-y-4">
                         <div className="space-y-2">
                           <Label>PPF Category</Label>
@@ -1048,7 +1061,11 @@ export default function CustomerRegistration() {
                             <h3 className="font-semibold text-sm text-primary flex items-center gap-2">
                               Accessory Section
                             </h3>
-                            {(customerData.tempAccessoryCategory || customerData.tempAccessoryName || customerData.selectedOtherServices.some(s => s.vehicleType === "Accessory")) && (
+                            {(customerData.tempAccessoryCategory ||
+                              customerData.tempAccessoryName ||
+                              customerData.selectedOtherServices.some(
+                                (s) => s.vehicleType === "Accessory",
+                              )) && (
                               <Button
                                 variant="ghost"
                                 size="sm"
@@ -1059,7 +1076,10 @@ export default function CustomerRegistration() {
                                     tempAccessoryCategory: "",
                                     tempAccessoryName: "",
                                     accessoryQuantity: 1,
-                                    selectedOtherServices: customerData.selectedOtherServices.filter(s => s.vehicleType !== "Accessory")
+                                    selectedOtherServices:
+                                      customerData.selectedOtherServices.filter(
+                                        (s) => s.vehicleType !== "Accessory",
+                                      ),
                                   });
                                 }}
                               >
@@ -1177,7 +1197,10 @@ export default function CustomerRegistration() {
                                           key={item._id}
                                           value={item.name}
                                         >
-                                          {item.name} {item.quantity > 0 ? "" : "(out of stock)"}
+                                          {item.name}{" "}
+                                          {item.quantity > 0
+                                            ? ""
+                                            : "(out of stock)"}
                                         </SelectItem>
                                       ))}
                                     </SelectContent>
@@ -1189,7 +1212,9 @@ export default function CustomerRegistration() {
                                     <Input
                                       type="number"
                                       min="1"
-                                      value={customerData.accessoryQuantity || 1}
+                                      value={
+                                        customerData.accessoryQuantity || 1
+                                      }
                                       onChange={(e) =>
                                         setCustomerData({
                                           ...customerData,
@@ -1201,19 +1226,33 @@ export default function CustomerRegistration() {
                                     />
                                     <Button
                                       type="button"
-                                      disabled={!customerData.tempAccessoryName || (() => {
-                                        const item = accessoryInventory.find(
-                                          (i) => i.name === customerData.tempAccessoryName,
-                                        );
-                                        return !item || item.quantity < customerData.accessoryQuantity;
-                                      })()}
+                                      disabled={
+                                        !customerData.tempAccessoryName ||
+                                        (() => {
+                                          const item = accessoryInventory.find(
+                                            (i) =>
+                                              i.name ===
+                                              customerData.tempAccessoryName,
+                                          );
+                                          return (
+                                            !item ||
+                                            item.quantity <
+                                              customerData.accessoryQuantity
+                                          );
+                                        })()
+                                      }
                                       onClick={() => {
                                         if (customerData.tempAccessoryName) {
                                           const item = accessoryInventory.find(
-                                            (i) => i.name === customerData.tempAccessoryName,
+                                            (i) =>
+                                              i.name ===
+                                              customerData.tempAccessoryName,
                                           );
                                           if (item) {
-                                            if (item.quantity < customerData.accessoryQuantity) {
+                                            if (
+                                              item.quantity <
+                                              customerData.accessoryQuantity
+                                            ) {
                                               toast({
                                                 title: "Insufficient Stock",
                                                 description: `Only ${item.quantity} units available in stock.`,
@@ -1228,7 +1267,9 @@ export default function CustomerRegistration() {
                                                 {
                                                   name: `${item.name} (x${customerData.accessoryQuantity})`,
                                                   vehicleType: "Accessory",
-                                                  price: (item.price || 0) * customerData.accessoryQuantity,
+                                                  price:
+                                                    (item.price || 0) *
+                                                    customerData.accessoryQuantity,
                                                 },
                                               ],
                                               tempAccessoryCategory: "",
@@ -1246,31 +1287,40 @@ export default function CustomerRegistration() {
                               </>
                             )}
                           </div>
-                          {customerData.selectedOtherServices.some(s => s.vehicleType === "Accessory") && (
+                          {customerData.selectedOtherServices.some(
+                            (s) => s.vehicleType === "Accessory",
+                          ) && (
                             <div className="mt-4 p-4 bg-slate-50 rounded-lg border border-slate-200">
                               <Label className="font-semibold text-slate-900 mb-3 block">
                                 Selected Accessories
                               </Label>
                               <div className="space-y-2">
                                 {customerData.selectedOtherServices
-                                  .filter(s => s.vehicleType === "Accessory")
+                                  .filter((s) => s.vehicleType === "Accessory")
                                   .map((acc, idx) => (
                                     <div
                                       key={idx}
                                       className="flex items-center justify-between p-2 bg-white rounded border border-slate-200"
                                     >
                                       <span className="text-sm font-medium">
-                                        {acc.name} - ₹{acc.price.toLocaleString("en-IN")}
+                                        {acc.name} - ₹
+                                        {acc.price.toLocaleString("en-IN")}
                                       </span>
                                       <Button
                                         variant="ghost"
                                         size="sm"
                                         className="h-7 text-red-600 hover:text-red-700 hover:bg-red-50"
                                         onClick={() => {
-                                          const originalIndex = customerData.selectedOtherServices.findIndex(s => s === acc);
+                                          const originalIndex =
+                                            customerData.selectedOtherServices.findIndex(
+                                              (s) => s === acc,
+                                            );
                                           setCustomerData({
                                             ...customerData,
-                                            selectedOtherServices: customerData.selectedOtherServices.filter((_, i) => i !== originalIndex)
+                                            selectedOtherServices:
+                                              customerData.selectedOtherServices.filter(
+                                                (_, i) => i !== originalIndex,
+                                              ),
                                           });
                                         }}
                                       >
@@ -1293,7 +1343,11 @@ export default function CustomerRegistration() {
                         <h3 className="font-semibold text-sm text-primary flex items-center gap-2">
                           Other Services (Multiple)
                         </h3>
-                        {(customerData.tempServiceName || customerData.tempServiceVehicleType || customerData.selectedOtherServices.some(s => s.vehicleType !== "Accessory")) && (
+                        {(customerData.tempServiceName ||
+                          customerData.tempServiceVehicleType ||
+                          customerData.selectedOtherServices.some(
+                            (s) => s.vehicleType !== "Accessory",
+                          )) && (
                           <Button
                             variant="ghost"
                             size="sm"
@@ -1303,7 +1357,10 @@ export default function CustomerRegistration() {
                                 ...customerData,
                                 tempServiceName: "",
                                 tempServiceVehicleType: "",
-                                selectedOtherServices: customerData.selectedOtherServices.filter(s => s.vehicleType === "Accessory")
+                                selectedOtherServices:
+                                  customerData.selectedOtherServices.filter(
+                                    (s) => s.vehicleType === "Accessory",
+                                  ),
                               });
                             }}
                           >
@@ -1389,7 +1446,8 @@ export default function CustomerRegistration() {
                                     placeholder="Search..."
                                     className="h-8 text-sm"
                                     onChange={(e) => {
-                                      const search = e.target.value.toLowerCase();
+                                      const search =
+                                        e.target.value.toLowerCase();
                                       const items = e.target
                                         .closest('[role="listbox"]')
                                         ?.querySelectorAll('[role="option"]');
@@ -1397,7 +1455,9 @@ export default function CustomerRegistration() {
                                         const text =
                                           item.textContent?.toLowerCase() || "";
                                         (item as HTMLElement).style.display =
-                                          text.includes(search) ? "flex" : "none";
+                                          text.includes(search)
+                                            ? "flex"
+                                            : "none";
                                       });
                                     }}
                                     onKeyDown={(e) => e.stopPropagation()}
@@ -1427,9 +1487,10 @@ export default function CustomerRegistration() {
                                   const serviceData = OTHER_SERVICES[
                                     customerData.tempServiceName as keyof typeof OTHER_SERVICES
                                   ] as Record<string, number>;
-                                  const price = serviceData[
-                                    customerData.tempServiceVehicleType
-                                  ];
+                                  const price =
+                                    serviceData[
+                                      customerData.tempServiceVehicleType
+                                    ];
                                   setCustomerData({
                                     ...customerData,
                                     selectedOtherServices: [
@@ -1452,14 +1513,16 @@ export default function CustomerRegistration() {
                           </div>
                         )}
 
-                        {customerData.selectedOtherServices.some(s => s.vehicleType !== "Accessory") && (
+                        {customerData.selectedOtherServices.some(
+                          (s) => s.vehicleType !== "Accessory",
+                        ) && (
                           <div className="mt-4 p-4 bg-slate-50 rounded-lg border border-slate-200">
                             <Label className="font-semibold text-slate-900 mb-3 block">
                               Selected Services
                             </Label>
                             <div className="space-y-2">
                               {customerData.selectedOtherServices
-                                .filter(s => s.vehicleType !== "Accessory")
+                                .filter((s) => s.vehicleType !== "Accessory")
                                 .map((service, idx) => (
                                   <div
                                     key={idx}
@@ -1474,10 +1537,16 @@ export default function CustomerRegistration() {
                                       size="sm"
                                       className="h-7 text-red-600 hover:text-red-700 hover:bg-red-50"
                                       onClick={() => {
-                                        const originalIndex = customerData.selectedOtherServices.findIndex(s => s === service);
+                                        const originalIndex =
+                                          customerData.selectedOtherServices.findIndex(
+                                            (s) => s === service,
+                                          );
                                         setCustomerData({
                                           ...customerData,
-                                          selectedOtherServices: customerData.selectedOtherServices.filter((_, i) => i !== originalIndex)
+                                          selectedOtherServices:
+                                            customerData.selectedOtherServices.filter(
+                                              (_, i) => i !== originalIndex,
+                                            ),
                                         });
                                       }}
                                     >
@@ -1515,7 +1584,10 @@ export default function CustomerRegistration() {
                     <Input
                       value={customerData.city}
                       onChange={(e) =>
-                        setCustomerData({ ...customerData, city: e.target.value })
+                        setCustomerData({
+                          ...customerData,
+                          city: e.target.value,
+                        })
                       }
                       placeholder="City"
                       data-testid="input-city"
@@ -1601,165 +1673,312 @@ export default function CustomerRegistration() {
           </Card>
         )}
 
-        {/* Step 2: Vehicle Information */}
+        {/* Step 2: Vehicle Details */}
         {step === 2 && (
-          <div className="space-y-6" data-testid="card-vehicle-info">
-            <div className="border border-red-200 rounded-xl overflow-hidden bg-white shadow-sm">
-              <div className="p-6 border-b border-red-100 flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-red-50 flex items-center justify-center">
-                  <Car className="w-4 h-4 text-red-500" />
-                </div>
-                <h3 className="font-semibold text-slate-900 text-lg">Vehicle Details</h3>
-              </div>
-              
-              <div className="p-8 space-y-8">
-                <p className="text-[15px] text-slate-500">
-                  Please provide your vehicle information
-                </p>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
+          <Card
+            className="bg-gradient-to-br from-white to-slate-50 border-2 border-red-300 shadow-sm"
+            data-testid="card-vehicle-info"
+          >
+            <CardHeader className="pb-6 border-b border-slate-200 bg-gradient-to-r from-primary/5 to-transparent">
+              <CardTitle className="flex items-center gap-3 text-lg text-slate-900 font-semibold">
+                <Car className="w-5 h-5 text-primary" />
+                Vehicle Details
+              </CardTitle>
+              <p className="text-sm text-slate-600 mt-2">
+                Please provide your vehicle information
+              </p>
+            </CardHeader>
+            <CardContent className="space-y-6 pt-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label className="text-[14px] font-medium text-slate-900">Vehicle Name *</Label>
+                    <Label>Vehicle Name *</Label>
                     <Select
                       value={vehicleData.make}
                       onValueChange={(value) =>
                         setVehicleData({
                           ...vehicleData,
                           make: value,
-                          model: "",
+                          model: value === "Other" ? "Other" : "",
+                          otherMake: "",
+                          otherModel: "",
                         })
                       }
                     >
-                      <SelectTrigger className="h-[46px] bg-white border-slate-200 rounded-lg text-slate-400 px-4">
+                      <SelectTrigger
+                        className="border-slate-300"
+                        data-testid="select-vehicle-make"
+                      >
                         <SelectValue placeholder="Select vehicle make" />
                       </SelectTrigger>
-                      <SelectContent position="popper" className="max-h-60">
-                        {dynamicMakes.map((make) => (
-                          <SelectItem key={make} value={make}>{make}</SelectItem>
-                        ))}
+                      <SelectContent
+                        position="popper"
+                        className="max-h-60 w-[var(--radix-select-trigger-width)]"
+                      >
+                        <div className="p-2 sticky top-0 bg-white z-10 border-b">
+                          <Input
+                            placeholder="Search make..."
+                            className="h-8 text-sm"
+                            onChange={(e) => {
+                              const search = e.target.value.toLowerCase();
+                              const items = e.target
+                                .closest('[role="listbox"]')
+                                ?.querySelectorAll('[role="option"]');
+                              items?.forEach((item) => {
+                                const text =
+                                  item.textContent?.toLowerCase() || "";
+                                (item as HTMLElement).style.display =
+                                  text.includes(search) ? "flex" : "none";
+                              });
+                            }}
+                            onKeyDown={(e) => e.stopPropagation()}
+                          />
+                        </div>
+                        {(() => {
+                          return dynamicMakes.map((make) => (
+                            <SelectItem key={make} value={make}>
+                              {make}
+                            </SelectItem>
+                          ));
+                        })()}
                       </SelectContent>
                     </Select>
                   </div>
+                  {vehicleData.make === "Other" && (
+                    <div className="space-y-2 animate-in fade-in slide-in-from-top-1">
+                      <Label>Enter Vehicle Name *</Label>
+                      <Input
+                        value={vehicleData.otherMake}
+                        onChange={(e) =>
+                          setVehicleData({
+                            ...vehicleData,
+                            otherMake: e.target.value,
+                          })
+                        }
+                        placeholder="e.g. Tesla, Ferrari"
+                        className="border-slate-300"
+                        data-testid="input-other-make"
+                      />
+                    </div>
+                  )}
+                </div>
 
+                <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label className="text-[14px] font-medium text-slate-900">Vehicle Model *</Label>
+                    <Label>Vehicle Model *</Label>
                     <Select
                       value={vehicleData.model}
                       onValueChange={(value) =>
-                        setVehicleData({ ...vehicleData, model: value })
+                        setVehicleData({
+                          ...vehicleData,
+                          model: value,
+                          otherModel: "",
+                        })
                       }
                       disabled={!vehicleData.make}
                     >
-                      <SelectTrigger className="h-[46px] bg-white border-slate-200 rounded-lg text-slate-400 px-4">
-                        <SelectValue placeholder="Select vehicle name first" />
+                      <SelectTrigger
+                        className="border-slate-300"
+                        data-testid="select-vehicle-model"
+                      >
+                        <SelectValue
+                          placeholder={
+                            vehicleData.make
+                              ? "Select model"
+                              : "Select vehicle name first"
+                          }
+                        />
                       </SelectTrigger>
-                      <SelectContent position="popper" className="max-h-60">
-                        {(dynamicModels[vehicleData.make] || []).map((model) => (
-                          <SelectItem key={model} value={model}>{model}</SelectItem>
-                        ))}
-                        <SelectItem value="Other">Other</SelectItem>
+                      <SelectContent
+                        position="popper"
+                        className="max-h-60 w-[var(--radix-select-trigger-width)]"
+                      >
+                        <div className="p-2 sticky top-0 bg-white z-10 border-b">
+                          <Input
+                            placeholder="Search model..."
+                            className="h-8 text-sm"
+                            onChange={(e) => {
+                              const search = e.target.value.toLowerCase();
+                              const items = e.target
+                                .closest('[role="listbox"]')
+                                ?.querySelectorAll('[role="option"]');
+                              items?.forEach((item) => {
+                                const text =
+                                  item.textContent?.toLowerCase() || "";
+                                (item as HTMLElement).style.display =
+                                  text.includes(search) ? "flex" : "none";
+                              });
+                            }}
+                            onKeyDown={(e) => e.stopPropagation()}
+                          />
+                        </div>
+                        {vehicleData.make &&
+                          (() => {
+                            const standardModels = dynamicModels[vehicleData.make as keyof typeof dynamicModels] || [];
+                            const models = Array.from(new Set(["Other", ...standardModels])).sort((a, b) => {
+                              if (a === "Other") return -1;
+                              if (b === "Other") return 1;
+                              return a.localeCompare(b);
+                            });
+                            return models.map((model) => (
+                              <SelectItem key={model} value={model}>
+                                {model}
+                              </SelectItem>
+                            ));
+                          })()}
                       </SelectContent>
                     </Select>
                   </div>
-
-                  <div className="space-y-2">
-                    <Label className="text-[14px] font-medium text-slate-900">Vehicle Type</Label>
-                    <div className="h-[46px] px-4 flex items-center bg-white border border-slate-200 rounded-lg text-slate-900 font-medium">
-                      {vehicleData.vehicleType || "Not selected"}
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label className="text-[14px] font-medium text-slate-900">Year of Manufacture</Label>
-                    <Input
-                      type="text"
-                      value={vehicleData.year}
-                      onChange={(e) => setVehicleData({ ...vehicleData, year: e.target.value })}
-                      placeholder="e.g., 2023"
-                      className="h-[46px] bg-white border-slate-200 rounded-lg placeholder:text-slate-400 px-4"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label className="text-[14px] font-medium text-slate-900">Vehicle Number *</Label>
-                    <Input
-                      value={vehicleData.plateNumber}
-                      onChange={(e) => setVehicleData({ ...vehicleData, plateNumber: e.target.value.toUpperCase() })}
-                      placeholder="e.g., MH02 AB 1234"
-                      className="h-[46px] bg-white border-slate-200 rounded-lg placeholder:text-slate-400 px-4"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label className="text-[14px] font-medium text-slate-900">Color</Label>
-                    <Select
-                      value={vehicleData.color}
-                      onValueChange={(value) => setVehicleData({ ...vehicleData, color: value })}
-                    >
-                      <SelectTrigger className="h-[46px] bg-white border-slate-200 rounded-lg text-slate-400 px-4">
-                        <SelectValue placeholder="Select color" />
-                      </SelectTrigger>
-                      <SelectContent position="popper" className="max-h-60">
-                        {VEHICLE_COLORS.map((color) => (
-                          <SelectItem key={color} value={color}>{color}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="col-span-1 md:col-span-2 space-y-2">
-                    <Label className="text-[14px] font-medium text-slate-900">Vehicle Image</Label>
-                    <div className="relative">
-                      <Input 
-                        placeholder="Choose File No file chosen"
-                        className="h-[46px] bg-white border-slate-200 rounded-lg placeholder:text-slate-400 pr-24 cursor-pointer px-4"
-                        readOnly
-                        onClick={() => document.getElementById('vehicle-upload')?.click()}
-                      />
-                      <input
-                        id="vehicle-upload"
-                        type="file"
-                        className="hidden"
-                        accept="image/*"
-                        onChange={handleVehicleImageChange}
+                  {(vehicleData.make === "Other" ||
+                    vehicleData.model === "Other") && (
+                    <div className="space-y-2 animate-in fade-in slide-in-from-top-1">
+                      <Label>Enter Vehicle Model *</Label>
+                      <Input
+                        value={vehicleData.otherModel}
+                        onChange={(e) =>
+                          setVehicleData({
+                            ...vehicleData,
+                            otherModel: e.target.value,
+                          })
+                        }
+                        placeholder="e.g. Model S, 488"
+                        className="border-slate-300"
+                        data-testid="input-other-model"
                       />
                     </div>
-                    {vehicleImagePreview && (
-                      <div className="mt-4 relative w-48 aspect-video rounded-lg overflow-hidden border border-slate-200">
-                        <img src={vehicleImagePreview} alt="Preview" className="w-full h-full object-cover" />
-                        <button
-                          onClick={() => {
-                            setVehicleImagePreview("");
-                            setVehicleData({ ...vehicleData, image: undefined });
-                          }}
-                          className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full"
-                        >
-                          <X className="w-3 h-3" />
-                        </button>
-                      </div>
-                    )}
+                  )}
+                </div>
+
+                <div className="space-y-6">
+                  <Label>Vehicle Type</Label>
+                  <div
+                    className="px-4 py-3 bg-white border border-slate-300 rounded-lg text-sm font-medium text-slate-900"
+                    data-testid="display-vehicle-type"
+                  >
+                    {vehicleData.vehicleType || "Not selected"}
                   </div>
                 </div>
-              </div>
-            </div>
 
-            <div className="flex justify-between items-center pt-8">
-              <Button
-                variant="outline"
-                onClick={() => setStep(1)}
-                className="h-11 px-10 border-slate-200 text-slate-700 hover:bg-slate-50 rounded-lg font-medium"
-              >
-                Previous
-              </Button>
-              <Button
-                onClick={handleSubmit}
-                disabled={!canProceedStep2 || createCustomerMutation.isPending}
-                className="h-11 px-10 bg-[#81c1a8] hover:bg-[#72b097] text-white font-medium rounded-lg shadow-sm"
-              >
-                {createCustomerMutation.isPending ? "Registering..." : "Complete Registration"}
-              </Button>
-            </div>
-          </div>
+                <div className="space-y-6">
+                  <Label>Year of Manufacture</Label>
+                  <Input
+                    value={vehicleData.year}
+                    onChange={(e) =>
+                      setVehicleData({ ...vehicleData, year: e.target.value })
+                    }
+                    placeholder="e.g., 2023"
+                    data-testid="input-vehicle-year"
+                  />
+                </div>
+
+                <div className="space-y-6">
+                  <Label>Vehicle Number *</Label>
+                  <Input
+                    value={vehicleData.plateNumber}
+                    onChange={(e) =>
+                      setVehicleData({
+                        ...vehicleData,
+                        plateNumber: e.target.value,
+                      })
+                    }
+                    placeholder="e.g., MH02 AB 1234"
+                    data-testid="input-plate-number"
+                  />
+                </div>
+
+                <div className="space-y-6">
+                  <Label>Color</Label>
+                  <Select
+                    value={vehicleData.color}
+                    onValueChange={(value) =>
+                      setVehicleData({ ...vehicleData, color: value })
+                    }
+                  >
+                    <SelectTrigger
+                      className="border-slate-300"
+                      data-testid="select-vehicle-color"
+                    >
+                      <SelectValue placeholder="Select color" />
+                    </SelectTrigger>
+                    <SelectContent
+                      position="popper"
+                      className="max-h-60 w-[var(--radix-select-trigger-width)]"
+                    >
+                      <div className="p-2 sticky top-0 bg-white z-10 border-b">
+                        <Input
+                          placeholder="Search color..."
+                          className="h-8 text-sm"
+                          onChange={(e) => {
+                            const search = e.target.value.toLowerCase();
+                            const items = e.target
+                              .closest('[role="listbox"]')
+                              ?.querySelectorAll('[role="option"]');
+                            items?.forEach((item) => {
+                              const text =
+                                item.textContent?.toLowerCase() || "";
+                              (item as HTMLElement).style.display =
+                                text.includes(search) ? "flex" : "none";
+                            });
+                          }}
+                          onKeyDown={(e) => e.stopPropagation()}
+                        />
+                      </div>
+                      {VEHICLE_COLORS.map((color) => (
+                        <SelectItem key={color} value={color}>
+                          {color}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="md:col-span-2 space-y-6">
+                  <Label>Vehicle Image</Label>
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleVehicleImageChange}
+                    placeholder="Upload vehicle photo"
+                    data-testid="input-vehicle-image"
+                  />
+                  {vehicleImagePreview && (
+                    <div className="mt-3 relative w-full h-48 bg-slate-100 rounded-lg overflow-hidden border border-slate-200">
+                      <img
+                        src={vehicleImagePreview}
+                        alt="Vehicle preview"
+                        className="w-full h-full object-cover"
+                        data-testid="img-vehicle-preview"
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex justify-between pt-6 border-t border-slate-200">
+                <Button
+                  variant="outline"
+                  onClick={() => setStep(1)}
+                  className="border-slate-300 text-slate-700 hover:bg-slate-100"
+                  data-testid="button-prev-step"
+                >
+                  Previous
+                </Button>
+                <Button
+                  onClick={handleSubmit}
+                  disabled={
+                    !canProceedStep2 || createCustomerMutation.isPending
+                  }
+                  className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white hover:shadow-lg transition-all"
+                  data-testid="button-submit-registration"
+                >
+                  {createCustomerMutation.isPending
+                    ? "Registering..."
+                    : "Complete Registration"}
+                  <Check className="w-4 h-4 ml-2" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         )}
       </div>
     </div>
