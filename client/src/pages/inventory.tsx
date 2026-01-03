@@ -299,11 +299,17 @@ export default function Inventory() {
 
   const addRollMutation = useMutation({
     mutationFn: (data: { id: string; roll: any }) => api.inventory.addRoll(data.id, data.roll),
-    onSuccess: () => {
+    onSuccess: (newItem) => {
       queryClient.invalidateQueries({ queryKey: ['inventory'] });
       setRollDialogOpen(false);
       setRollName('');
       setRollQuantity('');
+      
+      // If the ID was a temporary one, update the selection to the new database ID
+      if (selectedProductId?.startsWith('temp-') && newItem?._id) {
+        setSelectedProductId(newItem._id);
+      }
+      
       toast({ title: 'Roll added successfully' });
     },
     onError: () => {
