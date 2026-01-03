@@ -581,7 +581,7 @@ export default function Inventory() {
               name: accName,
               category: accCategory,
               quantity: parseFloat(accQuantity),
-              unit: accUnit,
+              unit: 'Piece', // Default unit for accessories
               price: parseFloat(accPrice) || 0,
               minStock: 0
             });
@@ -594,15 +594,9 @@ export default function Inventory() {
               <Label>Category / Type</Label>
               <Input placeholder="e.g., Headgear" value={accCategory} onChange={(e) => setAccCategory(e.target.value)} required />
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Unit</Label>
-                <Input placeholder="e.g., Piece, Set" value={accUnit} onChange={(e) => setAccUnit(e.target.value)} required />
-              </div>
-              <div className="space-y-2">
-                <Label>Quantity</Label>
-                <Input type="number" placeholder="0" value={accQuantity} onChange={(e) => setAccQuantity(e.target.value)} required />
-              </div>
+            <div className="space-y-2">
+              <Label>Quantity</Label>
+              <Input type="number" placeholder="0" value={accQuantity} onChange={(e) => setAccQuantity(e.target.value)} required />
             </div>
               <div className="space-y-2">
                 <Label>Price (₹)</Label>
