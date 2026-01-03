@@ -1093,8 +1093,11 @@ export default function CustomerService() {
                           </SelectTrigger>
                           <SelectContent>
                             {Array.from(new Set(inventory
-                              .filter((item: any) => item.category === 'Accessories' || item.category === 'Car Care' || item.category === 'Other' || 
-                                (!['Elite', 'Garware Plus', 'Garware Premium', 'Garware Matt'].includes(item.category)))
+                              .filter((item: any) => item.category === 'Accessories' || 
+                                (item.category !== 'Elite' && 
+                                 item.category !== 'Garware Plus' && 
+                                 item.category !== 'Garware Premium' && 
+                                 item.category !== 'Garware Matt'))
                               .map((item: any) => item.category)))
                               .map((category: any) => (
                                 <SelectItem key={category} value={category}>{category}</SelectItem>
