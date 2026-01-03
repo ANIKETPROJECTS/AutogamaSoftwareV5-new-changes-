@@ -89,33 +89,20 @@ export default function CustomerService() {
     const urlParams = new URLSearchParams(window.location.search);
     const preSelectedCustomerId = urlParams.get('customerId');
     
-    // Debug logging
-    console.log('[Auto-select Debug] URL Customer ID:', preSelectedCustomerId);
-    console.log('[Auto-select Debug] Customers list length:', customers.length);
-    console.log('[Auto-select Debug] Location:', location);
-
     if (preSelectedCustomerId && customers.length > 0) {
-      // Find customer by _id or id (handling both MongoDB and Drizzle formats)
       const customer = customers.find((c: any) => (c._id === preSelectedCustomerId || c.id === preSelectedCustomerId));
-      console.log('[Auto-select Debug] Found customer object:', customer ? customer.name : 'NOT FOUND');
-
       if (customer) {
         const targetId = customer._id || customer.id;
-        console.log('[Auto-select Debug] Final Target ID to select:', targetId);
-        
-        // Use a slight delay to ensure the Select component is ready and not overridden by other effects
         const timer = setTimeout(() => {
-          console.log('[Auto-select Debug] Executing selection for:', targetId);
           setSelectedCustomerId(targetId);
           if (customer.vehicles && customer.vehicles.length > 0) {
-            console.log('[Auto-select Debug] Auto-selecting vehicle index 0');
             setSelectedVehicleIndex('0');
           }
         }, 150);
         return () => clearTimeout(timer);
       }
     }
-  }, [customersData, location]);
+  }, [customersData]);
 
   const filteredCustomers = customers.filter((customer: any) => 
     customer.name.toLowerCase().includes(customerSearch.toLowerCase()) || 
@@ -259,7 +246,6 @@ export default function CustomerService() {
             setPpfWarrantyFromPreferences(true);
           }
           
-          // Auto-populate Other Services using ppfVehicleType for consistent pricing
           if (Array.isArray(prefs.otherServices) && prefs.otherServices.length > 0 && (vehicleType || ppfVehicleType)) {
             const vType = vehicleType || ppfVehicleType;
             const servicesWithPrices = prefs.otherServices
@@ -290,7 +276,6 @@ export default function CustomerService() {
     loadVehiclePreferences();
   }, [selectedCustomerId, selectedVehicleIndex]);
 
-  // Catalog auto-fill effect
   useEffect(() => {
     if (isLoadingLastService) return;
     if (!ppfCategory || !ppfVehicleType || !ppfWarranty) return;
@@ -392,7 +377,6 @@ export default function CustomerService() {
       return;
     }
 
-    // Calculate total available across all rolls
     let totalAvailable = 0;
     if (item.rolls && item.rolls.length > 0) {
       totalAvailable = item.rolls.reduce((sum: number, roll: any) => {
@@ -426,19 +410,14 @@ export default function CustomerService() {
 
   const ppfDiscountAmount = parseFloat(ppfDiscount) || 0;
   const ppfAfterDiscount = Math.max(0, ppfPrice - ppfDiscountAmount);
-  const otherServicesTotal = selectedOtherServices.reduce((sum, s) => sum + s.price, 0);
   const accessoriesTotal = selectedAccessories.reduce((sum, a) => sum + (a.price * a.quantity), 0);
-  const otherServicesDiscount = selectedOtherServices.reduce((sum, s) => sum + (s.discount || 0), 0);
   const otherServicesAfterDiscount = selectedOtherServices.reduce((sum, s) => sum + Math.max(0, s.price - (s.discount || 0)), 0);
   
   const parsedLaborCost = parseFloat(laborCost) || 0;
   
-  const totalDiscount = ppfDiscountAmount + otherServicesDiscount;
-  const totalServiceAfterDiscount = ppfAfterDiscount + otherServicesAfterDiscount + accessoriesTotal;
-  
   const subtotal = ppfAfterDiscount + otherServicesAfterDiscount + accessoriesTotal + parsedLaborCost;
-  const gstValue = includeGst ? subtotal * 0.18 : 0;
-  const totalCostValue = subtotal + gstValue;
+  const includeGstValue = includeGst ? subtotal * 0.18 : 0;
+  const totalCostValue = subtotal + includeGstValue;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -458,9 +437,7 @@ export default function CustomerService() {
 
     const serviceItemsList: any[] = [];
     if (ppfPrice > 0) {
-      // Find the material item associated with this PPF service
       const ppfMaterialItem = selectedItems.find(item => item.rollId);
-      
       serviceItemsList.push({
         name: `PPF ${ppfCategory} - ${ppfWarranty}`,
         price: ppfPrice,
@@ -501,19 +478,6 @@ export default function CustomerService() {
         type: 'labor'
       });
     }
-
-    const materialsList = [
-      ...selectedItems.map(item => ({
-        inventoryId: item.inventoryId,
-        name: item.name,
-        quantity: item.quantity || item.metersUsed,
-      })),
-      ...selectedAccessories.map(a => ({
-        inventoryId: a.id,
-        name: a.name,
-        quantity: a.quantity
-      }))
-    ];
 
     createJobMutation.mutate({
       customerId: selectedCustomerId,
@@ -688,7 +652,6 @@ export default function CustomerService() {
                         setPpfWarranty('');
                         setShowPpfSection(true);
                         
-                        // Auto-select product from inventory with matching name
                         const matchingItem = (Array.isArray(inventory) ? inventory : []).find(
                           (item: any) => item.name.toLowerCase() === val.toLowerCase() && item.category !== 'Accessories'
                         );
@@ -720,7 +683,6 @@ export default function CustomerService() {
                           ))}
                         </SelectContent>
                       </Select>
-                    </div>
 
                     {showPpfSection && (
                       <div className="space-y-3 pt-3 border-t">
@@ -842,7 +804,6 @@ export default function CustomerService() {
                           ))}
                         </SelectContent>
                       </Select>
-                    </div>
 
                     <div className="space-y-2">
                       <Label className="text-sm">Vehicle Type</Label>
@@ -977,136 +938,153 @@ export default function CustomerService() {
                     </div>
 
                     {selectedItemId && (
-                      <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 space-y-2">
+                      <div className="space-y-3 pt-3 border-t">
                         {(() => {
                           const item = (Array.isArray(inventory) ? inventory : []).find((inv: any) => inv._id === selectedItemId);
-                          const totalAvailable = item?.rolls?.reduce((sum: number, roll: any) => {
-                            if (roll.status !== 'Finished' && roll.remaining_sqft > 0) {
-                              return sum + (roll.remaining_sqft || 0);
-                            }
-                            return sum;
-                          }, 0) || 0;
-                          const activeRolls = item?.rolls?.filter((r: any) => r.status !== 'Finished' && r.remaining_sqft > 0) || [];
+                          if (!item) return null;
+                          
+                          let totalAvailable = 0;
+                          if (item.rolls && item.rolls.length > 0) {
+                            totalAvailable = item.rolls.reduce((sum: number, roll: any) => {
+                              if (roll.status !== 'Finished' && roll.remaining_sqft > 0) {
+                                return sum + (roll.remaining_sqft || 0);
+                              }
+                              return sum;
+                            }, 0);
+                          } else {
+                            totalAvailable = item.quantity || 0;
+                          }
 
                           return (
                             <>
-                              <div className="flex items-center justify-between cursor-pointer" onClick={() => setExpandedInventoryId(expandedInventoryId === selectedItemId ? null : selectedItemId)}>
-                                <div>
-                                  <p className="text-sm font-medium text-blue-900 dark:text-blue-100">{totalAvailable} sq ft available across {activeRolls.length} roll(s)</p>
+                              <div className="bg-blue-50 p-2 rounded-md border border-blue-200">
+                                <div className="flex justify-between items-center">
+                                  <span className="text-xs font-medium text-blue-700">Available Stock</span>
+                                  <span className="text-sm font-bold text-blue-800">{totalAvailable} sq ft</span>
                                 </div>
-                                {activeRolls.length > 0 && (
-                                  expandedInventoryId === selectedItemId ? 
-                                  <ChevronUp className="w-4 h-4 text-blue-600 dark:text-blue-400" /> : 
-                                  <ChevronDown className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                                )}
                               </div>
-                              
-                              {expandedInventoryId === selectedItemId && activeRolls.length > 0 && (
-                                <div className="space-y-2 mt-2 pt-2 border-t border-blue-200 dark:border-blue-800">
-                                  {activeRolls.map((roll: any, idx: number) => (
-                                    <div key={roll._id || idx} className="flex items-center justify-between text-sm bg-white dark:bg-slate-800 p-2 rounded">
-                                      <div>
-                                        <p className="font-medium text-slate-900 dark:text-slate-100">{roll.name}</p>
-                                        <p className="text-xs text-slate-500 dark:text-slate-400">Created: {new Date(roll.createdAt).toLocaleDateString()}</p>
-                                      </div>
-                                      <p className="font-semibold text-blue-600 dark:text-blue-400">{roll.remaining_sqft} sq ft</p>
-                                    </div>
-                                  ))}
-                                </div>
-                              )}
+
+                              <div className="space-y-2">
+                                <Label className="text-sm">Quantity/Amount (sq ft)</Label>
+                                <Input type="number" value={metersUsed} onChange={(e) => setMetersUsed(e.target.value)} min="1" step="0.1" />
+                              </div>
+
+                              <Button type="button" variant="outline" onClick={handleAddItem} className="w-full">
+                                <Plus className="w-4 h-4 mr-2" />
+                                Add Item
+                              </Button>
                             </>
                           );
                         })()}
                       </div>
                     )}
-
-                    <div className="space-y-2">
-                      <Label className="text-sm">Quantity/Amount</Label>
-                      <Input type="number" value={metersUsed} onChange={(e) => setMetersUsed(e.target.value)} placeholder="0" min="0" />
-                    </div>
-
-                    <Button type="button" variant="outline" onClick={handleAddItem} className="w-full">
-                      <Plus className="w-4 h-4 mr-2" />
-                      Add Item
-                    </Button>
                   </div>
-
-                  {selectedItems.length > 0 && (
-                    <div className="space-y-2">
-                      <Label className="text-sm font-semibold">Selected Items</Label>
-                      <div className="border rounded-lg divide-y">
-                        {selectedItems.map((item, index) => (
-                          <div key={index} className="flex items-center justify-between p-2">
-                            <div>
-                              <p className="text-sm font-medium">{item.name}</p>
-                              <p className="text-xs text-muted-foreground">{item.quantity} {item.unit}</p>
-                            </div>
-                            <Button type="button" variant="ghost" size="icon" onClick={() => handleRemoveItem(index)}>
-                              <Trash2 className="w-4 h-4 text-red-500" />
-                            </Button>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
                 </div>
 
-                <div className="space-y-3 border border-gray-200 p-4 rounded-lg bg-white">
-                  <h3 className="font-semibold text-sm flex items-center gap-2">
-                    <Package className="w-4 h-4 text-red-600" />
-                    Cost Summary
-                  </h3>
-                  <div className="space-y-2 border-t pt-3">
-                    {ppfPrice > 0 && (
-                      <div className="flex justify-between text-sm">
-                        <span className="text-slate-500">PPF Service:</span>
-                        <span className="font-medium">₹{ppfPrice.toLocaleString('en-IN')}</span>
+                <Card className="border border-red-200">
+                  <CardHeader className="py-3">
+                    <CardTitle className="text-base">Add Accessory</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="space-y-2">
+                      <Label className="text-sm">Accessory Category</Label>
+                      <Select value={selectedAccessoryCategory} onValueChange={setSelectedAccessoryCategory}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select category" />
+                        </SelectTrigger>
+                        <SelectContent className="max-h-60 overflow-y-auto">
+                          {Array.from(new Set(inventory.filter((item: any) => item.category === 'Accessories').map((item: any) => item.accessory_category))).map((cat: any) => (
+                            <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label className="text-sm">Select Accessory</Label>
+                      <Select value={selectedAccessoryId} onValueChange={setSelectedAccessoryId} disabled={!selectedAccessoryCategory}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Choose an accessory" />
+                        </SelectTrigger>
+                        <SelectContent className="max-h-60 overflow-y-auto">
+                          {inventory.filter((item: any) => item.accessory_category === selectedAccessoryCategory).map((item: any) => (
+                            <SelectItem key={item._id} value={item._id}>
+                              {item.name} - ₹{item.price.toLocaleString('en-IN')} ({item.quantity} available)
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label className="text-sm">Quantity</Label>
+                      <Input type="number" value={accessoryQuantity} onChange={(e) => setAccessoryQuantity(e.target.value)} min="1" />
+                    </div>
+
+                    <Button type="button" variant="outline" onClick={handleAddAccessory} disabled={!selectedAccessoryId} className="w-full">
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add Accessory
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                <Card className="border border-red-200 bg-red-50/30">
+                  <CardHeader className="pb-3 border-b border-red-100">
+                    <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                      <div className="p-1.5 bg-red-100 rounded-md">
+                        <Package className="w-4 h-4 text-red-600" />
                       </div>
-                    )}
-                    {selectedOtherServices.length > 0 && (
+                      Cost Summary
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-4 space-y-4">
+                    <div className="space-y-2">
                       <div className="flex justify-between text-sm">
-                        <span className="text-slate-500">Other Services:</span>
-                        <span className="font-medium">₹{otherServicesTotal.toLocaleString('en-IN')}</span>
+                        <span className="text-muted-foreground">PPF Service:</span>
+                        <span className="font-medium">₹{ppfAfterDiscount.toLocaleString('en-IN')}</span>
                       </div>
-                    )}
-                    {selectedAccessories.length > 0 && (
                       <div className="flex justify-between text-sm">
-                        <span className="text-slate-500">Accessories:</span>
+                        <span className="text-muted-foreground">Other Services:</span>
+                        <span className="font-medium">₹{otherServicesAfterDiscount.toLocaleString('en-IN')}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Accessories:</span>
                         <span className="font-medium">₹{accessoriesTotal.toLocaleString('en-IN')}</span>
                       </div>
-                    )}
-                    {parsedLaborCost > 0 && (
                       <div className="flex justify-between text-sm">
-                        <span className="text-slate-500">Labor Charge:</span>
+                        <span className="text-muted-foreground">Labor:</span>
                         <span className="font-medium">₹{parsedLaborCost.toLocaleString('en-IN')}</span>
                       </div>
-                    )}
-                    {totalDiscount > 0 && (
-                      <div className="flex justify-between text-sm text-orange-600">
-                        <span>Discount:</span>
-                        <span>-₹{totalDiscount.toLocaleString('en-IN')}</span>
+                      <div className="border-t pt-2 mt-2">
+                        <div className="flex justify-between text-base font-semibold">
+                          <span>Subtotal:</span>
+                          <span>₹{subtotal.toLocaleString('en-IN')}</span>
+                        </div>
                       </div>
-                    )}
-                    <div className="flex justify-between text-sm border-t pt-2 font-medium">
-                      <span>Subtotal:</span>
-                      <span>₹{subtotal.toLocaleString('en-IN')}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Checkbox id="include-gst" checked={includeGst} onCheckedChange={(val) => setIncludeGst(!!val)} />
-                        <Label htmlFor="include-gst" className="text-sm cursor-pointer">GST (18%)</Label>
+                      <div className="flex items-center space-x-2 mt-2">
+                        <Checkbox id="gst" checked={includeGst} onCheckedChange={(checked) => setIncludeGst(checked as boolean)} />
+                        <label htmlFor="gst" className="text-sm font-medium leading-none cursor-pointer">
+                          GST (18%)
+                        </label>
+                        {includeGst && (
+                          <span className="ml-auto text-sm font-medium text-muted-foreground">
+                            ₹{includeGstValue.toLocaleString('en-IN')}
+                          </span>
+                        )}
                       </div>
-                      <span className="font-medium">{includeGst ? `₹${gstValue.toLocaleString('en-IN')}` : '₹0'}</span>
                     </div>
-                    <div className="flex justify-between text-base font-bold border-t pt-2 text-red-600">
-                      <span>Total:</span>
-                      <span>₹{totalCostValue.toLocaleString('en-IN')}</span>
+                    
+                    <div className="pt-4 border-t-2 border-red-200 border-dashed">
+                      <div className="flex justify-between items-center mb-6">
+                        <span className="text-lg font-bold text-slate-900">Total:</span>
+                        <span className="text-2xl font-black text-red-600">₹{totalCostValue.toLocaleString('en-IN')}</span>
+                      </div>
+                      <Button type="submit" className="w-full h-12 text-lg font-bold bg-red-600 hover:bg-red-700 text-white shadow-lg shadow-red-200" disabled={createJobMutation.isPending}>
+                        {createJobMutation.isPending ? 'Creating...' : 'Create Service'}
+                      </Button>
                     </div>
-                  </div>
-                  <Button type="submit" className="w-full" disabled={createJobMutation.isPending}>
-                    {createJobMutation.isPending ? "Creating..." : "Create Service"}
-                  </Button>
-                </div>
+                  </CardContent>
+                </Card>
               </div>
             </div>
           </form>
