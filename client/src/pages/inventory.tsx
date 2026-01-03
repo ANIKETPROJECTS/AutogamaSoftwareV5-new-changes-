@@ -50,7 +50,8 @@ function SearchableSelect({
   placeholder, 
   emptyMessage = "No option found.",
   allowCustom = true,
-  customLabel = "Add new"
+  customLabel = "Add new",
+  newPlaceholder = "Enter name"
 }: { 
   options: string[], 
   value: string, 
@@ -58,15 +59,41 @@ function SearchableSelect({
   placeholder: string,
   emptyMessage?: string,
   allowCustom?: boolean,
-  customLabel?: string
+  customLabel?: string,
+  newPlaceholder?: string
 }) {
   const [open, setOpen] = useState(false)
   const [inputValue, setInputValue] = useState("")
+  const [isAddingNew, setIsAddingNew] = useState(false)
 
   const filteredOptions = useMemo(() => {
     if (!inputValue) return options;
     return options.filter(opt => opt.toLowerCase().includes(inputValue.toLowerCase()));
   }, [options, inputValue]);
+
+  if (isAddingNew) {
+    return (
+      <div className="flex gap-2">
+        <Input
+          className="flex-1"
+          placeholder={newPlaceholder}
+          value={value}
+          onChange={(e) => onValueChange(e.target.value)}
+          autoFocus
+        />
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={() => {
+            setIsAddingNew(false);
+            onValueChange("");
+          }}
+        >
+          Cancel
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -127,15 +154,14 @@ function SearchableSelect({
                 <div
                   className="flex items-center gap-2 cursor-pointer py-1.5 px-2 text-sm text-[#E11D48] hover:bg-[#E11D48]/10 transition-colors rounded-sm font-medium"
                   onClick={() => {
-                    if (inputValue) {
-                      onValueChange(inputValue)
-                    }
-                    setOpen(false)
-                    setInputValue("")
+                    setIsAddingNew(true);
+                    onValueChange("");
+                    setOpen(false);
+                    setInputValue("");
                   }}
                 >
                   <Plus className="h-4 w-4" />
-                  {customLabel}{inputValue ? `: ${inputValue}` : ""}
+                  {customLabel}
                 </div>
               </div>
             )}
@@ -720,7 +746,8 @@ export default function Inventory() {
                 value={accCategory}
                 onValueChange={setAccCategory}
                 placeholder="Select category"
-                customLabel="Add New Category"
+                customLabel="+ Add New Category"
+                newPlaceholder="Enter new category name"
               />
             </div>
             <div className="space-y-2">
@@ -730,7 +757,8 @@ export default function Inventory() {
                 value={accName}
                 onValueChange={setAccName}
                 placeholder="Select name"
-                customLabel="Add New Accessory"
+                customLabel="+ Add New Accessory"
+                newPlaceholder="Enter new accessory name"
               />
             </div>
             <div className="space-y-2">
