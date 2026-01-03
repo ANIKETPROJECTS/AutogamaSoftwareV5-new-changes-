@@ -84,22 +84,26 @@ function SearchableSelect({
             onValueChange={setInputValue}
           />
           <CommandList>
-            <CommandEmpty>
-              {allowCustom && inputValue ? (
-                <Button 
-                  variant="ghost" 
-                  className="w-full justify-start text-xs"
-                  onClick={() => {
+            <CommandGroup heading="New Entry">
+              <CommandItem
+                onSelect={() => {
+                  if (inputValue) {
                     onValueChange(inputValue)
                     setOpen(false)
                     setInputValue("")
-                  }}
-                >
-                  {customLabel} "{inputValue}"
-                </Button>
-              ) : emptyMessage}
-            </CommandEmpty>
-            <CommandGroup>
+                  }
+                }}
+                disabled={!inputValue}
+                className={cn(
+                  "flex items-center gap-2",
+                  !inputValue && "opacity-50 cursor-not-allowed"
+                )}
+              >
+                <Plus className="h-4 w-4" />
+                {customLabel}{inputValue ? `: ${inputValue}` : " (Type to add)"}
+              </CommandItem>
+            </CommandGroup>
+            <CommandGroup heading="Existing Options">
               {options.map((option) => (
                 <CommandItem
                   key={option}
@@ -119,20 +123,6 @@ function SearchableSelect({
                 </CommandItem>
               ))}
             </CommandGroup>
-            {allowCustom && inputValue && !options.includes(inputValue) && (
-              <CommandGroup heading="New Entry">
-                <CommandItem
-                  onSelect={() => {
-                    onValueChange(inputValue)
-                    setOpen(false)
-                    setInputValue("")
-                  }}
-                >
-                  <Plus className="mr-2 h-4 w-4" />
-                  {customLabel}: {inputValue}
-                </CommandItem>
-              </CommandGroup>
-            )}
           </CommandList>
         </Command>
       </PopoverContent>
@@ -218,8 +208,8 @@ export default function Inventory() {
     // Filter out PPF items from accessory categories
     const ppfCategories = new Set(PPF_ITEMS.map(item => item.category));
     const cats = new Set(inventory
+      .filter((inv: any) => !ppfCategories.has(inv.category))
       .map((inv: any) => inv.category)
-      .filter((cat: string) => !ppfCategories.has(cat))
     );
     return Array.from(cats);
   }, [inventory]);
