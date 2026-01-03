@@ -178,6 +178,8 @@ export default function Inventory() {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'name' | 'quantity'>('name');
   const [filterCategory, setFilterCategory] = useState<string>('all');
+  const [accSortBy, setAccSortBy] = useState<'name' | 'quantity'>('name');
+  const [accFilterCategory, setAccFilterCategory] = useState<string>('all');
   const [rollName, setRollName] = useState('');
   const [rollQuantity, setRollQuantity] = useState('');
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
@@ -231,11 +233,33 @@ export default function Inventory() {
   }, [inventory, searchQuery, filterCategory, sortBy]);
 
   const accessoryItems = useMemo(() => {
+    let items = [];
     if (activeTab === 'accessories') {
-      return inventory.filter((inv: any) => !PPF_ITEMS.some(ppf => ppf.category === inv.category));
+      items = inventory.filter((inv: any) => !PPF_ITEMS.some(ppf => ppf.category === inv.category));
+    } else {
+      items = inventory.filter((inv: any) => inv.category === 'Accessories');
     }
-    return inventory.filter((inv: any) => inv.category === 'Accessories');
-  }, [inventory, activeTab]);
+
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      items = items.filter((item: any) => 
+        item.category.toLowerCase().includes(query) || 
+        item.name.toLowerCase().includes(query)
+      );
+    }
+
+    if (accFilterCategory !== 'all') {
+      items = items.filter((item: any) => item.category === accFilterCategory);
+    }
+
+    if (accSortBy === 'quantity') {
+      items.sort((a: any, b: any) => b.quantity - a.quantity);
+    } else {
+      items.sort((a: any, b: any) => a.name.localeCompare(b.name));
+    }
+
+    return items;
+  }, [inventory, activeTab, searchQuery, accFilterCategory, accSortBy]);
 
   const selectedItemForDetail = useMemo(() => {
     if (!selectedProductId) return null;
@@ -385,30 +409,56 @@ export default function Inventory() {
               />
             </div>
 
-            <Select value={sortBy} onValueChange={(value) => setSortBy(value as 'name' | 'quantity')}>
-              <SelectTrigger className="w-40">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="name">Sort by Name</SelectItem>
-                <SelectItem value="quantity">Sort by Quantity</SelectItem>
-              </SelectContent>
-            </Select>
+            {activeTab === 'ppf' ? (
+              <>
+                <Select value={sortBy} onValueChange={(value) => setSortBy(value as 'name' | 'quantity')}>
+                  <SelectTrigger className="w-40">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="name">Sort by Name</SelectItem>
+                    <SelectItem value="quantity">Sort by Quantity</SelectItem>
+                  </SelectContent>
+                </Select>
 
-            <Select value={filterCategory} onValueChange={setFilterCategory}>
-              <SelectTrigger className="w-40">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Categories</SelectItem>
-                {PPF_ITEMS.map(i => <SelectItem key={i.category} value={i.category}>{i.name}</SelectItem>)}
-              </SelectContent>
-            </Select>
+                <Select value={filterCategory} onValueChange={setFilterCategory}>
+                  <SelectTrigger className="w-40">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Categories</SelectItem>
+                    {PPF_ITEMS.map(i => <SelectItem key={i.category} value={i.category}>{i.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </>
+            ) : (
+              <>
+                <Select value={accSortBy} onValueChange={(value) => setAccSortBy(value as 'name' | 'quantity')}>
+                  <SelectTrigger className="w-40">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="name">Sort by Name</SelectItem>
+                    <SelectItem value="quantity">Sort by Quantity</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <Select value={accFilterCategory} onValueChange={setAccFilterCategory}>
+                  <SelectTrigger className="w-40">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Categories</SelectItem>
+                    {categories.map(cat => <SelectItem key={cat} value={cat}>{cat}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </>
+            )}
           </div>
         )}
       </div>
 
-      {!selectedProductId && lowStockItems.length > 0 && (
+      {!selectedProductId && activeTab === 'ppf' && lowStockItems.length > 0 && (
         <Card className="bg-gray-50 border-gray-200">
           <CardContent className="p-4 flex items-center gap-3">
             <AlertTriangle className="w-5 h-5 text-gray-600" />
