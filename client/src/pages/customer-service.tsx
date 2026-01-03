@@ -673,6 +673,14 @@ export default function CustomerService() {
                         setPpfCategory(val);
                         setPpfWarranty('');
                         setShowPpfSection(true);
+                        
+                        // Auto-select product from inventory with matching name
+                        const matchingItem = (Array.isArray(inventory) ? inventory : []).find(
+                          (item: any) => item.name.toLowerCase() === val.toLowerCase() && item.category !== 'Accessories'
+                        );
+                        if (matchingItem) {
+                          setSelectedItemId(matchingItem._id || matchingItem.id);
+                        }
                       }}>
                         <SelectTrigger data-testid="select-ppf-category">
                           <SelectValue placeholder="Select category" />
