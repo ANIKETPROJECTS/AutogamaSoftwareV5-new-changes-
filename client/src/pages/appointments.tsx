@@ -227,17 +227,32 @@ export default function Appointments() {
     setTime('09:00');
   };
 
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+
   const filteredAppointments = useMemo(() => {
-    return appointments.filter((appt: any) => {
-      if (!searchQuery.trim()) return true;
-      const query = searchQuery.toLowerCase();
-      return (
-        appt.customerName?.toLowerCase().includes(query) ||
-        appt.customerPhone?.includes(query) ||
-        appt.vehicleInfo?.toLowerCase().includes(query)
-      );
+    let result = appointments.filter((appt: any) => {
+      // Search filter
+      const matchesSearch = !searchQuery.trim() || 
+        appt.customerName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        appt.customerPhone?.includes(searchQuery) ||
+        appt.vehicleInfo?.toLowerCase().includes(searchQuery.toLowerCase());
+
+      // Status filter
+      const matchesStatus = statusFilter === "all" || appt.status === statusFilter;
+
+      return matchesSearch && matchesStatus;
     });
-  }, [appointments, searchQuery]);
+
+    // Sort by date and time
+    result.sort((a: any, b: any) => {
+      const dateA = new Date(`${format(new Date(a.date), 'yyyy-MM-dd')}T${a.time}`);
+      const dateB = new Date(`${format(new Date(b.date), 'yyyy-MM-dd')}T${b.time}`);
+      return sortOrder === "asc" ? dateA.getTime() - dateB.getTime() : dateB.getTime() - dateA.getTime();
+    });
+
+    return result;
+  }, [appointments, searchQuery, statusFilter, sortOrder]);
 
   return (
     <div className="space-y-6">
@@ -245,14 +260,43 @@ export default function Appointments() {
         <h1 className="text-3xl font-bold">Appointments</h1>
       </div>
 
-      <div className="relative">
-        <Search className="absolute left-3 top-3 w-4 h-4 text-secondary" />
-        <Input
-          placeholder="Search by name or phone number..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-10"
-        />
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+        <div className="md:col-span-2 relative">
+          <Label className="mb-2 block">Search</Label>
+          <Search className="absolute left-3 top-9 w-4 h-4 text-secondary" />
+          <Input
+            placeholder="Search by name or phone number..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10"
+            data-testid="input-search-appointments"
+          />
+        </div>
+        <div>
+          <Label className="mb-2 block">Status Filter</Label>
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger data-testid="select-status-filter">
+              <SelectValue placeholder="All Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Status</SelectItem>
+              <SelectItem value="Scheduled">Scheduled</SelectItem>
+              <SelectItem value="Done">Done</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label className="mb-2 block">Sort by Date</Label>
+          <Button 
+            variant="outline" 
+            className="w-full justify-between" 
+            onClick={() => setSortOrder(prev => prev === "asc" ? "desc" : "asc")}
+            data-testid="button-sort-date"
+          >
+            {sortOrder === "asc" ? "Oldest First" : "Newest First"}
+            {sortOrder === "asc" ? <ChevronUp className="w-4 h-4 ml-2" /> : <ChevronDown className="w-4 h-4 ml-2" />}
+          </Button>
+        </div>
       </div>
 
       {!showForm ? (
