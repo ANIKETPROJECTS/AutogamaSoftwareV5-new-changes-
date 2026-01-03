@@ -697,11 +697,33 @@ export async function registerRoutes(
 
   app.post("/api/inventory/:id/rolls", async (req, res) => {
     try {
-      const item = await storage.addRoll(req.params.id, req.body);
+      const { id } = req.params;
+      const rollData = req.body;
+      let inventoryId = id;
+
+      if (id.startsWith('temp-')) {
+        const category = id.replace('temp-', '');
+        let item = await Inventory.findOne({ category });
+        if (!item) {
+          item = await Inventory.create({
+            name: category,
+            category: category,
+            quantity: 0,
+            unit: 'rolls',
+            minStock: 1,
+            rolls: [],
+            history: []
+          });
+        }
+        inventoryId = item._id.toString();
+      }
+
+      const item = await storage.addRoll(inventoryId, rollData);
       if (!item) return res.status(404).json({ message: "Item not found" });
       res.status(201).json(item);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to add roll" });
+    } catch (error: any) {
+      console.error("Add roll error:", error);
+      res.status(500).json({ message: error.message || "Failed to add roll" });
     }
   });
 

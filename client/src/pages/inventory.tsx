@@ -505,7 +505,14 @@ export default function Inventory() {
                           isLowStock(displayItem) ? "border-red-200" : "border-border",
                           isSelected && "ring-2 ring-primary border-primary bg-primary/5 shadow-md scale-[1.02]"
                         )}
-                        onClick={() => setSelectedProductId(isSelected ? null : displayItem._id)}
+                        onClick={() => {
+                          if (!displayItem._id || displayItem._id.startsWith('temp-')) {
+                            // Automatically handle creation on first roll add or just select for detail
+                            setSelectedProductId(displayItem._id);
+                          } else {
+                            setSelectedProductId(isSelected ? null : displayItem._id);
+                          }
+                        }}
                       >
                         <CardHeader className="pb-2">
                           <div className="flex items-start justify-between">
