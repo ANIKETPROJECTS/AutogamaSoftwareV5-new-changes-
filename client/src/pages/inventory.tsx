@@ -348,7 +348,7 @@ export default function Inventory() {
                         <div>
                           <CardTitle className="text-xl font-bold">{item.name}</CardTitle>
                           <Badge className="mt-1 bg-slate-500/20 text-slate-400">
-                            {item.unit}
+                            {item.category}
                           </Badge>
                         </div>
                         <Button 
