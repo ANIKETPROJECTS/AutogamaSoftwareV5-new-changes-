@@ -48,6 +48,7 @@ export default function Invoices() {
   const [filterStatus, setFilterStatus] = useState<"all" | "paid" | "unpaid">("all");
   const [filterBusiness, setFilterBusiness] = useState<string>("all");
   const [filterPaymentMode, setFilterPaymentMode] = useState<string>("all");
+  const [timeFilter, setTimeFilter] = useState<"all" | "today" | "week" | "month">("all");
   const [fromDate, setFromDate] = useState<Date | undefined>();
   const [toDate, setToDate] = useState<Date | undefined>();
   const [selectedInvoice, setSelectedInvoice] = useState<any>(null);
@@ -101,8 +102,30 @@ export default function Invoices() {
       (filterBusiness === "Auto Gamma" && !invoice.businessId?.includes("business_2") && !invoice.business?.includes("Business 2")) ||
       (filterBusiness === "Business 2" && (invoice.businessId?.includes("business_2") || invoice.business?.includes("Business 2")));
     
-    const matchesDate = (!fromDate || new Date(invoice.createdAt) >= fromDate) && 
+    const matchesDate = (() => {
+      if (timeFilter !== "all") {
+        const now = new Date();
+        const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const invoiceDate = new Date(invoice.createdAt);
+        
+        if (timeFilter === "today") {
+          return invoiceDate >= startOfToday;
+        }
+        if (timeFilter === "week") {
+          const startOfWeek = new Date(startOfToday);
+          startOfWeek.setDate(startOfToday.getDate() - startOfToday.getDay());
+          return invoiceDate >= startOfWeek;
+        }
+        if (timeFilter === "month") {
+          const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+          return invoiceDate >= startOfMonth;
+        }
+      }
+      
+      const matchesCustomDate = (!fromDate || new Date(invoice.createdAt) >= fromDate) && 
                       (!toDate || new Date(invoice.createdAt) <= new Date(new Date(toDate).setHours(23, 59, 59, 999)));
+      return matchesCustomDate;
+    })();
     
     return matchesSearch && matchesStatus && matchesPaymentMode && matchesBusiness && matchesDate;
   });
@@ -481,6 +504,27 @@ export default function Invoices() {
                 <SelectItem value="all">All Invoices</SelectItem>
                 <SelectItem value="paid">Paid Only</SelectItem>
                 <SelectItem value="unpaid">Unpaid Only</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <CalendarIcon className="w-4 h-4 text-slate-600" />
+            <Select value={timeFilter} onValueChange={(value: any) => {
+              setTimeFilter(value);
+              if (value !== "all") {
+                setFromDate(undefined);
+                setToDate(undefined);
+              }
+            }}>
+              <SelectTrigger className="w-40 h-9" data-testid="select-filter-time">
+                <SelectValue placeholder="Time Period" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Time</SelectItem>
+                <SelectItem value="today">Today</SelectItem>
+                <SelectItem value="week">This Week</SelectItem>
+                <SelectItem value="month">This Month</SelectItem>
               </SelectContent>
             </Select>
           </div>
