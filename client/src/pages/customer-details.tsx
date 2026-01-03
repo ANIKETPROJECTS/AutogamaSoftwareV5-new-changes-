@@ -222,7 +222,7 @@ export default function CustomerDetails() {
                                   const normalizedS = s.replace(/\s*\(x\d+\)\s*/g, '').trim().toLowerCase();
                                   return !vehicle.otherServices.some((as: any) => 
                                     as.vehicleType === "Accessory" && 
-                                    (normalizedS.includes(as.name.toLowerCase()) || as.name.toLowerCase().includes(normalizedS))
+                                    (normalizedS === as.name.replace(/\s*\(x\d+\)\s*/g, '').trim().toLowerCase())
                                   );
                                 }).join(' + ')}
                               </p>
