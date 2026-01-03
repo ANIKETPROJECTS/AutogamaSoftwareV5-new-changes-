@@ -816,13 +816,21 @@ export class MongoStorage implements IStorage {
 
       // For items with rolls, validate using FIFO logic
       if (item.rolls && item.rolls.length > 0) {
-        // Use the total available from individual rolls directly from the DB record
+        // Log individual roll contents to identify why summing fails
+        item.rolls.forEach((r, idx) => {
+          console.log(`[Storage Debug] Roll ${idx + 1}: ${r.name}, sqft: ${r.remaining_sqft}, meters: ${r.remaining_meters}, unit: ${r.unit}`);
+        });
+
+        // Sum up the total available from individual rolls directly
         const totalAvailable = item.rolls.reduce((sum, r) => {
-          const qty = r.unit === 'Square Feet' ? (r.remaining_sqft || 0) : (r.remaining_meters || 0);
+          // IMPORTANT: Check remaining_sqft first, then fall back to meters conversion if needed
+          const qty = (r.remaining_sqft !== undefined && r.remaining_sqft !== null) 
+            ? Number(r.remaining_sqft) 
+            : (r.unit === 'Meters' ? Number(r.remaining_meters || 0) * 10 : Number(r.remaining_meters || 0));
           return sum + qty;
         }, 0);
 
-        console.log(`[Storage] Stock Check for ${item.name}: Found ${totalAvailable} sqft across rolls. Main quantity field: ${item.quantity}`);
+        console.log(`[Storage] Stock Check for ${item.name}: Summed ${totalAvailable} sqft across rolls. DB Total field: ${item.quantity}`);
 
         if (totalAvailable < mat.quantity) {
           throw new Error(`Insufficient stock for ${item.name}. Available: ${totalAvailable}, Requested: ${mat.quantity}`);
