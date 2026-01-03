@@ -810,10 +810,12 @@ export class MongoStorage implements IStorage {
         }
 
         rollUsage = result.consumedRolls.map(cr => {
-          const roll = item.rolls.find(r => r._id?.toString() === cr.rollId);
+          // Check item.rolls first, then item.finishedRolls
+          const roll = (item.rolls || []).find(r => r._id?.toString() === cr.rollId) || 
+                       (item.finishedRolls || []).find(r => r._id?.toString() === cr.rollId);
           return {
             rollId: cr.rollId,
-            rollName: roll?.name || 'Unknown Roll',
+            rollName: roll?.name || 'Inventory Item',
             quantityUsed: cr.quantityUsed
           };
         });
