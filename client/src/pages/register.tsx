@@ -1157,171 +1157,174 @@ export default function CustomerRegistration() {
                                       onKeyDown={(e) => e.stopPropagation()}
                                     />
                                   </div>
-                              {accessoryCategories.length > 0 ? (
-                                accessoryCategories.map((category) => (
-                                  <SelectItem key={category} value={category}>
-                                    {category}
-                                  </SelectItem>
-                                ))
-                              ) : (
-                                <SelectItem value="none" disabled>
-                                  No categories available
-                                </SelectItem>
-                              )}
-                                </SelectContent>
-                              </Select>
-                            </div>
-                            <div className="space-y-2">
-                              <Label>Accessory Name</Label>
-                              <Select
-                                value={customerData.tempAccessoryName}
-                                onValueChange={(value) => {
-                                  const item = accessoryInventory.find(
-                                    (i) => i.name === value,
-                                  );
-                                  setCustomerData({
-                                    ...customerData,
-                                    tempAccessoryName: value,
-                                    tempAccessoryCategory:
-                                      item?.unit ||
-                                      customerData.tempAccessoryCategory,
-                                  });
-                                }}
-                              >
-                                <SelectTrigger className="border-slate-300">
-                                  <SelectValue placeholder="Select accessory" />
-                                </SelectTrigger>
-                                <SelectContent
-                                  position="popper"
-                                  className="max-h-60 w-[var(--radix-select-trigger-width)]"
-                                >
-                                  <div className="p-2 sticky top-0 bg-white z-10 border-b">
-                                    <Input
-                                      placeholder="Search..."
-                                      className="h-8 text-sm"
-                                      onChange={(e) => {
-                                        const search =
-                                          e.target.value.toLowerCase();
-                                        const items = e.target
-                                          .closest('[role="listbox"]')
-                                          ?.querySelectorAll(
-                                            '[role="option"]',
-                                          );
-                                        items?.forEach((item) => {
-                                          const text =
-                                            item.textContent?.toLowerCase() ||
-                                            "";
-                                          (
-                                            item as HTMLElement
-                                          ).style.display = text.includes(
-                                            search,
-                                          )
-                                            ? "flex"
-                                            : "none";
-                                        });
-                                      }}
-                                      onKeyDown={(e) => e.stopPropagation()}
-                                    />
-                                  </div>
-                                  {filteredAccessories.length > 0 ? (
-                                    filteredAccessories.map((item) => (
-                                      <SelectItem
-                                        key={item._id}
-                                        value={item.name}
-                                      >
-                                        {item.name}{" "}
-                                        {item.quantity > 0
-                                          ? ""
-                                          : "(out of stock)"}
+                                  {accessoryCategories.length > 0 ? (
+                                    accessoryCategories.map((category) => (
+                                      <SelectItem key={category} value={category}>
+                                        {category}
                                       </SelectItem>
                                     ))
                                   ) : (
                                     <SelectItem value="none" disabled>
-                                      No accessories available
+                                      No categories available
                                     </SelectItem>
                                   )}
                                 </SelectContent>
                               </Select>
                             </div>
-                                <div className="space-y-2">
-                                  <Label>Quantity</Label>
-                                  <div className="flex gap-2">
-                                    <Input
-                                      type="number"
-                                      min="1"
-                                      value={
-                                        customerData.accessoryQuantity || 1
-                                      }
-                                      onChange={(e) =>
+
+                            {customerData.tempAccessoryCategory && (
+                              <div className="space-y-2">
+                                <Label>Accessory Name</Label>
+                                <Select
+                                  value={customerData.tempAccessoryName}
+                                  onValueChange={(value) => {
+                                    setCustomerData({
+                                      ...customerData,
+                                      tempAccessoryName: value,
+                                    });
+                                  }}
+                                >
+                                  <SelectTrigger className="border-slate-300">
+                                    <SelectValue placeholder="Select accessory" />
+                                  </SelectTrigger>
+                                  <SelectContent
+                                    position="popper"
+                                    className="max-h-60 w-[var(--radix-select-trigger-width)]"
+                                  >
+                                    <div className="p-2 sticky top-0 bg-white z-10 border-b">
+                                      <Input
+                                        placeholder="Search..."
+                                        className="h-8 text-sm"
+                                        onChange={(e) => {
+                                          const search =
+                                            e.target.value.toLowerCase();
+                                          const items = e.target
+                                            .closest('[role="listbox"]')
+                                            ?.querySelectorAll(
+                                              '[role="option"]',
+                                            );
+                                          items?.forEach((item) => {
+                                            const text =
+                                              item.textContent?.toLowerCase() ||
+                                              "";
+                                            (
+                                              item as HTMLElement
+                                            ).style.display = text.includes(
+                                              search,
+                                            )
+                                              ? "flex"
+                                              : "none";
+                                          });
+                                        }}
+                                        onKeyDown={(e) => e.stopPropagation()}
+                                      />
+                                    </div>
+                                    {filteredAccessories.length > 0 ? (
+                                      filteredAccessories.map((item) => (
+                                        <SelectItem
+                                          key={item._id}
+                                          value={item.name}
+                                        >
+                                          {item.name}{" "}
+                                          {item.quantity > 0
+                                            ? ""
+                                            : "(out of stock)"}
+                                        </SelectItem>
+                                      ))
+                                    ) : (
+                                      <SelectItem value="none" disabled>
+                                        No accessories available
+                                      </SelectItem>
+                                    )}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            )}
+                          </div>
+
+                          {customerData.tempAccessoryCategory && customerData.tempAccessoryName && (
+                            <div className="space-y-2">
+                              <Label>Quantity</Label>
+                              <div className="flex gap-2">
+                                <Input
+                                  type="number"
+                                  min="1"
+                                  value={
+                                    customerData.accessoryQuantity || 1
+                                  }
+                                  onChange={(e) =>
+                                    setCustomerData({
+                                      ...customerData,
+                                      accessoryQuantity:
+                                        parseInt(e.target.value) || 1,
+                                    })
+                                  }
+                                  className="border-slate-300"
+                                />
+                                <Button
+                                  type="button"
+                                  disabled={
+                                    !customerData.tempAccessoryName ||
+                                    (() => {
+                                      const item = accessoryInventory.find(
+                                        (i: any) =>
+                                          i.name ===
+                                          customerData.tempAccessoryName,
+                                      );
+                                      return (
+                                        !item ||
+                                        item.quantity <
+                                          customerData.accessoryQuantity
+                                      );
+                                    })()
+                                  }
+                                  onClick={() => {
+                                    if (customerData.tempAccessoryName) {
+                                      const item = accessoryInventory.find(
+                                        (i: any) =>
+                                          i.name ===
+                                          customerData.tempAccessoryName,
+                                      );
+                                      if (item) {
+                                        if (
+                                          item.quantity <
+                                          customerData.accessoryQuantity
+                                        ) {
+                                          toast({
+                                            title: "Insufficient Stock",
+                                            description: `Only ${item.quantity} units available in stock.`,
+                                            variant: "destructive",
+                                          });
+                                          return;
+                                        }
                                         setCustomerData({
                                           ...customerData,
-                                          accessoryQuantity:
-                                            parseInt(e.target.value) || 1,
-                                        })
+                                          selectedOtherServices: [
+                                            ...customerData.selectedOtherServices,
+                                            {
+                                              name: `${item.name} (x${customerData.accessoryQuantity})`,
+                                              vehicleType: "Accessory",
+                                              price:
+                                                (item.price || 0) *
+                                                customerData.accessoryQuantity,
+                                            },
+                                          ],
+                                          tempAccessoryCategory: "",
+                                          tempAccessoryName: "",
+                                          accessoryQuantity: 1,
+                                        });
+                                        toast({
+                                          title: "Accessory added",
+                                        });
                                       }
-                                      className="border-slate-300"
-                                    />
-                                    <Button
-                                      type="button"
-                                      disabled={
-                                        !customerData.tempAccessoryName ||
-                                        (() => {
-                                          const item = accessoryInventory.find(
-                                            (i: any) =>
-                                              i.name ===
-                                              customerData.tempAccessoryName,
-                                          );
-                                          return (
-                                            !item ||
-                                            item.quantity <
-                                              customerData.accessoryQuantity
-                                          );
-                                        })()
-                                      }
-                                      onClick={() => {
-                                        if (customerData.tempAccessoryName) {
-                                          const item = accessoryInventory.find(
-                                            (i: any) =>
-                                              i.name ===
-                                              customerData.tempAccessoryName,
-                                          );
-                                          if (item) {
-                                            if (
-                                              item.quantity <
-                                              customerData.accessoryQuantity
-                                            ) {
-                                              toast({
-                                                title: "Insufficient Stock",
-                                                description: `Only ${item.quantity} units available in stock.`,
-                                                variant: "destructive",
-                                              });
-                                              return;
-                                            }
-                                            setCustomerData({
-                                              ...customerData,
-                                              selectedOtherServices: [
-                                                ...customerData.selectedOtherServices,
-                                                {
-                                                  name: `${item.name} (x${customerData.accessoryQuantity})`,
-                                                  vehicleType: "Accessory",
-                                                  price:
-                                                    (item.price || 0) *
-                                                    customerData.accessoryQuantity,
-                                                },
-                                              ],
-                                              tempAccessoryCategory: "",
-                                              tempAccessoryName: "",
-                                              accessoryQuantity: 1,
-                                            });
-                                          }
-                                        }
-                                      }}
-                                    >
-                                      Add
-                                    </Button>
-                                  </div>
-                                </div>
-                          </div>
+                                    }
+                                  }}
+                                >
+                                  Add
+                                </Button>
+                              </div>
+                            </div>
+                          )}
                           {customerData.selectedOtherServices.some(
                             (s) => s.vehicleType === "Accessory",
                           ) && (
