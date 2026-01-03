@@ -428,7 +428,7 @@ export class MongoStorage implements IStorage {
       remaining -= Number(toConsume.toFixed(2));
 
       // Update roll quantities
-      const newRemainingSqft = Math.max(0, (roll.remaining_sqft || 0) - toConsume);
+      const newRemainingSqft = Math.max(0, (roll.remaining_sqft || 0) - Number(toConsume));
       roll.remaining_sqft = Number(newRemainingSqft.toFixed(2));
       
       // Sync meters proportionally
@@ -441,9 +441,13 @@ export class MongoStorage implements IStorage {
       // Mark as finished if depleted
       if (roll.remaining_sqft <= 0.01) {
         console.log(`[Storage] Archiving roll in FIFO: ${roll.name}`);
-        const rollObj = (roll as any).toObject ? (roll as any).toObject() : { ...roll };
+        
+        // Find the original roll in the item.rolls array to preserve ALL fields
+        const originalRoll = item.rolls.find(r => r._id?.toString() === roll._id.toString());
+        const rollData = originalRoll ? originalRoll.toObject() : roll;
+
         const finishedRoll = {
-          ...rollObj,
+          ...rollData,
           remaining_meters: 0,
           remaining_sqft: 0,
           status: 'Finished' as const,
@@ -455,7 +459,7 @@ export class MongoStorage implements IStorage {
           $pull: { rolls: { _id: roll._id } }
         });
         
-        console.log(`[Storage] Roll archived via atomic update for: ${roll.name}`);
+        console.log(`[Storage] Roll archived via atomic update for: ${finishedRoll.name}`);
       }
     }
 
