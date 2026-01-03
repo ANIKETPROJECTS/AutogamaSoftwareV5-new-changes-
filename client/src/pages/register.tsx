@@ -419,6 +419,7 @@ export default function CustomerRegistration() {
 
   // Vehicle info
   const [vehicleData, setVehicleData] = useState({
+    name: "",
     make: "",
     otherMake: "",
     model: "",
@@ -1612,7 +1613,7 @@ export default function CustomerRegistration() {
                 Vehicle Information
               </CardTitle>
               <p className="text-sm text-slate-600 mt-2">
-                Provide details about the vehicle being registered
+                Please provide your vehicle information
               </p>
             </CardHeader>
             <CardContent className="space-y-8 pt-6">
@@ -1620,7 +1621,7 @@ export default function CustomerRegistration() {
                 <div className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                      <Label>Make *</Label>
+                      <Label>Vehicle Name *</Label>
                       <Select
                         value={vehicleData.make}
                         onValueChange={(value) =>
@@ -1669,26 +1670,8 @@ export default function CustomerRegistration() {
                       </Select>
                     </div>
 
-                    {vehicleData.make === "Other" && (
-                      <div className="space-y-2">
-                        <Label>Enter Make *</Label>
-                        <Input
-                          value={vehicleData.otherMake}
-                          onChange={(e) =>
-                            setVehicleData({
-                              ...vehicleData,
-                              otherMake: e.target.value,
-                            })
-                          }
-                          placeholder="Enter vehicle make"
-                          data-testid="input-other-make"
-                          className="border-slate-300"
-                        />
-                      </div>
-                    )}
-
                     <div className="space-y-2">
-                      <Label>Model *</Label>
+                      <Label>Vehicle Model *</Label>
                       <Select
                         value={vehicleData.model}
                         onValueChange={(value) =>
@@ -1737,41 +1720,66 @@ export default function CustomerRegistration() {
                       </Select>
                     </div>
 
-                    {(vehicleData.make === "Other" ||
-                      vehicleData.model === "Other") && (
-                      <div className="space-y-2">
-                        <Label>Enter Model *</Label>
-                        <Input
-                          value={vehicleData.otherModel}
-                          onChange={(e) =>
-                            setVehicleData({
-                              ...vehicleData,
-                              otherModel: e.target.value,
-                            })
-                          }
-                          placeholder="Enter vehicle model"
-                          data-testid="input-other-model"
-                          className="border-slate-300"
-                        />
-                      </div>
-                    )}
+                    <div className="space-y-2">
+                      <Label>Enter Vehicle Name *</Label>
+                      <Input
+                        value={vehicleData.otherMake}
+                        onChange={(e) =>
+                          setVehicleData({
+                            ...vehicleData,
+                            otherMake: e.target.value,
+                          })
+                        }
+                        placeholder="Tesla"
+                        data-testid="input-other-make"
+                        className="border-slate-300"
+                      />
+                    </div>
 
                     <div className="space-y-2">
-                      <Label>Year</Label>
+                      <Label>Enter Vehicle Model *</Label>
+                      <Input
+                        value={vehicleData.otherModel}
+                        onChange={(e) =>
+                          setVehicleData({
+                            ...vehicleData,
+                            otherModel: e.target.value,
+                          })
+                        }
+                        placeholder="Model Y"
+                        data-testid="input-other-model"
+                        className="border-slate-300"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Vehicle Type</Label>
+                      <Input
+                        value={vehicleData.vehicleType}
+                        onChange={(e) =>
+                          setVehicleData({ ...vehicleData, vehicleType: e.target.value })
+                        }
+                        placeholder="Hatchback / Small Sedan"
+                        className="border-slate-300"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Year of Manufacture</Label>
                       <Input
                         type="number"
                         value={vehicleData.year}
                         onChange={(e) =>
                           setVehicleData({ ...vehicleData, year: e.target.value })
                         }
-                        placeholder="e.g. 2024"
+                        placeholder="2001"
                         data-testid="input-year"
                         className="border-slate-300"
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <Label>Plate Number *</Label>
+                      <Label>Vehicle Number *</Label>
                       <Input
                         value={vehicleData.plateNumber}
                         onChange={(e) =>
@@ -1780,25 +1788,8 @@ export default function CustomerRegistration() {
                             plateNumber: e.target.value.toUpperCase(),
                           })
                         }
-                        placeholder="MH 12 AB 1234"
+                        placeholder="MHa"
                         data-testid="input-plate"
-                        className="border-slate-300"
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label>Chassis Number (VIN)</Label>
-                      <Input
-                        value={vehicleData.chassisNumber}
-                        onChange={(e) =>
-                          setVehicleData({
-                            ...vehicleData,
-                            chassisNumber: e.target.value.toUpperCase(),
-                          })
-                        }
-                        placeholder="17-digit VIN (optional)"
-                        maxLength={17}
-                        data-testid="input-vin"
                         className="border-slate-300"
                       />
                     </div>
@@ -1815,7 +1806,7 @@ export default function CustomerRegistration() {
                           className="border-slate-300"
                           data-testid="select-color"
                         >
-                          <SelectValue placeholder="Select color" />
+                          <SelectValue placeholder="Grey" />
                         </SelectTrigger>
                         <SelectContent
                           position="popper"
@@ -1854,6 +1845,11 @@ export default function CustomerRegistration() {
                 <div className="space-y-6">
                   <Label>Vehicle Image</Label>
                   <div className="flex flex-col items-center gap-4">
+                    <Input 
+                      placeholder="Choose File Coming soon image.webp"
+                      className="border-slate-300"
+                      readOnly
+                    />
                     {vehicleImagePreview ? (
                       <div className="relative w-full aspect-video rounded-xl overflow-hidden border-2 border-red-300 group">
                         <img
