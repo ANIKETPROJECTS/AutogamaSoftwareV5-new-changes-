@@ -410,44 +410,46 @@ export class MongoStorage implements IStorage {
       if (remaining <= 0) break;
       if (!roll._id) continue;
 
-      // Use the unit field to determine which quantity to use
-      const availableQty = roll.unit === 'Square Feet' ? (roll.remaining_sqft || 0) : (roll.remaining_meters || 0);
+      // Use the unit field to determine which quantity to use, or fallback to sqft conversion
+      let availableQty = roll.unit === 'Square Feet' ? (roll.remaining_sqft || 0) : (roll.remaining_meters || 0);
+      
+      // If we are looking for sqft but roll is in meters, convert on the fly if needed
+      // Actually, the storage system seems to keep both in sync, but let's be safe
+      if (roll.unit === 'Meters' && (roll.remaining_sqft === undefined || roll.remaining_sqft === 0) && roll.remaining_meters > 0) {
+        availableQty = roll.remaining_meters * 10;
+      } else if (roll.remaining_sqft !== undefined && roll.remaining_sqft !== null) {
+        availableQty = Number(roll.remaining_sqft);
+      }
+
       if (availableQty <= 0) continue;
 
       const toConsume = Math.min(remaining, availableQty);
       consumedRolls.push({ rollId: roll._id.toString(), quantityUsed: toConsume });
-      remaining -= toConsume;
+      remaining -= Number(toConsume.toFixed(2));
 
-      // Update roll quantities based on unit
-      if (roll.unit === 'Square Feet') {
-        roll.remaining_sqft = Math.max(0, (roll.remaining_sqft || 0) - toConsume);
-        // Sync meters proportionally if both exist
-        if (roll.squareFeet > 0 && roll.meters > 0) {
-          roll.remaining_meters = (roll.remaining_sqft / roll.squareFeet) * roll.meters;
-        }
-      } else {
-        // Default to meters
-        roll.remaining_meters = Math.max(0, (roll.remaining_meters || 0) - toConsume);
-        // Sync sqft proportionally if both exist
-        if (roll.meters > 0 && roll.squareFeet > 0) {
-          roll.remaining_sqft = (roll.remaining_meters / roll.meters) * roll.squareFeet;
-        }
+      // Update roll quantities
+      const newRemainingSqft = Math.max(0, (roll.remaining_sqft || 0) - toConsume);
+      roll.remaining_sqft = Number(newRemainingSqft.toFixed(2));
+      
+      // Sync meters proportionally
+      if (roll.squareFeet > 0 && roll.meters > 0) {
+        roll.remaining_meters = Number(((roll.remaining_sqft / roll.squareFeet) * roll.meters).toFixed(2));
+      } else if (roll.unit === 'Meters') {
+        roll.remaining_meters = Number((roll.remaining_sqft / 10).toFixed(2));
       }
 
       // Mark as finished if depleted
-      if ((roll.remaining_meters || 0) <= 0.01 && (roll.remaining_sqft || 0) <= 0.01) {
+      if (roll.remaining_sqft <= 0.01) {
         console.log(`[Storage] Archiving roll in FIFO: ${roll.name}`);
-        // Use toObject() to get a clean data object if it's a mongoose document
         const rollObj = (roll as any).toObject ? (roll as any).toObject() : { ...roll };
         const finishedRoll = {
           ...rollObj,
           remaining_meters: 0,
           remaining_sqft: 0,
-          status: 'Finished',
+          status: 'Finished' as const,
           finishedAt: new Date()
         };
         
-        // Use atomic update to ensure persistence
         await Inventory.findByIdAndUpdate(item._id, {
           $push: { finishedRolls: finishedRoll },
           $pull: { rolls: { _id: roll._id } }
@@ -457,11 +459,18 @@ export class MongoStorage implements IStorage {
       }
     }
 
-    if (remaining > 0) {
+    if (remaining > 0.01) {
+      console.error(`[Storage FIFO] Insufficient stock. Still need ${remaining} sqft for ${item.name}`);
       return { success: false, consumedRolls: [] };
     }
 
-    // Since we used atomic updates for archiving, we only save if there were partial updates
+    // Update main quantity field to match rolls
+    const finalItem = await Inventory.findById(inventoryId);
+    if (finalItem) {
+      const totalRemaining = finalItem.rolls.reduce((sum: number, r: any) => sum + (r.remaining_sqft || 0), 0);
+      await Inventory.findByIdAndUpdate(inventoryId, { quantity: totalRemaining });
+    }
+
     await item.save();
     return { success: true, consumedRolls };
   }
