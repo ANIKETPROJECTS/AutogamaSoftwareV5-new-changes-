@@ -227,7 +227,7 @@ export default function Dashboard() {
           title="Today's Sales"
           value={`₹${todaySales}`}
           icon={IndianRupee}
-          description="+12.5% from last month"
+          description="Total sales generated today"
           data-testid="card-todays-sales"
         />
 
